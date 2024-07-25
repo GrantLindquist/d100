@@ -1,0 +1,1 @@
+export const SESSION_TIMEOUT: number = 604800000;
