@@ -33,7 +33,9 @@ const CampaignTab = (props: { campaignId: string }) => {
       ) : (
         <>
           {campaign && (
-            <Link href={`campaigns/${props.campaignId}`}>
+            <Link
+              href={`campaigns/${props.campaignId}/collections/${campaign.baseCollectionId}`}
+            >
               <Box sx={{ backgroundColor: 'grey' }}>
                 <p>{campaign.title}</p>
               </Box>

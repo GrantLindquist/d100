@@ -68,14 +68,6 @@ export default function CampaignsPage() {
             <Button startIcon={<LoginIcon />}>Join Campaign</Button>
             <Button startIcon={<AddIcon />}>Create Campaign</Button>
           </Stack>
-          {/*<Button*/}
-          {/*  onClick={async () => {*/}
-          {/*    await signOut(auth);*/}
-          {/*    await clearSession();*/}
-          {/*  }}*/}
-          {/*>*/}
-          {/*  Sign out*/}
-          {/*</Button>*/}
         </Stack>
       ) : (
         <Button onClick={handleSignIn}>Sign-in with Google</Button>

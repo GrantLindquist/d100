@@ -12,9 +12,11 @@ import { UserSession } from '@/types/User';
 const UserContext = createContext<{
   user: UserSession | null;
   fetchUser: () => void;
+  signOutUser: () => void;
 }>({
   user: null,
   fetchUser: () => {},
+  signOutUser: () => {},
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -38,8 +40,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const signOutUser = () => {
+    setUser(null);
+  };
+
   return (
-    <UserContext.Provider value={{ user, fetchUser }}>
+    <UserContext.Provider value={{ user, fetchUser, signOutUser }}>
       {children}
     </UserContext.Provider>
   );
