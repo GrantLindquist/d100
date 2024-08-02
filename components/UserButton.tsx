@@ -30,15 +30,7 @@ const UserButton = () => {
 
   return (
     <div>
-      <Button
-        onClick={handleClick}
-        sx={{
-          position: 'fixed',
-          right: 0,
-          marginY: 2,
-          marginX: 4,
-        }}
-      >
+      <Button onClick={handleClick}>
         <Avatar
           src={user?.photoURL ?? ''}
           alt={'Current User'}

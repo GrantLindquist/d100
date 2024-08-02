@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
-import { Box, Stack } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import CollectionSearch from '@/components/CollectionSearch';
 import { Collection } from '@/types/Scoop';
 
@@ -47,8 +47,9 @@ export default function CollectionPage({
           width={'45%'}
           minWidth={350}
         >
-          {/* @ts-ignore */}
-          <h1 align={'center'}>{collection.title}</h1>
+          <Typography variant={'h3'} align={'center'}>
+            {collection?.title}
+          </Typography>
           <CollectionSearch collection={collection} />
         </Stack>
       )}

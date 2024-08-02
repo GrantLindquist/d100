@@ -1,18 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, IconButton, Stack, TextField } from '@mui/material';
+import { Box, Stack, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Collection, Scoop } from '@/types/Scoop';
 import { collection, getDocs, query, where } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import Link from 'next/link';
-import AddIcon from '@mui/icons-material/Add';
+import CreateNewModal from '@/components/CreateNewModal';
 
 const ArticleTab = (props: { article: Scoop }) => {
   return (
     <Link
-      href={`/campaigns/${props.article.campaignId}/articles/${props.article.title}`}
+      href={`/campaigns/${props.article.campaignId}/articles/${props.article.id}`}
     >
       <Box sx={{ backgroundColor: 'grey' }}>
         <p>{props.article.title}</p>
@@ -72,12 +72,8 @@ const CollectionSearch = (props: { collection: Collection }) => {
             startAdornment: <SearchIcon />,
           }}
         />
-
-        <IconButton color={'primary'}>
-          <AddIcon />
-        </IconButton>
+        <CreateNewModal />
       </Stack>
-
       {scoops?.map((scoop: Scoop) => {
         if (
           scoop.title
@@ -87,6 +83,8 @@ const CollectionSearch = (props: { collection: Collection }) => {
         )
           switch (scoop.type) {
             case 'article':
+              return <ArticleTab key={scoop.id} article={scoop as Scoop} />;
+            case 'quest':
               return <ArticleTab key={scoop.id} article={scoop as Scoop} />;
             case 'collection':
               return (

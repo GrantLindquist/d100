@@ -1,12 +1,13 @@
 // i·tem [ˈīdəm] (noun) - an individual article or unit, especially one that is part of a list, collection, or set.
 // Synonyms: SCOOP (may rename later)
 
+export type ScoopType = 'article' | 'quest' | 'collection';
+
 export interface Scoop {
   id: string;
   campaignId: string;
   title: string;
-  description?: string;
-  type: 'article' | 'collection';
+  type: ScoopType;
 }
 
 export interface Collection extends Scoop {
@@ -14,12 +15,12 @@ export interface Collection extends Scoop {
 }
 
 export interface Article extends Scoop {
-  articlePath: string;
-  overview: string;
   sections: Section[];
 }
 
 export interface Section {
+  id: string;
+  isHeader: boolean;
   title: string;
   body: string;
 }

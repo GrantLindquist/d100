@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import AppWrapper from '@/components/AppWrapper';
 import { ReactNode } from 'react';
-import UserButton from '@/components/UserButton';
+import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AppWrapper>
-          <UserButton />
+          <Navbar />
           {children}
         </AppWrapper>
       </body>
