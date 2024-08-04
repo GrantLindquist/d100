@@ -33,6 +33,7 @@ const CreateNewForm = (props: { modalState: ScoopType | null }) => {
     ? props.modalState.charAt(0).toUpperCase() + props.modalState.slice(1)
     : '';
 
+  // TODO: Breadcrumbs
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (props.modalState) {
@@ -42,6 +43,7 @@ const CreateNewForm = (props: { modalState: ScoopType | null }) => {
         title: scoopTitle,
         type: props.modalState,
         campaignId: campaignId,
+        breadcrumbs: null,
       };
 
       if (props.modalState === 'article') {

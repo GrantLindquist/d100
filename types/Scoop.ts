@@ -8,6 +8,7 @@ export interface Scoop {
   campaignId: string;
   title: string;
   type: ScoopType;
+  breadcrumbs: Breadcrumb[] | null;
 }
 
 export interface Collection extends Scoop {
@@ -23,4 +24,10 @@ export interface Section {
   isHeader: boolean;
   title: string;
   body: string;
+  authorId: string;
+}
+
+export interface Breadcrumb {
+  id: string;
+  title: string;
 }
