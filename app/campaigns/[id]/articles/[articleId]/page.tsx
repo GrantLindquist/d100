@@ -54,7 +54,7 @@ export default function ArticlePage({
           const title = formData.get(`title-${section.id}`) as string;
           const body = formData.get(`body-${section.id}`) as string;
 
-          if (title.trim() && body.trim()) {
+          if (title.trim()) {
             return {
               id: section.id,
               isHeader: section.isHeader || false,
@@ -115,19 +115,19 @@ export default function ArticlePage({
 
   const Section = (props: { section: Section }) => {
     return (
-      <div id={props.section.title}>
-        <Typography variant={props.section.isHeader ? 'h2' : 'h4'} py={1}>
+      <Stack spacing={2} id={props.section.title}>
+        <Typography variant={props.section.isHeader ? 'h2' : 'h4'}>
           {props.section.title}
         </Typography>
-        <Typography py={1}>{props.section.body}</Typography>
-      </div>
+        <Typography>{props.section.body}</Typography>
+      </Stack>
     );
   };
 
   // TODO: Figure out how to have my cake (onFocus id state) and eat it too (one click to access TextField)
   const EditableSection = (props: { section: Section }) => {
     return (
-      <>
+      <Stack spacing={2}>
         <TextField
           name={`title-${props.section.id}`}
           defaultValue={props.section.title}
@@ -137,8 +137,7 @@ export default function ArticlePage({
             '& .MuiInputBase-input': {
               fontSize: props.section.isHeader ? '4rem' : '2rem',
               fontStyle: 'italic',
-              py: 1,
-              px: 0,
+              p: 0,
             },
             '& .MuiOutlinedInput-notchedOutline': {
               border: 'none',
@@ -156,8 +155,7 @@ export default function ArticlePage({
               fontStyle: 'italic',
             },
             '& .MuiInputBase-root': {
-              px: 0,
-              py: 1,
+              p: 0,
             },
             '& .MuiOutlinedInput-notchedOutline': {
               border: 'none',
@@ -166,7 +164,7 @@ export default function ArticlePage({
           multiline
           fullWidth
         />
-      </>
+      </Stack>
     );
   };
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
 import CollectionSearch from '@/components/CollectionSearch';
 import { Collection } from '@/types/Unit';
 
@@ -31,28 +31,27 @@ export default function CollectionPage({
 
   // TODO: Figure out best way to handle page loading state, maybe skeleton?
   return (
-    <Box
+    <Container
       sx={{
-        width: '100vw',
-        height: '100vh',
+        height: '90vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
       {collection && (
-        <Stack
-          direction={'column'}
-          justifyContent={'center'}
-          width={'45%'}
-          minWidth={350}
+        <Box
+          sx={{
+            minWidth: 350,
+            width: '70%',
+          }}
         >
-          <Typography variant={'h3'} align={'center'}>
+          <Typography align="center" variant={'h3'} py={3}>
             {collection?.title}
           </Typography>
           <CollectionSearch collection={collection} />
-        </Stack>
+        </Box>
       )}
-    </Box>
+    </Container>
   );
 }

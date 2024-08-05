@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, Divider, Stack } from '@mui/material';
+import { Button, Container, Divider, Stack } from '@mui/material';
 import {
   getAdditionalUserInfo,
   GoogleAuthProvider,
@@ -52,18 +52,18 @@ export default function CampaignsPage() {
       });
   };
 
+  // TODO: Find better way of sizing container to screen
   return (
-    <Box
+    <Container
       sx={{
-        width: '100vw',
-        height: '100vh',
+        minHeight: '90vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
       {user ? (
-        <Stack direction={'column'} spacing={2} width={'40%'} minWidth={350}>
+        <Stack spacing={2} width={'40%'} minWidth={350}>
           <CampaignList />
           <Divider />
           <Stack direction={'row'} spacing={2} justifyContent={'center'}>
@@ -74,6 +74,6 @@ export default function CampaignsPage() {
       ) : (
         <Button onClick={handleSignIn}>Sign-in with Google</Button>
       )}
-    </Box>
+    </Container>
   );
 }

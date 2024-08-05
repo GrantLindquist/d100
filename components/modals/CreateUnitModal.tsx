@@ -14,7 +14,7 @@ import {
 import { FormEvent, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import { generateUUID } from '@/utils/uuid';
-import { Article, Section, Unit, UnitType } from '@/types/Unit';
+import { Article, Collection, Section, Unit, UnitType } from '@/types/Unit';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { arrayUnion, doc, runTransaction } from '@firebase/firestore';
@@ -72,6 +72,11 @@ const CreateUnitModal = () => {
               },
             ] as Section[],
           } as Article;
+        } else if (modalState === 'collection') {
+          newUnitObj = {
+            ...newUnitObj,
+            unitIds: [],
+          } as Collection;
         }
 
         await runTransaction(db, async (transaction) => {
@@ -97,7 +102,7 @@ const CreateUnitModal = () => {
       <>
         <form onSubmit={handleSubmit}>
           {modalState && (
-            <Stack direction={'column'} spacing={1}>
+            <Stack spacing={1}>
               <InputLabel>{unitDisplayValue} Title</InputLabel>
               <TextField
                 variant={'outlined'}
@@ -133,7 +138,7 @@ const CreateUnitModal = () => {
         <MenuItem onClick={() => setModalState('article')}>
           Create new Article
         </MenuItem>
-        <MenuItem onClick={() => setModalState('quest')}>
+        <MenuItem disabled onClick={() => setModalState('quest')}>
           Create new Quest
         </MenuItem>
         <MenuItem onClick={() => setModalState('collection')}>

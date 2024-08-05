@@ -5,10 +5,13 @@ import { useState } from 'react';
 import { clearSession } from '@/utils/userSession';
 import { auth } from '@/utils/firebase';
 import { signOut } from 'firebase/auth';
+import { useCampaign } from '@/hooks/useCampaign';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 
 // TODO: Redirect unauthenticated users
 const UserButton = () => {
   const { user, signOutUser } = useUser();
+  const { isUserDm } = useCampaign();
 
   const [anchor, setAnchor] = useState(null);
   const open = Boolean(anchor);
@@ -29,7 +32,7 @@ const UserButton = () => {
   };
 
   return (
-    <div>
+    <>
       <Button onClick={handleClick}>
         <Avatar
           src={user?.photoURL ?? ''}
@@ -41,12 +44,13 @@ const UserButton = () => {
           }}
         />
         {user?.displayName}
+        {isUserDm && <WorkspacePremiumIcon />}
       </Button>
       <Menu anchorEl={anchor} open={open} onClose={handleClose}>
         <MenuItem>Manage players</MenuItem>
         <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
       </Menu>
-    </div>
+    </>
   );
 };
 

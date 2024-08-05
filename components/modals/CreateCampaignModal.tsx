@@ -65,7 +65,7 @@ const CreateCampaignModal = () => {
     return (
       <>
         <form onSubmit={handleSubmit}>
-          <Stack direction={'column'} spacing={1}>
+          <Stack spacing={1}>
             <InputLabel>Campaign Title</InputLabel>
             <TextField
               variant={'outlined'}
