@@ -3,13 +3,13 @@
 import { useEffect, useState } from 'react';
 import { Box, Stack, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { Collection, Scoop } from '@/types/Scoop';
+import { Collection, Unit } from '@/types/Unit';
 import { collection, getDocs, query, where } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import Link from 'next/link';
-import CreateScoopModal from '@/components/modals/CreateScoopModal';
+import CreateUnitModal from '@/components/modals/CreateUnitModal';
 
-const ArticleTab = (props: { article: Scoop }) => {
+const ArticleTab = (props: { article: Unit }) => {
   return (
     <Link
       href={`/campaigns/${props.article.campaignId}/articles/${props.article.id}`}
@@ -35,23 +35,23 @@ const CollectionTab = (props: { collection: Collection }) => {
 
 const CollectionSearch = (props: { collection: Collection }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [scoops, setScoops] = useState<Scoop[] | null>(null);
+  const [units, setUnits] = useState<Unit[] | null>(null);
 
   useEffect(() => {
-    // TODO: Fix query to allow more than 10 scoopIds
-    const fetchScoops = async () => {
-      const scoopQuery = query(
-        collection(db, 'scoops'),
-        where('id', 'in', props.collection.scoopIds)
+    // TODO: Fix query to allow more than 10 unitIds
+    const fetchUnits = async () => {
+      const unitQuery = query(
+        collection(db, 'units'),
+        where('id', 'in', props.collection.unitIds)
       );
-      const scoopQuerySnap = await getDocs(scoopQuery);
-      let scoops: Scoop[] = [];
-      scoopQuerySnap.forEach((doc) => {
-        scoops.push(doc.data() as Scoop);
+      const unitQuerySnap = await getDocs(unitQuery);
+      let units: Unit[] = [];
+      unitQuerySnap.forEach((doc) => {
+        units.push(doc.data() as Unit);
       });
-      setScoops(scoops);
+      setUnits(units);
     };
-    props.collection.scoopIds?.length > 0 && fetchScoops();
+    props.collection.unitIds.length > 0 && fetchUnits();
   }, []);
 
   const handleInputChange = (event: Object) => {
@@ -72,26 +72,23 @@ const CollectionSearch = (props: { collection: Collection }) => {
             startAdornment: <SearchIcon />,
           }}
         />
-        <CreateScoopModal />
+        <CreateUnitModal />
       </Stack>
-      {scoops?.map((scoop: Scoop) => {
+      {units?.map((unit: Unit) => {
         if (
-          scoop.title
+          unit.title
             .toLowerCase()
             .trim()
             .includes(searchQuery.toLowerCase().trim())
         )
-          switch (scoop.type) {
+          switch (unit.type) {
             case 'article':
-              return <ArticleTab key={scoop.id} article={scoop as Scoop} />;
+              return <ArticleTab key={unit.id} article={unit as Unit} />;
             case 'quest':
-              return <ArticleTab key={scoop.id} article={scoop as Scoop} />;
+              return <ArticleTab key={unit.id} article={unit as Unit} />;
             case 'collection':
               return (
-                <CollectionTab
-                  key={scoop.id}
-                  collection={scoop as Collection}
-                />
+                <CollectionTab key={unit.id} collection={unit as Collection} />
               );
             default:
               return <></>;

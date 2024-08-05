@@ -14,7 +14,7 @@ import { generateUUID } from '@/utils/uuid';
 import { Campaign } from '@/types/Campaign';
 import { arrayUnion, doc, runTransaction } from '@firebase/firestore';
 import db from '@/utils/firebase';
-import { Collection } from '@/types/Scoop';
+import { Collection } from '@/types/Unit';
 import { useUser } from '@/hooks/useUser';
 
 const CreateCampaignModal = () => {
@@ -41,12 +41,12 @@ const CreateCampaignModal = () => {
           title: campaignTitle,
           type: 'collection',
           breadcrumbs: null,
-          scoopIds: [],
+          unitIds: [],
         };
         // TODO: Error handling
         await runTransaction(db, async (transaction) => {
           transaction.set(doc(db, 'campaigns', newCampaignId), newCampaign);
-          transaction.set(doc(db, 'scoops', baseCollectionId), baseCollection);
+          transaction.set(doc(db, 'units', baseCollectionId), baseCollection);
           transaction.update(doc(db, 'users', user.id), {
             campaignIds: arrayUnion(newCampaignId),
           });

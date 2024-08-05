@@ -5,7 +5,7 @@ import { doc, getDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { Box, Stack, Typography } from '@mui/material';
 import CollectionSearch from '@/components/CollectionSearch';
-import { Collection } from '@/types/Scoop';
+import { Collection } from '@/types/Unit';
 
 export default function CollectionPage({
   params,
@@ -17,7 +17,7 @@ export default function CollectionPage({
   useEffect(() => {
     const fetchCollection = async () => {
       const collectionDocSnap = await getDoc(
-        doc(db, 'scoops', params.collectionId)
+        doc(db, 'units', params.collectionId)
       );
       if (collectionDocSnap.exists()) {
         setCollection(collectionDocSnap.data() as Collection);

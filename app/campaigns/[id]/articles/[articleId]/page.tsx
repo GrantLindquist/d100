@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { Article, Section } from '@/types/Scoop';
+import { Article, Section } from '@/types/Unit';
 import { doc, getDoc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { generateUUID } from '@/utils/uuid';
@@ -36,7 +36,7 @@ export default function ArticlePage({
 
   useEffect(() => {
     const fetchArticle = async () => {
-      const articleDocSnap = await getDoc(doc(db, 'scoops', params.articleId));
+      const articleDocSnap = await getDoc(doc(db, 'units', params.articleId));
       if (articleDocSnap.exists()) {
         setArticle(articleDocSnap.data() as Article);
       }
@@ -75,7 +75,7 @@ export default function ArticlePage({
       isEditing && setEditing(false);
       isAdding && setAdding(false);
 
-      await updateDoc(doc(db, 'scoops', params.articleId), {
+      await updateDoc(doc(db, 'units', params.articleId), {
         sections: sectionsData,
       });
     }

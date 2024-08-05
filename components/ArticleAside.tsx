@@ -1,4 +1,4 @@
-import { Article } from '@/types/Scoop';
+import { Article } from '@/types/Unit';
 import { Card, CardContent, Typography } from '@mui/material';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import Link from 'next/link';

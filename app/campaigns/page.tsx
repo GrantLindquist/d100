@@ -17,6 +17,7 @@ import CreateCampaignModal from '@/components/modals/CreateCampaignModal';
 import JoinCampaignModal from '@/components/modals/JoinCampaignModal';
 
 // TODO: Limit campaigns to 10
+// TODO: Change [id] to [campaignId]
 export default function CampaignsPage() {
   const { user, fetchUser } = useUser();
 

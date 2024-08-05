@@ -14,15 +14,15 @@ import {
 import { FormEvent, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import { generateUUID } from '@/utils/uuid';
-import { Article, Scoop, ScoopType, Section } from '@/types/Scoop';
+import { Article, Section, Unit, UnitType } from '@/types/Unit';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { arrayUnion, doc, runTransaction } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { MODAL_STYLE } from '@/utils/globals';
 
-const CreateScoopModal = () => {
-  const [modalState, setModalState] = useState<ScoopType | null>(null);
+const CreateUnitModal = () => {
+  const [modalState, setModalState] = useState<UnitType | null>(null);
 
   const [menuAnchor, setMenuAnchor] = useState(null);
   const menuOpen = Boolean(menuAnchor);
@@ -35,16 +35,15 @@ const CreateScoopModal = () => {
     setMenuAnchor(null);
   };
 
-  const CreateScoopForm = () => {
-    const [scoopTitle, setScoopTitle] = useState('');
+  const CreateUnitForm = () => {
+    const [unitTitle, setUnitTitle] = useState('');
     const [displaySnackbar, setDisplaySnackbar] = useState(false);
 
-    // TODO: turn [id] into [campaignId]
     const params = useParams();
     const campaignId = params.id as string;
     const collectionId = params.collectionId as string;
 
-    const scoopDisplayValue = modalState
+    const unitDisplayValue = modalState
       ? modalState.charAt(0).toUpperCase() + modalState.slice(1)
       : '';
 
@@ -52,22 +51,22 @@ const CreateScoopModal = () => {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (modalState) {
-        const newScoopId = generateUUID();
-        let newScoopObj: Scoop = {
-          id: newScoopId,
-          title: scoopTitle,
+        const newUnitId = generateUUID();
+        let newUnitObj: Unit = {
+          id: newUnitId,
+          title: unitTitle,
           type: modalState,
           campaignId: campaignId,
           breadcrumbs: null,
         };
 
         if (modalState === 'article') {
-          newScoopObj = {
-            ...newScoopObj,
+          newUnitObj = {
+            ...newUnitObj,
             sections: [
               {
                 id: generateUUID(),
-                title: scoopTitle,
+                title: unitTitle,
                 body: '',
                 isHeader: true,
               },
@@ -76,9 +75,9 @@ const CreateScoopModal = () => {
         }
 
         await runTransaction(db, async (transaction) => {
-          transaction.set(doc(db, 'scoops', newScoopId), newScoopObj);
-          transaction.update(doc(db, 'scoops', collectionId), {
-            scoopIds: arrayUnion(newScoopId),
+          transaction.set(doc(db, 'units', newUnitId), newUnitObj);
+          transaction.update(doc(db, 'units', collectionId), {
+            unitIds: arrayUnion(newUnitId),
           });
         });
 
@@ -90,7 +89,7 @@ const CreateScoopModal = () => {
     const handleInputChange = (event: Object) => {
       // @ts-ignore
       const value = event.target.value;
-      setScoopTitle(value);
+      setUnitTitle(value);
     };
 
     // TODO: Route snackbar to new article and place outside of modal
@@ -99,14 +98,14 @@ const CreateScoopModal = () => {
         <form onSubmit={handleSubmit}>
           {modalState && (
             <Stack direction={'column'} spacing={1}>
-              <InputLabel>{scoopDisplayValue} Title</InputLabel>
+              <InputLabel>{unitDisplayValue} Title</InputLabel>
               <TextField
                 variant={'outlined'}
                 size={'small'}
                 fullWidth
                 onChange={handleInputChange}
               />
-              <Button type={'submit'}>Create new {scoopDisplayValue}</Button>
+              <Button type={'submit'}>Create new {unitDisplayValue}</Button>
             </Stack>
           )}
         </form>
@@ -114,7 +113,7 @@ const CreateScoopModal = () => {
           open={displaySnackbar}
           autoHideDuration={6000}
           onClose={() => setDisplaySnackbar(false)}
-          message={scoopDisplayValue + ' created'}
+          message={unitDisplayValue + ' created'}
           action={
             <Link href={`/campaigns/${campaignId}/${modalState}s/${''}`}>
               <Button>View</Button>
@@ -143,11 +142,11 @@ const CreateScoopModal = () => {
       </Menu>
       <Modal open={Boolean(modalState)} onClose={() => setModalState(null)}>
         <Box sx={MODAL_STYLE}>
-          <CreateScoopForm />
+          <CreateUnitForm />
         </Box>
       </Modal>
     </>
   );
 };
 
-export default CreateScoopModal;
+export default CreateUnitModal;
