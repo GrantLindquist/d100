@@ -1,12 +1,13 @@
 import { Article } from '@/types/Scoop';
 import { Card, CardContent, Typography } from '@mui/material';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import Link from 'next/link';
 
 const ArticleAside = (props: { article: Article }) => {
   return (
     <Card
       sx={{
-        width: '100%',
+        position: 'sticky',
       }}
     >
       <CardContent>
@@ -24,7 +25,7 @@ const ArticleAside = (props: { article: Article }) => {
                   }
             }
           >
-            {section.title}
+            <Link href={`#${section.title}`}>{section.title}</Link>
           </Typography>
         ))}
       </CardContent>

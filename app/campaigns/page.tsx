@@ -12,10 +12,11 @@ import { doc, setDoc } from '@firebase/firestore';
 import { useUser } from '@/hooks/useUser';
 import { useEffect } from 'react';
 import CampaignList from '@/components/CampaignList';
-import LoginIcon from '@mui/icons-material/Login';
-import AddIcon from '@mui/icons-material/Add';
 import { setUserSession } from '@/utils/userSession';
+import CreateCampaignModal from '@/components/modals/CreateCampaignModal';
+import JoinCampaignModal from '@/components/modals/JoinCampaignModal';
 
+// TODO: Limit campaigns to 10
 export default function CampaignsPage() {
   const { user, fetchUser } = useUser();
 
@@ -65,8 +66,8 @@ export default function CampaignsPage() {
           <CampaignList />
           <Divider />
           <Stack direction={'row'} spacing={2} justifyContent={'center'}>
-            <Button startIcon={<LoginIcon />}>Join Campaign</Button>
-            <Button startIcon={<AddIcon />}>Create Campaign</Button>
+            <JoinCampaignModal />
+            <CreateCampaignModal />
           </Stack>
         </Stack>
       ) : (

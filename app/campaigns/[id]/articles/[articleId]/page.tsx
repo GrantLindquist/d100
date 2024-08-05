@@ -19,6 +19,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import ArticleAside from '@/components/ArticleAside';
 
+// TODO: Do not remove sections w/ no body - instead display UI
 export default function ArticlePage({
   params,
 }: {
@@ -43,7 +44,6 @@ export default function ArticlePage({
     fetchArticle();
   }, [params.articleId]);
 
-  // TODO: Cannot read trim of undefined (reading title) - does not work if isEditing is false
   const handleSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -115,12 +115,12 @@ export default function ArticlePage({
 
   const Section = (props: { section: Section }) => {
     return (
-      <>
+      <div id={props.section.title}>
         <Typography variant={props.section.isHeader ? 'h2' : 'h4'} py={1}>
           {props.section.title}
         </Typography>
         <Typography py={1}>{props.section.body}</Typography>
-      </>
+      </div>
     );
   };
 
@@ -135,7 +135,7 @@ export default function ArticlePage({
           // onFocus={() => setFocusedSectionId(props.section.id)}
           sx={{
             '& .MuiInputBase-input': {
-              fontSize: '2rem',
+              fontSize: props.section.isHeader ? '4rem' : '2rem',
               fontStyle: 'italic',
               py: 1,
               px: 0,
@@ -175,6 +175,9 @@ export default function ArticlePage({
       {article && (
         <Grid container spacing={3}>
           <Grid item xs={3}>
+            <Box width={'100%'}>
+              <ArticleAside article={article} />
+            </Box>
             {/*<Breadcrumbs aria-label="breadcrumb">*/}
             {/*  <Link href="/">MUI</Link>*/}
             {/*  <Link href="/material-ui/getting-started/installation/">*/}
@@ -182,7 +185,6 @@ export default function ArticlePage({
             {/*  </Link>*/}
             {/*  <Typography>Breadcrumbs</Typography>*/}
             {/*</Breadcrumbs>*/}
-            <ArticleAside article={article} />
           </Grid>
           <Grid item xs={8}>
             <Box pl={3}>
@@ -222,7 +224,7 @@ export default function ArticlePage({
         <Fab size="small" onClick={handleAddSection}>
           <AddIcon />
         </Fab>
-        {isEditing ? (
+        {(isEditing || isAdding) && (
           <Fab
             size="small"
             onClick={() => {
@@ -237,12 +239,12 @@ export default function ArticlePage({
           >
             Save
           </Fab>
-        ) : (
+        )}
+        {!isEditing && (
           <Fab size="small" onClick={() => setEditing(true)}>
             <EditIcon />
           </Fab>
         )}
-
         <Fab
           size="small"
           disabled={!Boolean(focusedSectionId)}

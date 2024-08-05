@@ -7,7 +7,7 @@ import { Collection, Scoop } from '@/types/Scoop';
 import { collection, getDocs, query, where } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import Link from 'next/link';
-import CreateNewModal from '@/components/CreateNewModal';
+import CreateScoopModal from '@/components/modals/CreateScoopModal';
 
 const ArticleTab = (props: { article: Scoop }) => {
   return (
@@ -72,7 +72,7 @@ const CollectionSearch = (props: { collection: Collection }) => {
             startAdornment: <SearchIcon />,
           }}
         />
-        <CreateNewModal />
+        <CreateScoopModal />
       </Stack>
       {scoops?.map((scoop: Scoop) => {
         if (

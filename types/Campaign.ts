@@ -1,6 +1,6 @@
 export interface Campaign {
   id: string;
   title: string;
-  description: string;
   baseCollectionId: string;
+  dmId: string;
 }
