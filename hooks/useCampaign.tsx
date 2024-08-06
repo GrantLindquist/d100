@@ -13,15 +13,20 @@ import { useUser } from '@/hooks/useUser';
 import { doc, getDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { Campaign } from '@/types/Campaign';
+import { Unit } from '@/types/Unit';
 
 const CampaignContext = createContext<{
   campaign: Campaign | null;
   setCampaignId: Dispatch<SetStateAction<string | null>>;
   isUserDm: boolean | null;
+  currentUnit: Unit | null;
+  setCurrentUnit: Dispatch<SetStateAction<Unit | null>>;
 }>({
   campaign: null,
   setCampaignId: () => {},
   isUserDm: null,
+  currentUnit: null,
+  setCurrentUnit: () => {},
 });
 
 export const CampaignProvider = ({ children }: { children: ReactNode }) => {
@@ -30,6 +35,7 @@ export const CampaignProvider = ({ children }: { children: ReactNode }) => {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [isUserDm, setIsUserDm] = useState<boolean | null>(null);
+  const [currentUnit, setCurrentUnit] = useState<Unit | null>(null);
 
   useEffect(() => {
     const fetchCampaign = async () => {
@@ -48,7 +54,9 @@ export const CampaignProvider = ({ children }: { children: ReactNode }) => {
   }, [campaignId, user?.id]);
 
   return (
-    <CampaignContext.Provider value={{ campaign, setCampaignId, isUserDm }}>
+    <CampaignContext.Provider
+      value={{ campaign, setCampaignId, isUserDm, currentUnit, setCurrentUnit }}
+    >
       {children}
     </CampaignContext.Provider>
   );

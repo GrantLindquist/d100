@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react';
 import {
   Box,
   Card,
+  CardContent,
   Divider,
   Stack,
   TextField,
   Typography,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { Collection, Unit } from '@/types/Unit';
+import { Article, Collection, Unit } from '@/types/Unit';
 import { collection, getDocs, query, where } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import Link from 'next/link';
@@ -21,14 +22,26 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import Masonry from '@mui/lab/Masonry';
 import { useCampaign } from '@/hooks/useCampaign';
 
-const ArticleTab = (props: { article: Unit }) => {
+const ArticleTab = (props: { article: Article }) => {
   return (
     <Link
       href={`/campaigns/${props.article.campaignId}/articles/${props.article.id}`}
     >
-      <Box sx={{ backgroundColor: 'grey' }}>
-        <p>{props.article.title}</p>
-      </Box>
+      <Card variant={'outlined'}>
+        {props.article.imageUrls.length > 0 && (
+          // <CardMedia sx={{ height: 300 }} image={props.article.imageUrls[0]} />
+          <img
+            style={{
+              width: '100%',
+              height: 'auto',
+            }}
+            src={props.article.imageUrls[0]}
+          />
+        )}
+        <CardContent>
+          <Typography>{props.article.title}</Typography>
+        </CardContent>
+      </Card>
     </Link>
   );
 };
@@ -71,18 +84,19 @@ const CollectionTab = (props: { collection: Collection }) => {
   );
 };
 
-const CollectionSearch = (props: { collection: Collection }) => {
+// TODO: Fix bug that occurs when entering an empty collection
+const CollectionSearch = (props: { unitIds: string[] }) => {
   const { isUserDm } = useCampaign();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [units, setUnits] = useState<Unit[] | null>(null);
+  const [units, setUnits] = useState<Unit[]>([]);
 
   useEffect(() => {
     // TODO: Fix query to allow more than 10 unitIds
     const fetchUnits = async () => {
       const unitQuery = query(
         collection(db, 'units'),
-        where('id', 'in', props.collection.unitIds)
+        where('id', 'in', props.unitIds)
       );
       const unitQuerySnap = await getDocs(unitQuery);
       let units: Unit[] = [];
@@ -91,8 +105,8 @@ const CollectionSearch = (props: { collection: Collection }) => {
       });
       setUnits(units);
     };
-    props.collection.unitIds.length > 0 && fetchUnits();
-  }, []);
+    props.unitIds.length > 0 ? fetchUnits() : setUnits([]);
+  }, [props.unitIds]);
 
   const handleInputChange = (event: Object) => {
     // @ts-ignore
@@ -141,7 +155,7 @@ const CollectionSearch = (props: { collection: Collection }) => {
           </Box>
           <Divider />
           {/* TODO: Make column count responsive */}
-          <Masonry spacing={1}>
+          <Masonry spacing={1} columns={3} sx={{ py: 2 }}>
             {units
               .filter((unit) => unit.type !== 'collection')
               .map((unit: Unit) => {
@@ -155,11 +169,11 @@ const CollectionSearch = (props: { collection: Collection }) => {
                   switch (unit.type) {
                     case 'article':
                       return (
-                        <ArticleTab key={unit.id} article={unit as Unit} />
+                        <ArticleTab key={unit.id} article={unit as Article} />
                       );
                     case 'quest':
                       return (
-                        <ArticleTab key={unit.id} article={unit as Unit} />
+                        <ArticleTab key={unit.id} article={unit as Article} />
                       );
                     default:
                       return null;

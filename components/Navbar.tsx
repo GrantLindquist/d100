@@ -1,15 +1,23 @@
 import UserButton from '@/components/UserButton';
-import { AppBar, Stack, Toolbar } from '@mui/material';
+import { AppBar, Divider, Stack, Toolbar } from '@mui/material';
 import Link from 'next/link';
+import SettingsButton from '@/components/SettingsButton';
+import NavBreadcrumbs from '@/components/modals/NavBreadcrumbs';
 
 const Navbar = () => {
   return (
-    <AppBar position={'static'}>
+    <AppBar position={'static'} sx={{ backgroundColor: 'black' }}>
       <Toolbar>
-        <Stack direction={'row'} spacing={3} sx={{ flexGrow: 1 }}>
-          <Link href={'/campaigns'}>Campaigns</Link>
+        <Stack direction={'row'} spacing={2} sx={{ flexGrow: 1 }}>
+          <Link href={'/campaigns'}>All Campaigns</Link>
+          <Divider orientation={'vertical'} flexItem />
+          <NavBreadcrumbs />
         </Stack>
-        <UserButton />
+        <Stack direction={'row'} spacing={1}>
+          <SettingsButton />
+          <Divider orientation={'vertical'} flexItem />
+          <UserButton />
+        </Stack>
       </Toolbar>
     </AppBar>
   );

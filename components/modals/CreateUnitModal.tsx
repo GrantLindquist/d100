@@ -25,7 +25,7 @@ import { MODAL_STYLE } from '@/utils/globals';
 import { useCampaign } from '@/hooks/useCampaign';
 
 const CreateUnitModal = () => {
-  const { isUserDm } = useCampaign();
+  const { isUserDm, currentUnit } = useCampaign();
 
   const [modalState, setModalState] = useState<UnitType | null>(null);
 
@@ -53,7 +53,18 @@ const CreateUnitModal = () => {
       ? modalState.charAt(0).toUpperCase() + modalState.slice(1)
       : '';
 
-    // TODO: Breadcrumbs
+    const generateBreadcrumbs = (newUnitId: string) => {
+      if (currentUnit?.type === 'collection') {
+        let breadcrumbs = currentUnit.breadcrumbs;
+        breadcrumbs.push({
+          title: unitTitle,
+          url: `/campaigns/${campaignId}/${modalState}s/${newUnitId}`,
+        });
+        return breadcrumbs;
+      }
+      return [];
+    };
+
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (modalState) {
@@ -63,7 +74,7 @@ const CreateUnitModal = () => {
           title: unitTitle,
           type: modalState,
           campaignId: campaignId,
-          breadcrumbs: null,
+          breadcrumbs: generateBreadcrumbs(newUnitId),
           hidden: isHiddenChecked,
         };
 
@@ -141,7 +152,7 @@ const CreateUnitModal = () => {
           onClose={() => setDisplaySnackbar(false)}
           message={unitDisplayValue + ' created'}
           action={
-            <Link href={`/campaigns/${campaignId}/${modalState}s/${''}`}>
+            <Link href={`/campaigns/${campaignId}/${modalState}s`}>
               <Button>View</Button>
             </Link>
           }

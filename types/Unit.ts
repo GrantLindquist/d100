@@ -1,11 +1,12 @@
 export type UnitType = 'article' | 'quest' | 'collection';
+export const UnitEnum = ['article', 'quest', 'collection'];
 
 export interface Unit {
   id: string;
   campaignId: string;
   title: string;
   type: UnitType;
-  breadcrumbs: Breadcrumb[] | null;
+  breadcrumbs: Breadcrumb[];
   hidden: boolean;
 }
 
@@ -27,6 +28,6 @@ export interface Section {
 }
 
 export interface Breadcrumb {
-  id: string;
+  url: string;
   title: string;
 }

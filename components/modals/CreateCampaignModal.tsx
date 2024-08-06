@@ -40,7 +40,13 @@ const CreateCampaignModal = () => {
           campaignId: newCampaignId,
           title: campaignTitle,
           type: 'collection',
-          breadcrumbs: null,
+          breadcrumbs: [
+            {
+              title: campaignTitle,
+              url: `/campaigns/${newCampaignId}/collections/${baseCollectionId}`,
+            },
+          ],
+          hidden: false,
           unitIds: [],
         };
         // TODO: Error handling

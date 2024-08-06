@@ -47,7 +47,6 @@ const UserButton = () => {
         {isUserDm && <WorkspacePremiumIcon />}
       </Button>
       <Menu anchorEl={anchor} open={open} onClose={handleClose}>
-        <MenuItem>Manage players</MenuItem>
         <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
       </Menu>
     </>

@@ -15,13 +15,7 @@ import {
 } from '@mui/material';
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import { Article, Section } from '@/types/Unit';
-import {
-  arrayRemove,
-  arrayUnion,
-  doc,
-  getDoc,
-  updateDoc,
-} from '@firebase/firestore';
+import { arrayRemove, arrayUnion, doc, updateDoc } from '@firebase/firestore';
 import db, { storage } from '@/utils/firebase';
 import { generateUUID } from '@/utils/uuid';
 import { useUser } from '@/hooks/useUser';
@@ -55,7 +49,7 @@ export default function ArticlePage({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { user } = useUser();
-  const { campaign } = useCampaign();
+  const { campaign, currentUnit } = useCampaign();
 
   const [anchor, setAnchor] = useState(null);
   const addMenuOpen = Boolean(anchor);
@@ -63,14 +57,8 @@ export default function ArticlePage({
   const [backdropIndex, setBackdropIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const fetchArticle = async () => {
-      const articleDocSnap = await getDoc(doc(db, 'units', params.articleId));
-      if (articleDocSnap.exists()) {
-        setArticle(articleDocSnap.data() as Article);
-      }
-    };
-    fetchArticle();
-  }, [params.articleId]);
+    currentUnit?.type === 'article' && setArticle(currentUnit as Article);
+  }, [currentUnit]);
 
   const handleClickAddMenu = (event: any) => {
     setAnchor(event.currentTarget);
