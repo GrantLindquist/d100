@@ -1,25 +1,35 @@
 'use client';
 
 import {
+  Backdrop,
   Box,
   Container,
   Fab,
   Grid,
+  IconButton,
+  Menu,
+  MenuItem,
   Stack,
   TextField,
   Typography,
 } from '@mui/material';
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import { Article, Section } from '@/types/Unit';
-import { doc, getDoc, updateDoc } from '@firebase/firestore';
-import db from '@/utils/firebase';
+import { arrayUnion, doc, getDoc, updateDoc } from '@firebase/firestore';
+import db, { storage } from '@/utils/firebase';
 import { generateUUID } from '@/utils/uuid';
 import { useUser } from '@/hooks/useUser';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import ArticleAside from '@/components/ArticleAside';
+import Masonry from '@mui/lab/Masonry';
+import { getDownloadURL, ref, uploadBytes } from '@firebase/storage';
+import { useCampaign } from '@/hooks/useCampaign';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import DeleteIcon from '@mui/icons-material/Delete';
 
-// TODO: Do not remove sections w/ no body - instead display UI
+// TODO: This file is bloated
 export default function ArticlePage({
   params,
 }: {
@@ -31,8 +41,15 @@ export default function ArticlePage({
   const [focusedSectionId, setFocusedSectionId] = useState<string | null>(null);
 
   const sectionsFormRef = useRef<HTMLFormElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { user } = useUser();
+  const { campaign } = useCampaign();
+
+  const [anchor, setAnchor] = useState(null);
+  const addMenuOpen = Boolean(anchor);
+
+  const [backdropIndex, setBackdropIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -43,6 +60,14 @@ export default function ArticlePage({
     };
     fetchArticle();
   }, [params.articleId]);
+
+  const handleClickAddMenu = (event: any) => {
+    setAnchor(event.currentTarget);
+  };
+
+  const handleCloseAddMenu = () => {
+    setAnchor(null);
+  };
 
   const handleSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -81,8 +106,51 @@ export default function ArticlePage({
     }
   };
 
+  const handleAddImage = () => {
+    handleCloseAddMenu();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleDeleteImage = () => {};
+
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    if (article && campaign) {
+      const files = event.target.files;
+      if (files) {
+        for (let file of files) {
+          const imageId = file.name + '-' + generateUUID();
+          const imageRef = ref(
+            storage,
+            `${campaign.title}-${campaign.id}/${imageId}`
+          );
+          await uploadBytes(imageRef, file);
+          const fileUrl = await getDownloadURL(imageRef);
+          await updateDoc(doc(db, 'units', article.id), {
+            imageUrls: arrayUnion(fileUrl),
+          });
+        }
+      }
+    }
+  };
+
+  const changeBackdrop = (difference: -1 | 1) => {
+    if (article && backdropIndex !== null) {
+      const imageUrlCount = article.imageUrls.length;
+      if (backdropIndex <= 0 && difference === -1) {
+        setBackdropIndex(imageUrlCount - 1);
+      } else if (backdropIndex >= imageUrlCount) {
+        setBackdropIndex(0);
+      } else {
+        setBackdropIndex(backdropIndex + difference);
+      }
+    }
+  };
+
   const handleAddSection = () => {
     if (article && user) {
+      handleCloseAddMenu();
       setAdding(true);
       const newSection = {
         id: generateUUID(),
@@ -205,6 +273,24 @@ export default function ArticlePage({
                   </div>
                 ))}
               </form>
+              {article.imageUrls.length > 0 && (
+                <>
+                  <Typography variant={'h4'}>Reference Images</Typography>
+                  <Masonry spacing={1}>
+                    {article.imageUrls.map((url, index) => {
+                      return (
+                        <img
+                          key={index}
+                          alt={`Reference Image #${index}`}
+                          src={url}
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setBackdropIndex(index)}
+                        />
+                      );
+                    })}
+                  </Masonry>
+                </>
+              )}
             </Box>
           </Grid>
         </Grid>
@@ -219,9 +305,21 @@ export default function ArticlePage({
           bottom: 16,
         }}
       >
-        <Fab size="small" onClick={handleAddSection}>
+        <Fab size="small" onClick={handleClickAddMenu}>
           <AddIcon />
         </Fab>
+        <Menu anchorEl={anchor} open={addMenuOpen} onClose={handleCloseAddMenu}>
+          <MenuItem onClick={handleAddSection}>Add Section</MenuItem>
+          <MenuItem onClick={handleAddImage}>Add Reference Images</MenuItem>
+        </Menu>
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          style={{ display: 'none' }}
+          ref={fileInputRef}
+          onChange={handleFileChange}
+        />
         {(isEditing || isAdding) && (
           <Fab
             size="small"
@@ -251,6 +349,40 @@ export default function ArticlePage({
           Del
         </Fab>
       </Stack>
+      <Backdrop
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+        open={backdropIndex !== null}
+        onClick={() => setBackdropIndex(null)}
+      >
+        <Box
+          sx={{ height: '65%' }}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <img
+            style={{ height: '100%' }}
+            src={
+              article && backdropIndex !== null
+                ? article.imageUrls[backdropIndex]
+                : ''
+            }
+            alt={'Resized Reference Image'}
+          />
+          {/* TODO: Change UI to not resize w/ image width */}
+          <Stack direction={'row'}>
+            <IconButton onClick={() => changeBackdrop(-1)}>
+              <KeyboardArrowLeftIcon />
+            </IconButton>
+            <IconButton onClick={() => changeBackdrop(1)}>
+              <KeyboardArrowRightIcon />
+            </IconButton>
+            <IconButton onClick={handleDeleteImage}>
+              <DeleteIcon />
+            </IconButton>
+          </Stack>
+        </Box>
+      </Backdrop>
     </Container>
   );
 }

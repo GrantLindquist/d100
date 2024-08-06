@@ -14,6 +14,7 @@ export interface Collection extends Unit {
 
 export interface Article extends Unit {
   sections: Section[];
+  imageUrls: string[];
 }
 
 export interface Section {

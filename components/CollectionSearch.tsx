@@ -63,7 +63,7 @@ const CollectionTab = (props: { collection: Collection }) => {
           <Typography fontWeight={BOLD_FONT_WEIGHT}>
             {props.collection.title}
           </Typography>
-          <Typography>Collection</Typography>
+          <Typography>Sub-Collection</Typography>
         </Stack>
       </Stack>
     </Card>

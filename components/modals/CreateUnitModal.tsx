@@ -63,6 +63,7 @@ const CreateUnitModal = () => {
         if (modalState === 'article') {
           newUnitObj = {
             ...newUnitObj,
+            imageUrls: [],
             sections: [
               {
                 id: generateUUID(),
