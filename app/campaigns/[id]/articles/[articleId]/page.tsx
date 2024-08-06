@@ -15,7 +15,13 @@ import {
 } from '@mui/material';
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import { Article, Section } from '@/types/Unit';
-import { arrayUnion, doc, getDoc, updateDoc } from '@firebase/firestore';
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  getDoc,
+  updateDoc,
+} from '@firebase/firestore';
 import db, { storage } from '@/utils/firebase';
 import { generateUUID } from '@/utils/uuid';
 import { useUser } from '@/hooks/useUser';
@@ -23,7 +29,12 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import ArticleAside from '@/components/ArticleAside';
 import Masonry from '@mui/lab/Masonry';
-import { getDownloadURL, ref, uploadBytes } from '@firebase/storage';
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+} from '@firebase/storage';
 import { useCampaign } from '@/hooks/useCampaign';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
@@ -113,7 +124,22 @@ export default function ArticlePage({
     }
   };
 
-  const handleDeleteImage = () => {};
+  const handleDeleteImage = async (index: number) => {
+    setBackdropIndex(null);
+    if (article) {
+      const imageUrl = article.imageUrls[index];
+      const newArticle = {
+        ...article,
+        imageUrls: article.imageUrls.filter((url) => url !== imageUrl),
+      };
+      setArticle(newArticle);
+
+      await updateDoc(doc(db, 'units', article.id), {
+        imageUrls: arrayRemove(imageUrl),
+      });
+      await deleteObject(ref(storage, imageUrl));
+    }
+  };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (article && campaign) {
@@ -140,7 +166,7 @@ export default function ArticlePage({
       const imageUrlCount = article.imageUrls.length;
       if (backdropIndex <= 0 && difference === -1) {
         setBackdropIndex(imageUrlCount - 1);
-      } else if (backdropIndex >= imageUrlCount) {
+      } else if (backdropIndex >= imageUrlCount - 1) {
         setBackdropIndex(0);
       } else {
         setBackdropIndex(backdropIndex + difference);
@@ -254,6 +280,11 @@ export default function ArticlePage({
           </Grid>
           <Grid item xs={8}>
             <Box pl={3}>
+              {article.hidden && (
+                <Typography color={'grey'} variant={'subtitle2'}>
+                  Hidden from players
+                </Typography>
+              )}
               <form ref={sectionsFormRef} onSubmit={handleSave}>
                 {article.sections.map((section, index) => (
                   <div key={index}>
@@ -275,7 +306,9 @@ export default function ArticlePage({
               </form>
               {article.imageUrls.length > 0 && (
                 <>
-                  <Typography variant={'h4'}>Reference Images</Typography>
+                  <Typography id={'Reference Images'} variant={'h4'}>
+                    Reference Images
+                  </Typography>
                   <Masonry spacing={1}>
                     {article.imageUrls.map((url, index) => {
                       return (
@@ -371,13 +404,19 @@ export default function ArticlePage({
           />
           {/* TODO: Change UI to not resize w/ image width */}
           <Stack direction={'row'}>
-            <IconButton onClick={() => changeBackdrop(-1)}>
-              <KeyboardArrowLeftIcon />
-            </IconButton>
-            <IconButton onClick={() => changeBackdrop(1)}>
-              <KeyboardArrowRightIcon />
-            </IconButton>
-            <IconButton onClick={handleDeleteImage}>
+            <Box flexGrow={1}>
+              <IconButton onClick={() => changeBackdrop(-1)}>
+                <KeyboardArrowLeftIcon />
+              </IconButton>
+              <IconButton onClick={() => changeBackdrop(1)}>
+                <KeyboardArrowRightIcon />
+              </IconButton>
+            </Box>
+            <IconButton
+              onClick={() =>
+                backdropIndex !== null && handleDeleteImage(backdropIndex)
+              }
+            >
               <DeleteIcon />
             </IconButton>
           </Stack>

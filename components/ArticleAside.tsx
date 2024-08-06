@@ -28,6 +28,11 @@ const ArticleAside = (props: { article: Article }) => {
             <Link href={`#${section.title}`}>{section.title}</Link>
           </Typography>
         ))}
+        {props.article.imageUrls.length > 0 && (
+          <Typography py={0.5} pl={3}>
+            <Link href={`#Reference Images`}>Reference Images</Link>
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );

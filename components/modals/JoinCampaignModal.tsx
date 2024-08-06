@@ -25,7 +25,9 @@ const JoinCampaignModal = () => {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (user) {
-        const campaignDocSnap = await getDoc(doc(db, 'campaigns', campaignId));
+        const campaignDocSnap = await getDoc(
+          doc(db, 'campaigns', campaignId.trim())
+        );
         if (campaignDocSnap.exists()) {
           await updateDoc(doc(db, 'users', user.id), {
             campaignIds: arrayUnion(campaignId),

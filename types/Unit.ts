@@ -6,6 +6,7 @@ export interface Unit {
   title: string;
   type: UnitType;
   breadcrumbs: Breadcrumb[] | null;
+  hidden: boolean;
 }
 
 export interface Collection extends Unit {

@@ -2,14 +2,16 @@
 import {
   Box,
   Button,
+  Checkbox,
+  FormControlLabel,
   IconButton,
-  InputLabel,
   Menu,
   MenuItem,
   Modal,
   Snackbar,
   Stack,
   TextField,
+  Typography,
 } from '@mui/material';
 import { FormEvent, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
@@ -20,8 +22,11 @@ import Link from 'next/link';
 import { arrayUnion, doc, runTransaction } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { MODAL_STYLE } from '@/utils/globals';
+import { useCampaign } from '@/hooks/useCampaign';
 
 const CreateUnitModal = () => {
+  const { isUserDm } = useCampaign();
+
   const [modalState, setModalState] = useState<UnitType | null>(null);
 
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -37,6 +42,7 @@ const CreateUnitModal = () => {
 
   const CreateUnitForm = () => {
     const [unitTitle, setUnitTitle] = useState('');
+    const [isHiddenChecked, setHiddenChecked] = useState(false);
     const [displaySnackbar, setDisplaySnackbar] = useState(false);
 
     const params = useParams();
@@ -58,6 +64,7 @@ const CreateUnitModal = () => {
           type: modalState,
           campaignId: campaignId,
           breadcrumbs: null,
+          hidden: isHiddenChecked,
         };
 
         if (modalState === 'article') {
@@ -104,13 +111,26 @@ const CreateUnitModal = () => {
         <form onSubmit={handleSubmit}>
           {modalState && (
             <Stack spacing={1}>
-              <InputLabel>{unitDisplayValue} Title</InputLabel>
+              <Typography>{unitDisplayValue} Title</Typography>
               <TextField
                 variant={'outlined'}
                 size={'small'}
                 fullWidth
                 onChange={handleInputChange}
               />
+              {isUserDm && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={isHiddenChecked}
+                      onChange={(event) =>
+                        setHiddenChecked(event.target.checked)
+                      }
+                    />
+                  }
+                  label="Hide From Players"
+                />
+              )}
               <Button type={'submit'}>Create new {unitDisplayValue}</Button>
             </Stack>
           )}

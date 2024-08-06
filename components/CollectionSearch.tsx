@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import FolderIcon from '@mui/icons-material/Folder';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import Masonry from '@mui/lab/Masonry';
+import { useCampaign } from '@/hooks/useCampaign';
 
 const ArticleTab = (props: { article: Unit }) => {
   return (
@@ -71,6 +72,8 @@ const CollectionTab = (props: { collection: Collection }) => {
 };
 
 const CollectionSearch = (props: { collection: Collection }) => {
+  const { isUserDm } = useCampaign();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [units, setUnits] = useState<Unit[] | null>(null);
 
@@ -115,7 +118,6 @@ const CollectionSearch = (props: { collection: Collection }) => {
       </Stack>
       {units && (
         <>
-          {' '}
           <Box
             sx={{
               display: 'flex',
@@ -127,6 +129,9 @@ const CollectionSearch = (props: { collection: Collection }) => {
             {units
               .filter((unit) => unit.type === 'collection')
               .map((collection) => {
+                if (!isUserDm && collection.hidden) {
+                  return null;
+                }
                 return (
                   <Box key={collection.id} flexGrow={1} minWidth={'20%'}>
                     <CollectionTab collection={collection as Collection} />
@@ -144,7 +149,8 @@ const CollectionSearch = (props: { collection: Collection }) => {
                   unit.title
                     .toLowerCase()
                     .trim()
-                    .includes(searchQuery.toLowerCase().trim())
+                    .includes(searchQuery.toLowerCase().trim()) &&
+                  (isUserDm || !unit.hidden)
                 )
                   switch (unit.type) {
                     case 'article':
