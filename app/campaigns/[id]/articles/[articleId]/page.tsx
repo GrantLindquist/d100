@@ -10,7 +10,6 @@ import {
   Menu,
   MenuItem,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material';
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
@@ -33,6 +32,10 @@ import { useCampaign } from '@/hooks/useCampaign';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  EditableSection,
+  Section as SectionComponent,
+} from '@/components/EditableSection';
 
 // TODO: This file is bloated
 export default function ArticlePage({
@@ -195,61 +198,6 @@ export default function ArticlePage({
     }
   };
 
-  const Section = (props: { section: Section }) => {
-    return (
-      <Stack spacing={2} id={props.section.title}>
-        <Typography variant={props.section.isHeader ? 'h2' : 'h4'}>
-          {props.section.title}
-        </Typography>
-        <Typography>{props.section.body}</Typography>
-      </Stack>
-    );
-  };
-
-  // TODO: Figure out how to have my cake (onFocus id state) and eat it too (one click to access TextField)
-  const EditableSection = (props: { section: Section }) => {
-    return (
-      <Stack spacing={2}>
-        <TextField
-          name={`title-${props.section.id}`}
-          defaultValue={props.section.title}
-          placeholder="Section Title"
-          // onFocus={() => setFocusedSectionId(props.section.id)}
-          sx={{
-            '& .MuiInputBase-input': {
-              fontSize: props.section.isHeader ? '4rem' : '2rem',
-              fontStyle: 'italic',
-              p: 0,
-            },
-            '& .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-          }}
-          fullWidth
-        />
-        <TextField
-          name={`body-${props.section.id}`}
-          defaultValue={props.section.body}
-          placeholder="Section Body"
-          // onFocus={() => setFocusedSectionId(props.section.id)}
-          sx={{
-            '& .MuiInputBase-input': {
-              fontStyle: 'italic',
-            },
-            '& .MuiInputBase-root': {
-              p: 0,
-            },
-            '& .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-          }}
-          multiline
-          fullWidth
-        />
-      </Stack>
-    );
-  };
-
   return (
     <Container sx={{ paddingY: 3 }}>
       {article && (
@@ -258,13 +206,6 @@ export default function ArticlePage({
             <Box width={'100%'}>
               <ArticleAside article={article} />
             </Box>
-            {/*<Breadcrumbs aria-label="breadcrumb">*/}
-            {/*  <Link href="/">MUI</Link>*/}
-            {/*  <Link href="/material-ui/getting-started/installation/">*/}
-            {/*    Core*/}
-            {/*  </Link>*/}
-            {/*  <Typography>Breadcrumbs</Typography>*/}
-            {/*</Breadcrumbs>*/}
           </Grid>
           <Grid item xs={8}>
             <Box pl={3}>
@@ -287,7 +228,7 @@ export default function ArticlePage({
                       <EditableSection section={section} />
                     </Box>
                     <Box sx={!isEditing ? {} : { display: 'none' }}>
-                      <Section section={section} />
+                      <SectionComponent section={section} />
                     </Box>
                   </div>
                 ))}

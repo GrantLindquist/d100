@@ -4,14 +4,13 @@ import { useEffect, useState } from 'react';
 import {
   Box,
   Card,
-  CardContent,
-  Divider,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { Article, Collection, Unit } from '@/types/Unit';
+import { Article, Collection, Quest, Unit } from '@/types/Unit';
 import { collection, getDocs, query, where } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import Link from 'next/link';
@@ -21,15 +20,25 @@ import FolderIcon from '@mui/icons-material/Folder';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import Masonry from '@mui/lab/Masonry';
 import { useCampaign } from '@/hooks/useCampaign';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import DescriptionIcon from '@mui/icons-material/Description';
+import KeyIcon from '@mui/icons-material/Key';
 
 const ArticleTab = (props: { article: Article }) => {
   return (
     <Link
       href={`/campaigns/${props.article.campaignId}/articles/${props.article.id}`}
     >
-      <Card variant={'outlined'}>
+      <Card
+        variant={'outlined'}
+        sx={{
+          cursor: 'pointer',
+          ':hover': {
+            backgroundColor: 'rgba(255,255,255, .05)',
+          },
+        }}
+      >
         {props.article.imageUrls.length > 0 && (
-          // <CardMedia sx={{ height: 300 }} image={props.article.imageUrls[0]} />
           <img
             style={{
               width: '100%',
@@ -38,9 +47,73 @@ const ArticleTab = (props: { article: Article }) => {
             src={props.article.imageUrls[0]}
           />
         )}
-        <CardContent>
-          <Typography>{props.article.title}</Typography>
-        </CardContent>
+        <Stack
+          direction={'row'}
+          spacing={1}
+          sx={{
+            pl: 1,
+            pr: 4,
+            py: 1,
+          }}
+        >
+          <Stack direction={'column'}>
+            <DescriptionIcon />
+            {props.article.hidden && (
+              <Tooltip title={'Hidden from players'}>
+                <VisibilityOffIcon style={{ color: '#555555' }} />
+              </Tooltip>
+            )}
+          </Stack>
+          <Stack direction={'column'}>
+            <Typography fontWeight={BOLD_FONT_WEIGHT}>
+              {props.article.title}
+            </Typography>
+            <Typography color={'grey'}>Article</Typography>
+          </Stack>
+        </Stack>
+      </Card>
+    </Link>
+  );
+};
+
+const QuestTab = (props: { quest: Quest }) => {
+  return (
+    <Link
+      href={`/campaigns/${props.quest.campaignId}/quests/${props.quest.id}`}
+    >
+      <Card
+        variant={'outlined'}
+        sx={{
+          cursor: 'pointer',
+          ':hover': {
+            backgroundColor: 'rgba(255,255,255, .05)',
+          },
+        }}
+      >
+        <Stack
+          direction={'row'}
+          spacing={1}
+          sx={{
+            pl: 1,
+            pr: 4,
+            py: 1,
+          }}
+        >
+          <Stack direction={'column'}>
+            <KeyIcon />
+            {props.quest.hidden && (
+              <Tooltip title={'Hidden from players'}>
+                <VisibilityOffIcon style={{ color: '#555555' }} />
+              </Tooltip>
+            )}
+          </Stack>
+          <Stack direction={'column'}>
+            <Typography fontWeight={BOLD_FONT_WEIGHT}>
+              {props.quest.title}
+            </Typography>
+            <Typography color={'grey'}>Quest</Typography>
+          </Stack>
+        </Stack>
       </Card>
     </Link>
   );
@@ -77,7 +150,7 @@ const CollectionTab = (props: { collection: Collection }) => {
           <Typography fontWeight={BOLD_FONT_WEIGHT}>
             {props.collection.title}
           </Typography>
-          <Typography>Sub-Collection</Typography>
+          <Typography color={'grey'}>Sub-Collection</Typography>
         </Stack>
       </Stack>
     </Card>
@@ -136,26 +209,27 @@ const CollectionSearch = (props: { unitIds: string[] }) => {
             sx={{
               display: 'flex',
               flexWrap: 'wrap',
-              py: 2,
+              pt: 2,
+              pb: 1,
               gap: 1,
             }}
           >
-            {units
-              .filter((unit) => unit.type === 'collection')
-              .map((collection) => {
-                if (!isUserDm && collection.hidden) {
-                  return null;
-                }
-                return (
-                  <Box key={collection.id} flexGrow={1} minWidth={'20%'}>
-                    <CollectionTab collection={collection as Collection} />
-                  </Box>
-                );
-              })}
+            {searchQuery.trim().length === 0 &&
+              units
+                .filter((unit) => unit.type === 'collection')
+                .map((collection) => {
+                  if (!isUserDm && collection.hidden) {
+                    return null;
+                  }
+                  return (
+                    <Box key={collection.id} flexGrow={1} minWidth={'20%'}>
+                      <CollectionTab collection={collection as Collection} />
+                    </Box>
+                  );
+                })}
           </Box>
-          <Divider />
           {/* TODO: Make column count responsive */}
-          <Masonry spacing={1} columns={3} sx={{ py: 2 }}>
+          <Masonry spacing={1} columns={3} sx={{ py: 1 }}>
             {units
               .filter((unit) => unit.type !== 'collection')
               .map((unit: Unit) => {
@@ -172,9 +246,7 @@ const CollectionSearch = (props: { unitIds: string[] }) => {
                         <ArticleTab key={unit.id} article={unit as Article} />
                       );
                     case 'quest':
-                      return (
-                        <ArticleTab key={unit.id} article={unit as Article} />
-                      );
+                      return <QuestTab key={unit.id} quest={unit as Quest} />;
                     default:
                       return null;
                   }

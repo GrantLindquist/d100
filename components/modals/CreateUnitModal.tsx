@@ -16,13 +16,21 @@ import {
 import { FormEvent, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import { generateUUID } from '@/utils/uuid';
-import { Article, Collection, Section, Unit, UnitType } from '@/types/Unit';
+import {
+  Article,
+  Collection,
+  Quest,
+  Section,
+  Unit,
+  UnitType,
+} from '@/types/Unit';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { arrayUnion, doc, runTransaction } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { MODAL_STYLE } from '@/utils/globals';
 import { useCampaign } from '@/hooks/useCampaign';
+import { useUser } from '@/hooks/useUser';
 
 const CreateUnitModal = () => {
   const { isUserDm, currentUnit } = useCampaign();
@@ -41,6 +49,7 @@ const CreateUnitModal = () => {
   };
 
   const CreateUnitForm = () => {
+    const { user } = useUser();
     const [unitTitle, setUnitTitle] = useState('');
     const [isHiddenChecked, setHiddenChecked] = useState(false);
     const [displaySnackbar, setDisplaySnackbar] = useState(false);
@@ -67,7 +76,7 @@ const CreateUnitModal = () => {
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      if (modalState) {
+      if (modalState && user) {
         const newUnitId = generateUUID();
         let newUnitObj: Unit = {
           id: newUnitId,
@@ -77,20 +86,27 @@ const CreateUnitModal = () => {
           breadcrumbs: generateBreadcrumbs(newUnitId),
           hidden: isHiddenChecked,
         };
+        const defaultSection: Section = {
+          id: generateUUID(),
+          title: unitTitle,
+          body: '',
+          isHeader: true,
+          authorId: user.id,
+        };
 
         if (modalState === 'article') {
           newUnitObj = {
             ...newUnitObj,
             imageUrls: [],
-            sections: [
-              {
-                id: generateUUID(),
-                title: unitTitle,
-                body: '',
-                isHeader: true,
-              },
-            ] as Section[],
+            sections: [defaultSection],
           } as Article;
+        } else if (modalState === 'quest') {
+          newUnitObj = {
+            ...newUnitObj,
+            imageUrls: [],
+            loot: [],
+            sections: [defaultSection],
+          } as Quest;
         } else if (modalState === 'collection') {
           newUnitObj = {
             ...newUnitObj,
@@ -170,7 +186,7 @@ const CreateUnitModal = () => {
         <MenuItem onClick={() => setModalState('article')}>
           Create new Article
         </MenuItem>
-        <MenuItem disabled onClick={() => setModalState('quest')}>
+        <MenuItem onClick={() => setModalState('quest')}>
           Create new Quest
         </MenuItem>
         <MenuItem onClick={() => setModalState('collection')}>

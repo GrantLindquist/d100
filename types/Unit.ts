@@ -19,6 +19,10 @@ export interface Article extends Unit {
   imageUrls: string[];
 }
 
+export interface Quest extends Article {
+  loot: string[];
+}
+
 export interface Section {
   id: string;
   isHeader: boolean;
