@@ -14,7 +14,7 @@ import {
 } from '@mui/lab';
 import {
   EditableSection,
-  Section as SectionComponent,
+  SectionComponent,
 } from '@/components/EditableSection';
 
 export default function QuestPage() {

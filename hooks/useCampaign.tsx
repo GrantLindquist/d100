@@ -10,7 +10,7 @@ import {
   useState,
 } from 'react';
 import { useUser } from '@/hooks/useUser';
-import { doc, getDoc } from '@firebase/firestore';
+import { doc, getDoc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { Campaign } from '@/types/Campaign';
 import { Unit } from '@/types/Unit';
@@ -20,13 +20,13 @@ const CampaignContext = createContext<{
   setCampaignId: Dispatch<SetStateAction<string | null>>;
   isUserDm: boolean | null;
   currentUnit: Unit | null;
-  setCurrentUnit: Dispatch<SetStateAction<Unit | null>>;
+  setCurrentUnitId: Dispatch<SetStateAction<string | null>>;
 }>({
   campaign: null,
   setCampaignId: () => {},
   isUserDm: null,
   currentUnit: null,
-  setCurrentUnit: () => {},
+  setCurrentUnitId: () => {},
 });
 
 export const CampaignProvider = ({ children }: { children: ReactNode }) => {
@@ -35,6 +35,8 @@ export const CampaignProvider = ({ children }: { children: ReactNode }) => {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [isUserDm, setIsUserDm] = useState<boolean | null>(null);
+
+  const [currentUnitId, setCurrentUnitId] = useState<string | null>(null);
   const [currentUnit, setCurrentUnit] = useState<Unit | null>(null);
 
   useEffect(() => {
@@ -53,9 +55,33 @@ export const CampaignProvider = ({ children }: { children: ReactNode }) => {
     fetchCampaign();
   }, [campaignId, user?.id]);
 
+  useEffect(() => {
+    if (currentUnitId) {
+      const unsubscribe = onSnapshot(
+        doc(db, 'units', currentUnitId),
+        (unitDocSnap) => {
+          if (unitDocSnap.exists()) {
+            setCurrentUnit(unitDocSnap.data() as Unit);
+          } else {
+            setCurrentUnit(null);
+          }
+        }
+      );
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, [currentUnitId]);
+
   return (
     <CampaignContext.Provider
-      value={{ campaign, setCampaignId, isUserDm, currentUnit, setCurrentUnit }}
+      value={{
+        campaign,
+        setCampaignId,
+        isUserDm,
+        currentUnit,
+        setCurrentUnitId,
+      }}
     >
       {children}
     </CampaignContext.Provider>

@@ -4,24 +4,15 @@ import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import { ReactNode, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
-import { Unit, UnitEnum } from '@/types/Unit';
-import db from '@/utils/firebase';
-import { doc, getDoc } from '@firebase/firestore';
+import { UnitEnum } from '@/types/Unit';
 
 const AppWrapper = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
-  const { campaign, setCampaignId, currentUnit, setCurrentUnit } =
+  const { campaign, setCampaignId, currentUnit, setCurrentUnitId } =
     useCampaign();
   const url = pathname.split('/').slice(1);
 
   useEffect(() => {
-    const fetchUnit = async (id: string) => {
-      const unitDocSnap = await getDoc(doc(db, 'units', id));
-      if (unitDocSnap.exists()) {
-        setCurrentUnit(unitDocSnap.data() as Unit);
-      }
-    };
-
     // Set current campaign
     const urlCampaignId = getCampaignIdFromUrl();
     if (!urlCampaignId) {
@@ -33,7 +24,7 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
     // Set current viewed unit
     const urlUnitId = getCurrentUnitIdFromUrl();
     if (urlUnitId && urlUnitId !== currentUnit?.id) {
-      fetchUnit(urlUnitId);
+      setCurrentUnitId(urlUnitId);
     }
   }, [pathname]);
 

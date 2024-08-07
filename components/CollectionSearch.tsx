@@ -13,7 +13,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import { Article, Collection, Quest, Unit } from '@/types/Unit';
 import { collection, getDocs, query, where } from '@firebase/firestore';
 import db from '@/utils/firebase';
-import Link from 'next/link';
 import CreateUnitModal from '@/components/modals/CreateUnitModal';
 import { useRouter } from 'next/navigation';
 import FolderIcon from '@mui/icons-material/Folder';
@@ -25,9 +24,14 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import KeyIcon from '@mui/icons-material/Key';
 
 const ArticleTab = (props: { article: Article }) => {
+  const router = useRouter();
   return (
-    <Link
-      href={`/campaigns/${props.article.campaignId}/articles/${props.article.id}`}
+    <div
+      onClick={() =>
+        router.push(
+          `/campaigns/${props.article.campaignId}/articles/${props.article.id}`
+        )
+      }
     >
       <Card
         variant={'outlined'}
@@ -45,6 +49,7 @@ const ArticleTab = (props: { article: Article }) => {
               height: 'auto',
             }}
             src={props.article.imageUrls[0]}
+            alt={''}
           />
         )}
         <Stack
@@ -72,14 +77,19 @@ const ArticleTab = (props: { article: Article }) => {
           </Stack>
         </Stack>
       </Card>
-    </Link>
+    </div>
   );
 };
 
 const QuestTab = (props: { quest: Quest }) => {
+  const router = useRouter();
   return (
-    <Link
-      href={`/campaigns/${props.quest.campaignId}/quests/${props.quest.id}`}
+    <div
+      onClick={() =>
+        router.push(
+          `/campaigns/${props.quest.campaignId}/quests/${props.quest.id}`
+        )
+      }
     >
       <Card
         variant={'outlined'}
@@ -115,7 +125,7 @@ const QuestTab = (props: { quest: Quest }) => {
           </Stack>
         </Stack>
       </Card>
-    </Link>
+    </div>
   );
 };
 
@@ -157,7 +167,6 @@ const CollectionTab = (props: { collection: Collection }) => {
   );
 };
 
-// TODO: Fix bug that occurs when entering an empty collection
 const CollectionSearch = (props: { unitIds: string[] }) => {
   const { isUserDm } = useCampaign();
 

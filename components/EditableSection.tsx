@@ -1,6 +1,7 @@
 import { Stack, TextField, Typography } from '@mui/material';
+import { Section } from '@/types/Unit';
 
-export const Section = (props: { section: Section }) => {
+export const SectionComponent = (props: { section: Section }) => {
   return (
     <Stack spacing={2} id={props.section.title}>
       <Typography variant={props.section.isHeader ? 'h2' : 'h4'}>

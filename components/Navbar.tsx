@@ -1,3 +1,4 @@
+'use client';
 import UserButton from '@/components/UserButton';
 import { AppBar, Divider, Stack, Toolbar } from '@mui/material';
 import Link from 'next/link';

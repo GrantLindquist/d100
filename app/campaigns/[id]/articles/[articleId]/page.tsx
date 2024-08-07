@@ -34,7 +34,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
   EditableSection,
-  Section as SectionComponent,
+  SectionComponent,
 } from '@/components/EditableSection';
 
 // TODO: This file is bloated

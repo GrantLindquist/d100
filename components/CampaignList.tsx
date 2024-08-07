@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Campaign } from '@/types/Campaign';
 import Link from 'next/link';
 import { useUser } from '@/hooks/useUser';
-import { doc, getDoc } from '@firebase/firestore';
+import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
 
 // TODO: Logic is repeated on CampaignId page
@@ -12,18 +12,19 @@ const CampaignTab = (props: { campaignId: string }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCampaign = async () => {
-      const campaignDocSnap = await getDoc(
-        doc(db, 'campaigns', props.campaignId)
-      );
-      if (campaignDocSnap.exists()) {
-        setCampaign(campaignDocSnap.data() as Campaign);
-      } else {
-        setCampaign(null);
+    const unsubscribe = onSnapshot(
+      doc(db, 'campaigns', props.campaignId),
+      (campaignDocSnap) => {
+        if (campaignDocSnap.exists()) {
+          setCampaign(campaignDocSnap.data() as Campaign);
+        } else {
+          setCampaign(null);
+        }
+        setLoading(false);
       }
-    };
+    );
 
-    fetchCampaign().then(() => setLoading(false));
+    return () => unsubscribe();
   }, [props.campaignId]);
 
   return (
@@ -52,13 +53,19 @@ const CampaignList = () => {
   const [campaignIds, setCampaignIds] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchCampaignIds = async (userId: string) => {
-      const userDocSnap = await getDoc(doc(db, 'users', userId));
-      if (userDocSnap.exists()) {
-        setCampaignIds(userDocSnap.data().campaignIds);
-      }
-    };
-    user && fetchCampaignIds(user.id);
+    if (user) {
+      const unsubscribe = onSnapshot(
+        doc(db, 'users', user.id),
+        (userDocSnap) => {
+          if (userDocSnap.exists()) {
+            setCampaignIds(userDocSnap.data().campaignIds);
+          }
+        }
+      );
+      return () => {
+        unsubscribe();
+      };
+    }
   }, [user?.id]);
 
   return (
