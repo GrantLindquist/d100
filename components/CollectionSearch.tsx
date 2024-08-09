@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 
-import { Article, Unit, UnitDisplayValues } from '@/types/Unit';
+import { Article, Quest, Unit, UnitDisplayValues } from '@/types/Unit';
 import {
   arrayRemove,
   collection,
@@ -247,9 +247,10 @@ const CollectionSearch = (props: {
                       }
                       isEditing={isEditing}
                       updateState={updateSelectedUnitIds}
-                      {...(unit.type === 'article' &&
-                      (unit as Article).imageUrls[0]
-                        ? { imageUrl: (unit as Article).imageUrls[0] }
+                      {...(unit.type === 'article' ||
+                      (unit.type === 'quest' &&
+                        (unit as Article | Quest).imageUrls[0])
+                        ? { imageUrl: (unit as Article | Quest).imageUrls[0] }
                         : {})}
                     />
                   );
