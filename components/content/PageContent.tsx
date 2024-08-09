@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Article, Quest, Section as SectionType } from '@/types/Unit';
-import ArticleAside from '@/components/ArticleAside';
+import ArticleAside from '@/components/content/ArticleAside';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
@@ -29,7 +29,8 @@ import {
 import { generateUUID } from '@/utils/uuid';
 import { useUser } from '@/hooks/useUser';
 import { useCampaign } from '@/hooks/useCampaign';
-import ImageList from '@/components/ImageList';
+import ImageList from '@/components/content/ImageList';
+import LootTable from '@/components/content/LootTable';
 
 const Section = (props: { section: SectionType }) => {
   return (
@@ -265,6 +266,7 @@ export const PageContent = () => {
                   </div>
                 ))}
               </form>
+              {content.type === 'quest' && <LootTable questId={content.id} />}
               {content.imageUrls.length > 0 && (
                 <ImageList
                   imageUrls={content.imageUrls}

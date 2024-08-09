@@ -1,4 +1,4 @@
-import { PageContent } from '@/components/PageContent';
+import { PageContent } from '@/components/content/PageContent';
 
 export default function ArticlePage({
   params,

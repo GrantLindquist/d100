@@ -25,7 +25,8 @@ export interface Article extends Unit {
 }
 
 export interface Quest extends Article {
-  loot: string[];
+  loot: Loot[];
+  complete: boolean;
 }
 
 export interface Section {
@@ -39,4 +40,10 @@ export interface Section {
 export interface Breadcrumb {
   url: string;
   title: string;
+}
+
+export interface Loot {
+  title: string;
+  currencyType: 'pp' | 'gp' | 'sp' | 'cp';
+  currencyQuantity: number;
 }

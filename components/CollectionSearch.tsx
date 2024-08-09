@@ -277,11 +277,7 @@ const CollectionSearch = (props: {
                 <Fab size="small" onClick={() => setEditing(false)}>
                   <CheckIcon />
                 </Fab>
-                <Fab
-                  size="small"
-                  disabled={selectedUnitIds.length === 0}
-                  onClick={() => setEditing(false)}
-                >
+                <Fab size="small" disabled onClick={() => setEditing(false)}>
                   <DriveFileMoveIcon />
                 </Fab>
                 <Fab
