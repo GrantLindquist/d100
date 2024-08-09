@@ -22,6 +22,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import ArticleAside from '@/components/ArticleAside';
 import Masonry from '@mui/lab/Masonry';
+import CheckIcon from '@mui/icons-material/Check';
 import {
   deleteObject,
   getDownloadURL,
@@ -295,7 +296,7 @@ export default function ArticlePage({
                 );
             }}
           >
-            Save
+            <CheckIcon />
           </Fab>
         )}
         {!isEditing && (
@@ -308,7 +309,7 @@ export default function ArticlePage({
           disabled={!Boolean(focusedSectionId)}
           onClick={handleDeleteSection}
         >
-          Del
+          <DeleteIcon />
         </Fab>
       </Stack>
       <Backdrop

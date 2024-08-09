@@ -39,7 +39,10 @@ export default function CollectionPage({
           <Typography align="center" variant={'h3'} py={3}>
             {collection?.title}
           </Typography>
-          <CollectionSearch unitIds={collection.unitIds} />
+          <CollectionSearch
+            unitIds={collection.unitIds}
+            collectionId={collection.id}
+          />
         </Box>
       )}
     </Container>

@@ -1,17 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+// TODO: Delete functionality does not work properly
+import { ChangeEvent, ReactNode, useEffect, useState } from 'react';
 import {
   Box,
   Card,
+  Checkbox,
+  Fab,
   Stack,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import { Article, Collection, Quest, Unit } from '@/types/Unit';
-import { collection, getDocs, query, where } from '@firebase/firestore';
+
+import { Article, Unit, UnitDisplayValues } from '@/types/Unit';
+import {
+  arrayRemove,
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from '@firebase/firestore';
 import db from '@/utils/firebase';
 import CreateUnitModal from '@/components/modals/CreateUnitModal';
 import { useRouter } from 'next/navigation';
@@ -19,36 +29,56 @@ import FolderIcon from '@mui/icons-material/Folder';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import Masonry from '@mui/lab/Masonry';
 import { useCampaign } from '@/hooks/useCampaign';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import DescriptionIcon from '@mui/icons-material/Description';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
+import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SearchIcon from '@mui/icons-material/Search';
 import KeyIcon from '@mui/icons-material/Key';
+import DescriptionIcon from '@mui/icons-material/Description';
 
-const ArticleTab = (props: { article: Article }) => {
+const UnitTab = (props: {
+  unit: Unit;
+  icon: ReactNode;
+  isEditing: boolean;
+  updateState: (removeId: boolean, unitId: string) => void;
+  imageUrl?: string;
+}) => {
   const router = useRouter();
+  // Changing this state re-renders entire component
+  const [isSelected, setSelected] = useState(false);
+  const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    setSelected(checked);
+    props.updateState(!checked, props.unit.id);
+  };
   return (
     <div
       onClick={() =>
+        !props.isEditing &&
         router.push(
-          `/campaigns/${props.article.campaignId}/articles/${props.article.id}`
+          `/campaigns/${props.unit.campaignId}/${props.unit.type}s/${props.unit.id}`
         )
       }
     >
       <Card
-        variant={'outlined'}
+        variant="outlined"
         sx={{
           cursor: 'pointer',
-          ':hover': {
-            backgroundColor: 'rgba(255,255,255, .05)',
-          },
+          ':hover': !props.isEditing
+            ? {
+                backgroundColor: 'rgba(255,255,255, .05)',
+              }
+            : {},
         }}
       >
-        {props.article.imageUrls.length > 0 && (
+        {props.imageUrl && (
           <img
             style={{
               width: '100%',
               height: 'auto',
             }}
-            src={props.article.imageUrls[0]}
+            src={props.imageUrl}
             alt={''}
           />
         )}
@@ -61,117 +91,46 @@ const ArticleTab = (props: { article: Article }) => {
             py: 1,
           }}
         >
-          <Stack direction={'column'}>
-            <DescriptionIcon />
-            {props.article.hidden && (
-              <Tooltip title={'Hidden from players'}>
-                <VisibilityOffIcon style={{ color: '#555555' }} />
-              </Tooltip>
-            )}
+          <Stack direction={'row'} spacing={1} flexGrow={1}>
+            {props.icon}
+            <Stack direction={'column'}>
+              <Typography fontWeight={BOLD_FONT_WEIGHT}>
+                {props.unit.title}
+              </Typography>
+              <Typography color={'grey'}>
+                {UnitDisplayValues[props.unit.type]}
+              </Typography>
+            </Stack>
           </Stack>
-          <Stack direction={'column'}>
-            <Typography fontWeight={BOLD_FONT_WEIGHT}>
-              {props.article.title}
-            </Typography>
-            <Typography color={'grey'}>Article</Typography>
-          </Stack>
+          {props.isEditing && props.unit.type !== 'collection' && (
+            <Checkbox
+              checked={isSelected}
+              onChange={handleCheck}
+              sx={{
+                p: 0,
+                ':hover': {
+                  backgroundColor: 'rgba(0,0,0,0)',
+                },
+              }}
+            />
+          )}
         </Stack>
       </Card>
     </div>
   );
 };
 
-const QuestTab = (props: { quest: Quest }) => {
-  const router = useRouter();
-  return (
-    <div
-      onClick={() =>
-        router.push(
-          `/campaigns/${props.quest.campaignId}/quests/${props.quest.id}`
-        )
-      }
-    >
-      <Card
-        variant={'outlined'}
-        sx={{
-          cursor: 'pointer',
-          ':hover': {
-            backgroundColor: 'rgba(255,255,255, .05)',
-          },
-        }}
-      >
-        <Stack
-          direction={'row'}
-          spacing={1}
-          sx={{
-            pl: 1,
-            pr: 4,
-            py: 1,
-          }}
-        >
-          <Stack direction={'column'}>
-            <KeyIcon />
-            {props.quest.hidden && (
-              <Tooltip title={'Hidden from players'}>
-                <VisibilityOffIcon style={{ color: '#555555' }} />
-              </Tooltip>
-            )}
-          </Stack>
-          <Stack direction={'column'}>
-            <Typography fontWeight={BOLD_FONT_WEIGHT}>
-              {props.quest.title}
-            </Typography>
-            <Typography color={'grey'}>Quest</Typography>
-          </Stack>
-        </Stack>
-      </Card>
-    </div>
-  );
-};
-
-const CollectionTab = (props: { collection: Collection }) => {
-  const router = useRouter();
-  return (
-    <Card
-      onClick={() =>
-        router.push(
-          `/campaigns/${props.collection.campaignId}/collections/${props.collection.id}`
-        )
-      }
-      variant="outlined"
-      sx={{
-        cursor: 'pointer',
-        ':hover': {
-          backgroundColor: 'rgba(255,255,255, .05)',
-        },
-      }}
-    >
-      <Stack
-        direction={'row'}
-        spacing={1}
-        sx={{
-          pl: 1,
-          pr: 4,
-          py: 1,
-        }}
-      >
-        <FolderIcon />
-        <Stack direction={'column'}>
-          <Typography fontWeight={BOLD_FONT_WEIGHT}>
-            {props.collection.title}
-          </Typography>
-          <Typography color={'grey'}>Sub-Collection</Typography>
-        </Stack>
-      </Stack>
-    </Card>
-  );
-};
-
-const CollectionSearch = (props: { unitIds: string[] }) => {
+const CollectionSearch = (props: {
+  unitIds: string[];
+  collectionId: string;
+}) => {
   const { isUserDm } = useCampaign();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [units, setUnits] = useState<Unit[]>([]);
+
+  const [isEditing, setEditing] = useState(false);
+  const [selectedUnitIds, setSelectedUnitIds] = useState<string[]>([]);
 
   useEffect(() => {
     // TODO: Fix query to allow more than 10 unitIds
@@ -190,10 +149,31 @@ const CollectionSearch = (props: { unitIds: string[] }) => {
     props.unitIds.length > 0 ? fetchUnits() : setUnits([]);
   }, [props.unitIds]);
 
-  const handleInputChange = (event: Object) => {
-    // @ts-ignore
+  const updateSelectedUnitIds = (removeId: boolean, unitId: string) => {
+    if (!removeId) {
+      let newSelectedUnitIds = [...selectedUnitIds];
+      newSelectedUnitIds.push(unitId);
+      setSelectedUnitIds(newSelectedUnitIds);
+    } else {
+      let newSelectedUnitIds = [...selectedUnitIds].filter(
+        (id) => id !== unitId
+      );
+      setSelectedUnitIds(newSelectedUnitIds);
+    }
+  };
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setSearchQuery(value);
+  };
+
+  const handleDeleteUnits = async () => {
+    setEditing(false);
+    for (let unitId of selectedUnitIds) {
+      await updateDoc(doc(db, 'units', props.collectionId), {
+        unitIds: arrayRemove(unitId),
+      });
+    }
   };
 
   return (
@@ -232,7 +212,12 @@ const CollectionSearch = (props: { unitIds: string[] }) => {
                   }
                   return (
                     <Box key={collection.id} flexGrow={1} minWidth={'20%'}>
-                      <CollectionTab collection={collection as Collection} />
+                      <UnitTab
+                        unit={collection}
+                        icon={<FolderIcon />}
+                        isEditing={isEditing}
+                        updateState={updateSelectedUnitIds}
+                      />
                     </Box>
                   );
                 })}
@@ -241,27 +226,73 @@ const CollectionSearch = (props: { unitIds: string[] }) => {
           <Masonry spacing={1} columns={3} sx={{ py: 1 }}>
             {units
               .filter((unit) => unit.type !== 'collection')
-              .map((unit: Unit) => {
+              .map((unit: Unit, index) => {
                 if (
                   unit.title
                     .toLowerCase()
                     .trim()
                     .includes(searchQuery.toLowerCase().trim()) &&
                   (isUserDm || !unit.hidden)
-                )
-                  switch (unit.type) {
-                    case 'article':
-                      return (
-                        <ArticleTab key={unit.id} article={unit as Article} />
-                      );
-                    case 'quest':
-                      return <QuestTab key={unit.id} quest={unit as Quest} />;
-                    default:
-                      return null;
-                  }
+                ) {
+                  return (
+                    <UnitTab
+                      key={index}
+                      unit={unit}
+                      icon={
+                        unit.type === 'quest' ? (
+                          <KeyIcon />
+                        ) : (
+                          <DescriptionIcon />
+                        )
+                      }
+                      isEditing={isEditing}
+                      updateState={updateSelectedUnitIds}
+                      {...(unit.type === 'article' &&
+                      (unit as Article).imageUrls[0]
+                        ? { imageUrl: (unit as Article).imageUrls[0] }
+                        : {})}
+                    />
+                  );
+                }
                 return null;
               })}
           </Masonry>
+          <Stack
+            direction="column"
+            spacing={1}
+            p={3}
+            sx={{
+              position: 'fixed',
+              right: 16,
+              bottom: 16,
+            }}
+          >
+            {!isEditing ? (
+              <Fab size="small" onClick={() => setEditing(true)}>
+                <EditIcon />
+              </Fab>
+            ) : (
+              <>
+                <Fab size="small" onClick={() => setEditing(false)}>
+                  <CheckIcon />
+                </Fab>
+                <Fab
+                  size="small"
+                  disabled={selectedUnitIds.length === 0}
+                  onClick={() => setEditing(false)}
+                >
+                  <DriveFileMoveIcon />
+                </Fab>
+                <Fab
+                  size="small"
+                  disabled={selectedUnitIds.length === 0}
+                  onClick={handleDeleteUnits}
+                >
+                  <DeleteIcon />
+                </Fab>
+              </>
+            )}
+          </Stack>
         </>
       )}
     </>

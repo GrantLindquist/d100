@@ -1,5 +1,10 @@
 export type UnitType = 'article' | 'quest' | 'collection';
 export const UnitEnum = ['article', 'quest', 'collection'];
+export const UnitDisplayValues = {
+  article: 'Article',
+  quest: 'Quest',
+  collection: 'Sub-Collection',
+};
 
 export interface Unit {
   id: string;
