@@ -3,6 +3,7 @@
 import {
   Box,
   Container,
+  Divider,
   Fab,
   Grid,
   Menu,
@@ -263,10 +264,13 @@ export const PageContent = () => {
                     <Box sx={!isEditing ? {} : { display: 'none' }}>
                       <Section section={section} />
                     </Box>
+                    {section.isHeader && <Divider />}
                   </div>
                 ))}
               </form>
-              {content.type === 'quest' && <LootTable questId={content.id} />}
+              {content.type === 'quest' && (
+                <LootTable questId={content.id} isEditing={isEditing} />
+              )}
               {content.imageUrls.length > 0 && (
                 <ImageList
                   imageUrls={content.imageUrls}

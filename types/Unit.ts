@@ -45,5 +45,7 @@ export interface Breadcrumb {
 export interface Loot {
   title: string;
   currencyType: 'pp' | 'gp' | 'sp' | 'cp';
-  currencyQuantity: number;
+  currencyQuantity: number | null;
 }
+
+export const CurrencyTypeEnum = ['pp', 'gp', 'sp', 'cp'];
