@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Container, Divider, Stack } from '@mui/material';
+import { Button, Container, Stack } from '@mui/material';
 import {
   getAdditionalUserInfo,
   GoogleAuthProvider,
@@ -16,7 +16,6 @@ import { setUserSession } from '@/utils/userSession';
 import CreateCampaignModal from '@/components/modals/CreateCampaignModal';
 import JoinCampaignModal from '@/components/modals/JoinCampaignModal';
 
-// TODO: Limit campaigns to 10
 // TODO: Change [id] to [campaignId]
 export default function CampaignsPage() {
   const { user, fetchUser } = useUser();
@@ -63,9 +62,9 @@ export default function CampaignsPage() {
       }}
     >
       {user ? (
-        <Stack spacing={2} width={'40%'} minWidth={350}>
+        <Stack spacing={2} width={'70%'} minWidth={350}>
           <CampaignList />
-          <Divider />
+
           <Stack direction={'row'} spacing={2} justifyContent={'center'}>
             <JoinCampaignModal />
             <CreateCampaignModal />

@@ -34,6 +34,7 @@ const CreateCampaignModal = () => {
           title: campaignTitle,
           baseCollectionId: baseCollectionId,
           dmId: user.id,
+          playerIds: [user.id],
         };
         const baseCollection: Collection = {
           id: baseCollectionId,

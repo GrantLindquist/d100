@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { MODAL_STYLE } from '@/utils/globals';
 import { FormEvent, useState } from 'react';
-import { arrayUnion, doc, getDoc, updateDoc } from '@firebase/firestore';
+import { arrayUnion, doc, getDoc, runTransaction } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useUser } from '@/hooks/useUser';
 import LoginIcon from '@mui/icons-material/Login';
@@ -29,8 +29,13 @@ const JoinCampaignModal = () => {
           doc(db, 'campaigns', campaignId.trim())
         );
         if (campaignDocSnap.exists()) {
-          await updateDoc(doc(db, 'users', user.id), {
-            campaignIds: arrayUnion(campaignId),
+          await runTransaction(db, async (transaction) => {
+            transaction.update(doc(db, 'users', user.id), {
+              campaignIds: arrayUnion(campaignId),
+            });
+            transaction.update(doc(db, 'campaigns', campaignId), {
+              playerIds: arrayUnion(user.id),
+            });
           });
           setOpen(false);
         } else {

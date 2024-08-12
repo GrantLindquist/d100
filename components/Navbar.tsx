@@ -3,7 +3,7 @@ import UserButton from '@/components/UserButton';
 import { AppBar, Divider, Stack, Toolbar } from '@mui/material';
 import Link from 'next/link';
 import SettingsButton from '@/components/SettingsButton';
-import NavBreadcrumbs from '@/components/modals/NavBreadcrumbs';
+import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 
 const Navbar = () => {
   return (

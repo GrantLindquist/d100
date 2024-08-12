@@ -3,10 +3,10 @@
 // TODO: Delete functionality does not work properly
 import { ChangeEvent, ReactNode, useEffect, useState } from 'react';
 import {
-  Box,
   Card,
   Checkbox,
   Fab,
+  Grid,
   Stack,
   TextField,
   Typography,
@@ -133,7 +133,7 @@ const CollectionSearch = (props: {
   const [selectedUnitIds, setSelectedUnitIds] = useState<string[]>([]);
 
   useEffect(() => {
-    // TODO: Fix query to allow more than 10 unitIds
+    // TODO: Fix query to allow more than 10 unitIds - use for loop lmao
     const fetchUnits = async () => {
       const unitQuery = query(
         collection(db, 'units'),
@@ -194,15 +194,7 @@ const CollectionSearch = (props: {
       </Stack>
       {units && (
         <>
-          <Box
-            sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              pt: 2,
-              pb: 1,
-              gap: 1,
-            }}
-          >
+          <Grid container spacing={1} py={2} pr={1}>
             {searchQuery.trim().length === 0 &&
               units
                 .filter((unit) => unit.type === 'collection')
@@ -211,19 +203,18 @@ const CollectionSearch = (props: {
                     return null;
                   }
                   return (
-                    <Box key={collection.id} flexGrow={1} minWidth={'20%'}>
+                    <Grid key={collection.id} item xs={12} sm={6} lg={4}>
                       <UnitTab
                         unit={collection}
                         icon={<FolderIcon />}
                         isEditing={isEditing}
                         updateState={updateSelectedUnitIds}
                       />
-                    </Box>
+                    </Grid>
                   );
                 })}
-          </Box>
-          {/* TODO: Make column count responsive */}
-          <Masonry spacing={1} columns={3} sx={{ py: 1 }}>
+          </Grid>
+          <Masonry spacing={1} columns={{ xs: 1, sm: 2, md: 3, lg: 4 }}>
             {units
               .filter((unit) => unit.type !== 'collection')
               .map((unit: Unit, index) => {

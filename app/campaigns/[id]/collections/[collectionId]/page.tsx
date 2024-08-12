@@ -21,19 +21,12 @@ export default function CollectionPage({
 
   // TODO: Figure out best way to handle page loading state, maybe skeleton?
   return (
-    <Container
-      sx={{
-        height: '90vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
+    <Container>
       {collection && (
         <Box
           sx={{
-            minWidth: 350,
-            width: '70%',
+            pt: 8,
+            px: { xs: 2, sm: 4, md: 8, lg: 12 },
           }}
         >
           <Typography align="center" variant={'h3'} py={3}>

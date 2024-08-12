@@ -3,4 +3,5 @@ export interface Campaign {
   title: string;
   baseCollectionId: string;
   dmId: string;
+  playerIds: string[];
 }
