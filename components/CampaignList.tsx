@@ -1,3 +1,4 @@
+'use client';
 import { Box, Card, Grid, Skeleton, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Campaign } from '@/types/Campaign';
@@ -8,12 +9,11 @@ import { useRouter } from 'next/navigation';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import PlayerAvatarList from '@/components/PlayerAvatarList';
 
-// TODO: Tweak component to use user.campaignIds instead of subscribe - also figure out user session vs functional? Maybe make them the same?
+// TODO: Tweak component to use user.campaignIds instead of subscribe
 const CampaignTab = (props: { campaignId: string }) => {
+  const router = useRouter();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(

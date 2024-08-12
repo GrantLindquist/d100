@@ -7,9 +7,11 @@ import { auth } from '@/utils/firebase';
 import { signOut } from 'firebase/auth';
 import { useCampaign } from '@/hooks/useCampaign';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
+import { useRouter } from 'next/navigation';
 
 // TODO: Redirect unauthenticated users
 const UserButton = () => {
+  const router = useRouter();
   const { user, signOutUser } = useUser();
   const { isUserDm } = useCampaign();
 
@@ -29,6 +31,7 @@ const UserButton = () => {
     signOutUser();
     await signOut(auth);
     await clearSession();
+    router.push('/');
   };
 
   return (

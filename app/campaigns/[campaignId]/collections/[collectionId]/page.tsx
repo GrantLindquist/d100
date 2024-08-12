@@ -19,7 +19,6 @@ export default function CollectionPage({
       setCollection(currentUnit as Collection);
   }, [currentUnit]);
 
-  // TODO: Figure out best way to handle page loading state, maybe skeleton?
   return (
     <Container>
       {collection && (

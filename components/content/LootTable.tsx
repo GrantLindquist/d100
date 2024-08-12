@@ -2,7 +2,6 @@
 import { Loot } from '@/types/Unit';
 import { useState } from 'react';
 import {
-  Box,
   Button,
   MenuItem,
   Paper,
@@ -70,8 +69,10 @@ const LootTable = (props: { questId: string; isEditing: boolean }) => {
   };
 
   return (
-    <Box py={2}>
-      <Typography variant={'h4'}>Loot Table</Typography>
+    <>
+      <Typography pb={1} variant={'h4'}>
+        Loot Table
+      </Typography>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -114,7 +115,7 @@ const LootTable = (props: { questId: string; isEditing: boolean }) => {
       ) : (
         <Button onClick={() => setAdding(true)}>Add Item</Button>
       )}
-    </Box>
+    </>
   );
 };
 export default LootTable;

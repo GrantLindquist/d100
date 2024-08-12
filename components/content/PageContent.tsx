@@ -255,7 +255,7 @@ export const PageContent = () => {
                 )}
                 <form ref={sectionsFormRef} onSubmit={handleSave}>
                   {content.sections.map((section, index) => (
-                    <div key={index}>
+                    <div key={index} style={{ paddingBottom: '28px' }}>
                       <Box
                         sx={
                           isEditing ||
@@ -270,18 +270,26 @@ export const PageContent = () => {
                       <Box sx={!isEditing ? {} : { display: 'none' }}>
                         <Section section={section} />
                       </Box>
-                      {section.isHeader && <Divider />}
+                      {section.isHeader && (
+                        <Divider
+                          sx={section.body.trim() || isEditing ? { py: 1 } : {}}
+                        />
+                      )}
                     </div>
                   ))}
                 </form>
                 {content.type === 'quest' && (
-                  <LootTable questId={content.id} isEditing={isEditing} />
+                  <div style={{ paddingBottom: '28px' }}>
+                    <LootTable questId={content.id} isEditing={isEditing} />
+                  </div>
                 )}
                 {content.imageUrls.length > 0 && (
-                  <ImageList
-                    imageUrls={content.imageUrls}
-                    handleDeleteImage={handleDeleteImage}
-                  />
+                  <div style={{ paddingBottom: '28px' }}>
+                    <ImageList
+                      imageUrls={content.imageUrls}
+                      handleDeleteImage={handleDeleteImage}
+                    />
+                  </div>
                 )}
               </Box>
             </Grid>

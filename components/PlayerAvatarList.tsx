@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { Avatar, Stack, Tooltip, Typography } from '@mui/material';
 import { doc, getDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
-import { UserSession } from '@/types/User';
+import { User } from '@/types/User';
 
 const PlayerAvatarList = (props: { playerIds: string[] }) => {
-  const [players, setPlayers] = useState<UserSession[]>([]);
+  const [players, setPlayers] = useState<User[]>([]);
 
   useEffect(() => {
     const fetchPlayerAvatarUrls = async () => {
@@ -13,7 +13,7 @@ const PlayerAvatarList = (props: { playerIds: string[] }) => {
       for (let id of props.playerIds) {
         const playerDocSnap = await getDoc(doc(db, 'users', id));
         if (playerDocSnap.exists()) {
-          players.push(playerDocSnap.data() as UserSession);
+          players.push(playerDocSnap.data() as User);
         }
       }
       setPlayers(players);

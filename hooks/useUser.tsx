@@ -7,10 +7,10 @@ import {
   useState,
 } from 'react';
 import { getUserFromSession } from '@/utils/userSession';
-import { UserSession } from '@/types/User';
+import { User } from '@/types/User';
 
 const UserContext = createContext<{
-  user: UserSession | null;
+  user: User | null;
   fetchUser: () => void;
   signOutUser: () => void;
 }>({
@@ -20,23 +20,18 @@ const UserContext = createContext<{
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<UserSession | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     fetchUser();
   }, []);
 
-  // TODO: Potentially remove fetchUser from hook
+  // Retrieves session data and sets user state for UserProvider
   const fetchUser = async () => {
     const session = await getUserFromSession();
     const sessionUser = session?.user || null;
     if (sessionUser) {
-      setUser({
-        displayName: sessionUser.displayName,
-        email: sessionUser.email,
-        photoURL: sessionUser.photoURL,
-        id: sessionUser.id,
-      });
+      setUser(sessionUser);
     }
   };
 

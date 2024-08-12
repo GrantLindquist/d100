@@ -7,7 +7,8 @@ const ArticleAside = (props: { article: Article }) => {
   return (
     <Card
       sx={{
-        position: 'sticky',
+        position: 'fixed',
+        width: '19vw',
       }}
     >
       <CardContent>
