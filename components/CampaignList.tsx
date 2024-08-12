@@ -9,7 +9,6 @@ import { useRouter } from 'next/navigation';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import PlayerAvatarList from '@/components/PlayerAvatarList';
 
-// TODO: Tweak component to use user.campaignIds instead of subscribe
 const CampaignTab = (props: { campaignId: string }) => {
   const router = useRouter();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
@@ -77,38 +76,29 @@ const CampaignTab = (props: { campaignId: string }) => {
 
 const CampaignList = () => {
   const { user } = useUser();
-  const [campaignIds, setCampaignIds] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (user) {
-      const unsubscribe = onSnapshot(
-        doc(db, 'users', user.id),
-        (userDocSnap) => {
-          if (userDocSnap.exists()) {
-            setCampaignIds(userDocSnap.data().campaignIds);
-          }
-        }
-      );
-      return () => {
-        unsubscribe();
-      };
-    }
-  }, [user?.id]);
+  if (user) {
+    return (
+      <>
+        <Typography align={'center'} variant={'h3'}>
+          Your Campaigns
+        </Typography>
 
-  return (
-    <>
-      <Typography align={'center'} variant={'h3'}>
-        Your Campaigns
-      </Typography>
-
-      <Grid container spacing={2}>
-        {campaignIds.map((id) => (
-          <Grid item md={campaignIds.length <= 1 ? 12 : 6} xs={12} key={id}>
-            <CampaignTab campaignId={id} />
-          </Grid>
-        ))}
-      </Grid>
-    </>
-  );
+        <Grid container spacing={2}>
+          {user.campaignIds.map((id) => (
+            <Grid
+              item
+              md={user.campaignIds.length <= 1 ? 12 : 6}
+              xs={12}
+              key={id}
+            >
+              <CampaignTab campaignId={id} />
+            </Grid>
+          ))}
+        </Grid>
+      </>
+    );
+  }
+  return null;
 };
 export default CampaignList;

@@ -50,6 +50,7 @@ export const CampaignProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setCampaign(null);
         setIsUserDm(null);
+        setCurrentUnit(null);
       }
     };
     fetchCampaign();

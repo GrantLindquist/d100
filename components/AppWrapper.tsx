@@ -4,7 +4,7 @@ import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import { ReactNode, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
-import { UnitEnum } from '@/types/Unit';
+import { getCampaignIdFromUrl, getCurrentUnitIdFromUrl } from '@/utils/url';
 
 const AppWrapper = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
@@ -14,7 +14,7 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Set current campaign
-    const urlCampaignId = getCampaignIdFromUrl();
+    const urlCampaignId = getCampaignIdFromUrl(url);
     if (!urlCampaignId) {
       setCampaignId(null);
     } else if (urlCampaignId && urlCampaignId !== campaign?.id) {
@@ -22,36 +22,11 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
     }
 
     // Set current viewed unit
-    const urlUnitId = getCurrentUnitIdFromUrl();
+    const urlUnitId = getCurrentUnitIdFromUrl(url);
     if (urlUnitId && urlUnitId !== currentUnit?.id) {
       setCurrentUnitId(urlUnitId);
     }
   }, [pathname]);
-
-  const getCampaignIdFromUrl = () => {
-    const baseIndex = url.lastIndexOf('campaigns');
-    if (baseIndex !== -1 && url.length > baseIndex) {
-      return url[baseIndex + 1];
-    } else {
-      return null;
-    }
-  };
-
-  const getCurrentUnitIdFromUrl = () => {
-    let baseIndex = -1;
-    UnitEnum.forEach((term) => {
-      const index = url.lastIndexOf(`${term}s`);
-      if (index > baseIndex) {
-        baseIndex = index;
-      }
-    });
-
-    if (baseIndex !== -1 && url.length > baseIndex) {
-      return url[baseIndex + 1];
-    } else {
-      return null;
-    }
-  };
 
   const darkTheme = createTheme({
     palette: {

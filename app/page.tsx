@@ -11,6 +11,7 @@ import { User, UserBase } from '@/types/User';
 import { doc, getDoc, setDoc } from '@firebase/firestore';
 import { setUserSession } from '@/utils/userSession';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function AuthPage() {
   const { user, fetchUser } = useUser();
@@ -47,18 +48,21 @@ export default function AuthPage() {
             campaignIds: userDocSnap.data().campaignIds,
           } as User;
         }
-        // Set session
-        await setUserSession(session);
-        fetchUser();
-        router.push('/campaigns');
       }
+      // Set session
+      await setUserSession(session);
+      fetchUser();
+      router.push('/campaigns');
     });
   };
 
   return (
-    <Box p={10}>
+    <Box p={5}>
       {user ? (
-        <Typography>you are signed in already</Typography>
+        <>
+          <Typography>You are already signed in. </Typography>
+          <Link href={'/campaigns'}>Go to your Campaigns</Link>
+        </>
       ) : (
         <Button onClick={handleSignIn}>Sign-in with Google</Button>
       )}

@@ -50,12 +50,12 @@ const CreateUnitModal = () => {
 
   const CreateUnitForm = () => {
     const { user } = useUser();
+    const { campaign } = useCampaign();
     const [unitTitle, setUnitTitle] = useState('');
     const [isHiddenChecked, setHiddenChecked] = useState(false);
     const [displaySnackbar, setDisplaySnackbar] = useState(false);
 
     const params = useParams();
-    const campaignId = params.id as string;
     const collectionId = params.collectionId as string;
 
     const unitDisplayValue = modalState
@@ -63,11 +63,11 @@ const CreateUnitModal = () => {
       : '';
 
     const generateBreadcrumbs = (newUnitId: string) => {
-      if (currentUnit?.type === 'collection') {
+      if (currentUnit?.type === 'collection' && campaign) {
         let breadcrumbs = currentUnit.breadcrumbs;
         breadcrumbs.push({
           title: unitTitle,
-          url: `/campaigns/${campaignId}/${modalState}s/${newUnitId}`,
+          url: `/campaigns/${campaign.id}/${modalState}s/${newUnitId}`,
         });
         return breadcrumbs;
       }
@@ -76,13 +76,13 @@ const CreateUnitModal = () => {
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      if (modalState && user) {
+      if (modalState && user && campaign) {
         const newUnitId = generateUUID();
         let newUnitObj: Unit = {
           id: newUnitId,
           title: unitTitle,
           type: modalState,
-          campaignId: campaignId,
+          campaignId: campaign.id,
           breadcrumbs: generateBreadcrumbs(newUnitId),
           hidden: isHiddenChecked,
         };
@@ -106,6 +106,7 @@ const CreateUnitModal = () => {
             imageUrls: [],
             loot: [],
             sections: [defaultSection],
+            complete: false,
           } as Quest;
         } else if (modalState === 'collection') {
           newUnitObj = {
@@ -168,7 +169,7 @@ const CreateUnitModal = () => {
           onClose={() => setDisplaySnackbar(false)}
           message={unitDisplayValue + ' created'}
           action={
-            <Link href={`/campaigns/${campaignId}/${modalState}s`}>
+            <Link href={`/campaigns/${campaign?.id}/${modalState}s`}>
               <Button>View</Button>
             </Link>
           }

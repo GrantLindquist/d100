@@ -9,7 +9,6 @@ import { useCampaign } from '@/hooks/useCampaign';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import { useRouter } from 'next/navigation';
 
-// TODO: Redirect unauthenticated users
 const UserButton = () => {
   const router = useRouter();
   const { user, signOutUser } = useUser();

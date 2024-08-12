@@ -28,19 +28,21 @@ const PlayerAvatarList = (props: { playerIds: string[] }) => {
         {players.length > 1 ? 's' : ''}
       </Typography>
       {players.map((player, index) => (
-        <Tooltip key={player.id} title={player.displayName}>
-          <Avatar
-            src={player.photoURL ?? ''}
-            alt={player.displayName ?? 'Player'}
-            sx={{
-              width: 30,
-              height: 30,
-              zIndex: players.length - index,
-              border: (theme) =>
-                `2px ${theme.palette.background.default} solid`,
-            }}
-          />
-        </Tooltip>
+        <div key={index}>
+          <Tooltip title={player.displayName}>
+            <Avatar
+              src={player.photoURL ?? ''}
+              alt={player.displayName ?? 'Player'}
+              sx={{
+                width: 30,
+                height: 30,
+                zIndex: players.length - index,
+                border: (theme) =>
+                  `2px ${theme.palette.background.default} solid`,
+              }}
+            />
+          </Tooltip>
+        </div>
       ))}
     </Stack>
   );

@@ -3,7 +3,6 @@ import { Breadcrumbs, Typography } from '@mui/material';
 import { useCampaign } from '@/hooks/useCampaign';
 import Link from 'next/link';
 
-// TODO: title of previous campaign displays when leaving to menu
 const NavBreadcrumbs = () => {
   const { currentUnit } = useCampaign();
 

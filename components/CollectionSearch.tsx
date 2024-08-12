@@ -132,19 +132,27 @@ const CollectionSearch = (props: {
   const [selectedUnitIds, setSelectedUnitIds] = useState<string[]>([]);
 
   useEffect(() => {
-    // TODO: Fix query to allow more than 10 unitIds - use for loop lmao
     const fetchUnits = async () => {
-      const unitQuery = query(
-        collection(db, 'units'),
-        where('id', 'in', props.unitIds)
-      );
-      const unitQuerySnap = await getDocs(unitQuery);
       let units: Unit[] = [];
-      unitQuerySnap.forEach((doc) => {
-        units.push(doc.data() as Unit);
-      });
+      const chunkSize = 30;
+      const chunks = [];
+      for (let i = 0; i < props.unitIds.length; i += chunkSize) {
+        chunks.push(props.unitIds.slice(i, i + chunkSize));
+      }
+
+      for (const chunk of chunks) {
+        const unitQuery = query(
+          collection(db, 'units'),
+          where('id', 'in', chunk)
+        );
+        const unitQuerySnap = await getDocs(unitQuery);
+        unitQuerySnap.forEach((doc) => {
+          units.push(doc.data() as Unit);
+        });
+      }
       setUnits(units);
     };
+
     props.unitIds.length > 0 ? fetchUnits() : setUnits([]);
   }, [props.unitIds]);
 
