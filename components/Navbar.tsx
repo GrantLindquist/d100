@@ -7,7 +7,7 @@ import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 
 const Navbar = () => {
   return (
-    <AppBar position={'static'} sx={{ backgroundColor: 'black' }}>
+    <AppBar position={'fixed'} sx={{ backgroundColor: 'black' }}>
       <Toolbar>
         <Stack direction={'row'} spacing={2} sx={{ flexGrow: 1 }}>
           <Link href={'/campaigns'}>All Campaigns</Link>

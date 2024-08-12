@@ -25,7 +25,7 @@ export default function CollectionPage({
       {collection && (
         <Box
           sx={{
-            pt: 8,
+            pt: 12,
             px: { xs: 2, sm: 4, md: 8, lg: 12 },
           }}
         >

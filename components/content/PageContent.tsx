@@ -233,108 +233,119 @@ export const PageContent = () => {
   };
 
   return (
-    <Container sx={{ paddingY: 3 }}>
-      {content && (
-        <Grid container spacing={3}>
-          <Grid item xs={3}>
-            <Box width={'100%'}>
-              <ArticleAside article={content} />
-            </Box>
-          </Grid>
-          <Grid item xs={8}>
-            <Box pl={3}>
-              {content.hidden && (
-                <Typography color={'grey'} variant={'subtitle2'}>
-                  Hidden from players
-                </Typography>
-              )}
-              <form ref={sectionsFormRef} onSubmit={handleSave}>
-                {content.sections.map((section, index) => (
-                  <div key={index}>
-                    <Box
-                      sx={
-                        isEditing ||
-                        (section.title.length <= 0 && section.body.length <= 0)
-                          ? {}
-                          : { display: 'none' }
-                      }
-                    >
-                      <EditableSection section={section} />
-                    </Box>
-                    <Box sx={!isEditing ? {} : { display: 'none' }}>
-                      <Section section={section} />
-                    </Box>
-                    {section.isHeader && <Divider />}
-                  </div>
-                ))}
-              </form>
-              {content.type === 'quest' && (
-                <LootTable questId={content.id} isEditing={isEditing} />
-              )}
-              {content.imageUrls.length > 0 && (
-                <ImageList
-                  imageUrls={content.imageUrls}
-                  handleDeleteImage={handleDeleteImage}
-                />
-              )}
-            </Box>
-          </Grid>
-        </Grid>
-      )}
-      <Stack
-        direction="column"
-        spacing={1}
-        p={3}
+    <Container>
+      <Box
         sx={{
-          position: 'fixed',
-          right: 16,
-          bottom: 16,
+          pt: 12,
         }}
       >
-        <Fab size="small" onClick={handleClickAddMenu}>
-          <AddIcon />
-        </Fab>
-        <Menu anchorEl={anchor} open={addMenuOpen} onClose={handleCloseAddMenu}>
-          <MenuItem onClick={handleAddSection}>Add Section</MenuItem>
-          <MenuItem onClick={handleAddImage}>Add Reference Images</MenuItem>
-        </Menu>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          style={{ display: 'none' }}
-          ref={fileInputRef}
-          onChange={handleFileChange}
-        />
-        {(isEditing || isAdding) && (
+        {content && (
+          <Grid container spacing={3}>
+            <Grid item xs={3}>
+              <Box width={'100%'}>
+                <ArticleAside article={content} />
+              </Box>
+            </Grid>
+            <Grid item xs={8}>
+              <Box pl={3}>
+                {content.hidden && (
+                  <Typography color={'grey'} variant={'subtitle2'}>
+                    Hidden from players
+                  </Typography>
+                )}
+                <form ref={sectionsFormRef} onSubmit={handleSave}>
+                  {content.sections.map((section, index) => (
+                    <div key={index}>
+                      <Box
+                        sx={
+                          isEditing ||
+                          (section.title.length <= 0 &&
+                            section.body.length <= 0)
+                            ? {}
+                            : { display: 'none' }
+                        }
+                      >
+                        <EditableSection section={section} />
+                      </Box>
+                      <Box sx={!isEditing ? {} : { display: 'none' }}>
+                        <Section section={section} />
+                      </Box>
+                      {section.isHeader && <Divider />}
+                    </div>
+                  ))}
+                </form>
+                {content.type === 'quest' && (
+                  <LootTable questId={content.id} isEditing={isEditing} />
+                )}
+                {content.imageUrls.length > 0 && (
+                  <ImageList
+                    imageUrls={content.imageUrls}
+                    handleDeleteImage={handleDeleteImage}
+                  />
+                )}
+              </Box>
+            </Grid>
+          </Grid>
+        )}
+        <Stack
+          direction="column"
+          spacing={1}
+          p={3}
+          sx={{
+            position: 'fixed',
+            right: 16,
+            bottom: 16,
+          }}
+        >
+          <Fab size="small" onClick={handleClickAddMenu}>
+            <AddIcon />
+          </Fab>
+          <Menu
+            anchorEl={anchor}
+            open={addMenuOpen}
+            onClose={handleCloseAddMenu}
+          >
+            <MenuItem onClick={handleAddSection}>Add Section</MenuItem>
+            <MenuItem onClick={handleAddImage}>Add Reference Images</MenuItem>
+          </Menu>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            style={{ display: 'none' }}
+            ref={fileInputRef}
+            onChange={handleFileChange}
+          />
+          {(isEditing || isAdding) && (
+            <Fab
+              size="small"
+              onClick={() => {
+                sectionsFormRef.current &&
+                  sectionsFormRef.current.dispatchEvent(
+                    new Event('submit', {
+                      cancelable: true,
+                      bubbles: true,
+                    })
+                  );
+              }}
+            >
+              <CheckIcon />
+            </Fab>
+          )}
+          {!isEditing && (
+            <Fab size="small" onClick={() => setEditing(true)}>
+              <EditIcon />
+            </Fab>
+          )}
           <Fab
             size="small"
-            onClick={() => {
-              sectionsFormRef.current &&
-                sectionsFormRef.current.dispatchEvent(
-                  new Event('submit', {
-                    cancelable: true,
-                    bubbles: true,
-                  })
-                );
-            }}
+            disabled={!Boolean(focusedSectionId)}
+            onClick={handleDeleteSection}
           >
-            <CheckIcon />
+            <DeleteIcon />
           </Fab>
-        )}
-        {!isEditing && (
-          <Fab size="small" onClick={() => setEditing(true)}>
-            <EditIcon />
-          </Fab>
-        )}
-        <Fab
-          size="small"
-          disabled={!Boolean(focusedSectionId)}
-          onClick={handleDeleteSection}
-        >
-          <DeleteIcon />
-        </Fab>
-      </Stack>
+        </Stack>
+      </Box>
     </Container>
   );
 };

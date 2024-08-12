@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Container, Stack } from '@mui/material';
+import { Box, Button, Container, Stack } from '@mui/material';
 import {
   getAdditionalUserInfo,
   GoogleAuthProvider,
@@ -16,7 +16,6 @@ import { setUserSession } from '@/utils/userSession';
 import CreateCampaignModal from '@/components/modals/CreateCampaignModal';
 import JoinCampaignModal from '@/components/modals/JoinCampaignModal';
 
-// TODO: Change [id] to [campaignId]
 export default function CampaignsPage() {
   const { user, fetchUser } = useUser();
 
@@ -51,28 +50,38 @@ export default function CampaignsPage() {
       });
   };
 
-  // TODO: Find better way of sizing container to screen
   return (
-    <Container
-      sx={{
-        minHeight: '90vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      {user ? (
-        <Stack spacing={2} width={'70%'} minWidth={350}>
-          <CampaignList />
+    <Container>
+      <Box
+        sx={{
+          pt: 16,
+          px: { xs: 2, sm: 4, md: 8, lg: 12 },
+          minHeight: '100vh',
+        }}
+      >
+        {user ? (
+          <Stack spacing={2} minWidth={350}>
+            <CampaignList />
 
-          <Stack direction={'row'} spacing={2} justifyContent={'center'}>
-            <JoinCampaignModal />
-            <CreateCampaignModal />
+            <Stack
+              direction={'row'}
+              spacing={2}
+              justifyContent={'center'}
+              sx={{
+                position: 'fixed',
+                bottom: 48,
+                left: '50%',
+                transform: 'translateX(-50%)',
+              }}
+            >
+              <JoinCampaignModal />
+              <CreateCampaignModal />
+            </Stack>
           </Stack>
-        </Stack>
-      ) : (
-        <Button onClick={handleSignIn}>Sign-in with Google</Button>
-      )}
+        ) : (
+          <Button onClick={handleSignIn}>Sign-in with Google</Button>
+        )}
+      </Box>
     </Container>
   );
 }

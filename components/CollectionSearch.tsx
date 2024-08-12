@@ -1,6 +1,5 @@
 'use client';
 
-// TODO: Delete functionality does not work properly
 import { ChangeEvent, ReactNode, useEffect, useState } from 'react';
 import {
   Card,
