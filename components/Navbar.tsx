@@ -6,6 +6,7 @@ import SettingsButton from '@/components/SettingsButton';
 import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 import { usePathname } from 'next/navigation';
 
+// TODO: Make campaignId easily accessible & display tooltip for where to find it in JoinCampaignModal
 const Navbar = () => {
   const pathname = usePathname();
   if (pathname !== '/') {

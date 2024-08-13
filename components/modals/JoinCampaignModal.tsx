@@ -13,14 +13,16 @@ import { arrayUnion, doc, getDoc, runTransaction } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useUser } from '@/hooks/useUser';
 import LoginIcon from '@mui/icons-material/Login';
+import { useAlert } from '@/hooks/useAlert';
 
 const JoinCampaignModal = () => {
   const [open, setOpen] = useState(false);
 
   const JoinCampaignForm = () => {
     const { user } = useUser();
+    const { displayAlert } = useAlert();
     const [campaignId, setCampaignId] = useState('');
-    const [displayAlert, setDisplayAlert] = useState(false);
+    const [displayErrorMsg, setDisplayErrorMsg] = useState(false);
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -38,8 +40,11 @@ const JoinCampaignModal = () => {
             });
           });
           setOpen(false);
+          displayAlert({
+            message: `Successfully joined campaign.`,
+          });
         } else {
-          setDisplayAlert(true);
+          setDisplayErrorMsg(true);
         }
       }
     };
@@ -50,7 +55,6 @@ const JoinCampaignModal = () => {
       setCampaignId(value);
     };
 
-    // TODO: Route snackbar to new article and place outside of modal
     return (
       <>
         <form onSubmit={handleSubmit}>
@@ -61,9 +65,9 @@ const JoinCampaignModal = () => {
               size={'small'}
               fullWidth
               onChange={handleInputChange}
-              error={displayAlert}
+              error={displayErrorMsg}
               helperText={
-                displayAlert
+                displayErrorMsg
                   ? 'There is no existing campaign with this ID.'
                   : ''
               }

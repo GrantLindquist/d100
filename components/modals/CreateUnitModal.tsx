@@ -8,7 +8,6 @@ import {
   Menu,
   MenuItem,
   Modal,
-  Snackbar,
   Stack,
   TextField,
   Typography,
@@ -25,12 +24,12 @@ import {
   UnitType,
 } from '@/types/Unit';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
 import { arrayUnion, doc, runTransaction } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { MODAL_STYLE } from '@/utils/globals';
 import { useCampaign } from '@/hooks/useCampaign';
 import { useUser } from '@/hooks/useUser';
+import { useAlert } from '@/hooks/useAlert';
 
 const CreateUnitModal = () => {
   const { isUserDm, currentUnit } = useCampaign();
@@ -51,9 +50,9 @@ const CreateUnitModal = () => {
   const CreateUnitForm = () => {
     const { user } = useUser();
     const { campaign } = useCampaign();
+    const { displayAlert } = useAlert();
     const [unitTitle, setUnitTitle] = useState('');
     const [isHiddenChecked, setHiddenChecked] = useState(false);
-    const [displaySnackbar, setDisplaySnackbar] = useState(false);
 
     const params = useParams();
     const collectionId = params.collectionId as string;
@@ -122,7 +121,10 @@ const CreateUnitModal = () => {
           });
         });
 
-        setDisplaySnackbar(true);
+        displayAlert({
+          message: `Successfully created ${unitDisplayValue}: ${unitTitle}`,
+          link: `/campaigns/${campaign?.id}/${modalState}s/${newUnitId}`,
+        });
         setModalState(null);
       }
     };
@@ -133,48 +135,32 @@ const CreateUnitModal = () => {
       setUnitTitle(value);
     };
 
-    // TODO: Route snackbar to new article and place outside of modal
     return (
-      <>
-        <form onSubmit={handleSubmit}>
-          {modalState && (
-            <Stack spacing={1}>
-              <Typography>{unitDisplayValue} Title</Typography>
-              <TextField
-                variant={'outlined'}
-                size={'small'}
-                fullWidth
-                onChange={handleInputChange}
+      <form onSubmit={handleSubmit}>
+        {modalState && (
+          <Stack spacing={1}>
+            <Typography>{unitDisplayValue} Title</Typography>
+            <TextField
+              variant={'outlined'}
+              size={'small'}
+              fullWidth
+              onChange={handleInputChange}
+            />
+            {isUserDm && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isHiddenChecked}
+                    onChange={(event) => setHiddenChecked(event.target.checked)}
+                  />
+                }
+                label="Hide From Players"
               />
-              {isUserDm && (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={isHiddenChecked}
-                      onChange={(event) =>
-                        setHiddenChecked(event.target.checked)
-                      }
-                    />
-                  }
-                  label="Hide From Players"
-                />
-              )}
-              <Button type={'submit'}>Create new {unitDisplayValue}</Button>
-            </Stack>
-          )}
-        </form>
-        <Snackbar
-          open={displaySnackbar}
-          autoHideDuration={6000}
-          onClose={() => setDisplaySnackbar(false)}
-          message={unitDisplayValue + ' created'}
-          action={
-            <Link href={`/campaigns/${campaign?.id}/${modalState}s`}>
-              <Button>View</Button>
-            </Link>
-          }
-        />
-      </>
+            )}
+            <Button type={'submit'}>Create new {unitDisplayValue}</Button>
+          </Stack>
+        )}
+      </form>
     );
   };
 

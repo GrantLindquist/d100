@@ -16,12 +16,15 @@ import { arrayUnion, doc, runTransaction } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { Collection } from '@/types/Unit';
 import { useUser } from '@/hooks/useUser';
+import { useAlert } from '@/hooks/useAlert';
 
+// TODO: I broke create campaign somehow
 const CreateCampaignModal = () => {
   const [open, setOpen] = useState(false);
 
   const CreateCampaignForm = () => {
     const { user } = useUser();
+    const { displayAlert } = useAlert();
     const [campaignTitle, setCampaignTitle] = useState('');
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -58,7 +61,12 @@ const CreateCampaignModal = () => {
             campaignIds: arrayUnion(newCampaignId),
           });
         });
+
         setOpen(false);
+        displayAlert({
+          message: `Successfully created campaign: ${campaignTitle}`,
+          link: `/campaigns/${newCampaignId}/collections/${baseCollectionId}`,
+        });
       }
     };
 
@@ -68,22 +76,19 @@ const CreateCampaignModal = () => {
       setCampaignTitle(value);
     };
 
-    // TODO: Route snackbar to new article and place outside of modal
     return (
-      <>
-        <form onSubmit={handleSubmit}>
-          <Stack spacing={1}>
-            <InputLabel>Campaign Title</InputLabel>
-            <TextField
-              variant={'outlined'}
-              size={'small'}
-              fullWidth
-              onChange={handleInputChange}
-            />
-            <Button type={'submit'}>Create new Campaign</Button>
-          </Stack>
-        </form>
-      </>
+      <form onSubmit={handleSubmit}>
+        <Stack spacing={1}>
+          <InputLabel>Campaign Title</InputLabel>
+          <TextField
+            variant={'outlined'}
+            size={'small'}
+            fullWidth
+            onChange={handleInputChange}
+          />
+          <Button type={'submit'}>Create new Campaign</Button>
+        </Stack>
+      </form>
     );
   };
 

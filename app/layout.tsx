@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import Navbar from '@/components/Navbar';
 import { CampaignProvider } from '@/hooks/useCampaign';
 import { UserProvider } from '@/hooks/useUser';
+import { AlertProvider } from '@/hooks/useAlert';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -18,14 +19,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <UserProvider>
-          <CampaignProvider>
-            <AppWrapper>
-              <Navbar />
-              {children}
-            </AppWrapper>
-          </CampaignProvider>
-        </UserProvider>
+        <AlertProvider>
+          <UserProvider>
+            <CampaignProvider>
+              <AppWrapper>
+                <Navbar />
+                {children}
+              </AppWrapper>
+            </CampaignProvider>
+          </UserProvider>
+        </AlertProvider>
       </body>
     </html>
   );
