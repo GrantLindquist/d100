@@ -5,9 +5,10 @@ import Link from 'next/link';
 import SettingsButton from '@/components/SettingsButton';
 import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 import { usePathname } from 'next/navigation';
+import { useCampaign } from '@/hooks/useCampaign';
 
-// TODO: Make campaignId easily accessible & display tooltip for where to find it in JoinCampaignModal
 const Navbar = () => {
+  const { campaign } = useCampaign();
   const pathname = usePathname();
   if (pathname !== '/') {
     return (
@@ -19,7 +20,7 @@ const Navbar = () => {
             <NavBreadcrumbs />
           </Stack>
           <Stack direction={'row'} spacing={1}>
-            <SettingsButton />
+            {campaign && <SettingsButton />}
             <Divider orientation={'vertical'} flexItem />
             <UserButton />
           </Stack>

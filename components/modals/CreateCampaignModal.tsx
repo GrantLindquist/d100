@@ -18,7 +18,6 @@ import { Collection } from '@/types/Unit';
 import { useUser } from '@/hooks/useUser';
 import { useAlert } from '@/hooks/useAlert';
 
-// TODO: I broke create campaign somehow
 const CreateCampaignModal = () => {
   const [open, setOpen] = useState(false);
 
@@ -29,6 +28,7 @@ const CreateCampaignModal = () => {
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+      console.log(user);
       if (user) {
         const newCampaignId = generateUUID();
         const baseCollectionId = generateUUID();

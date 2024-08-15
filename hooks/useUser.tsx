@@ -1,46 +1,68 @@
 'use client';
 import {
   createContext,
+  Dispatch,
   ReactNode,
+  SetStateAction,
   useContext,
   useEffect,
   useState,
 } from 'react';
-import { getUserFromSession } from '@/utils/userSession';
+import { getUserFromSession, setUserSession } from '@/utils/userSession';
 import { User } from '@/types/User';
+import { doc, onSnapshot } from '@firebase/firestore';
+import db from '@/utils/firebase';
 
 const UserContext = createContext<{
   user: User | null;
-  fetchUser: () => void;
+  setListening: Dispatch<SetStateAction<boolean>>;
   signOutUser: () => void;
 }>({
   user: null,
-  fetchUser: () => {},
+  setListening: () => {},
   signOutUser: () => {},
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [listening, setListening] = useState(false);
 
   useEffect(() => {
+    const fetchUser = async () => {
+      const sessionUser = await getUserFromSession();
+      if (sessionUser?.user) {
+        const unsubscribe = onSnapshot(
+          doc(db, 'users', sessionUser.user.id),
+          (userDocSnap) => {
+            if (userDocSnap.exists()) {
+              setUser(userDocSnap.data() as User);
+            }
+          }
+        );
+        return () => {
+          unsubscribe();
+        };
+      }
+    };
     fetchUser();
-  }, []);
+  }, [listening]);
 
-  // Retrieves session data and sets user state for UserProvider
-  const fetchUser = async () => {
-    const session = await getUserFromSession();
-    const sessionUser = session?.user || null;
-    if (sessionUser) {
-      setUser(sessionUser);
-    }
-  };
+  // Listens for changes to user.campaignIds & updates session to be read from middleware
+  useEffect(() => {
+    const updateSessionCampaignIds = async () => {
+      if (user?.campaignIds) {
+        await setUserSession(user);
+      }
+    };
+    updateSessionCampaignIds();
+  }, [user?.campaignIds]);
 
   const signOutUser = () => {
     setUser(null);
   };
 
   return (
-    <UserContext.Provider value={{ user, fetchUser, signOutUser }}>
+    <UserContext.Provider value={{ user, signOutUser, setListening }}>
       {children}
     </UserContext.Provider>
   );

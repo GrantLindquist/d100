@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function AuthPage() {
-  const { user, fetchUser } = useUser();
+  const { user, setListening } = useUser();
   const router = useRouter();
 
   const handleSignIn = async () => {
@@ -22,36 +22,32 @@ export default function AuthPage() {
     signInWithPopup(auth, provider).then(async (result) => {
       // Define user values from google
       const user = result.user;
-      let session: UserBase = {
+      let session = {
         displayName: user.displayName,
         email: user.email,
         photoURL: user.photoURL,
         id: user.uid,
-      };
+      } as UserBase;
       // If creating account, set new user doc w/ default values
       const additionalUserInfo = getAdditionalUserInfo(result);
       if (additionalUserInfo?.isNewUser) {
         session = {
           ...session,
-          createdAt: Date.now(),
           campaignIds: [],
+          createdAt: Date.now(),
         } as User;
         await setDoc(doc(db, 'users', user.uid), session);
-      }
-      // If signing in, fetch values from
-      else {
+      } else {
         const userDocSnap = await getDoc(doc(db, 'users', user.uid));
-        if (userDocSnap.exists()) {
-          session = {
-            ...session,
-            createdAt: userDocSnap.data().createdAt,
-            campaignIds: userDocSnap.data().campaignIds,
-          } as User;
-        }
+        session = {
+          ...session,
+          campaignIds: userDocSnap.data()?.campaignIds ?? [],
+          createdAt: userDocSnap.data()?.createdAt ?? Date.now(),
+        } as User;
       }
       // Set session
       await setUserSession(session);
-      fetchUser();
+      setListening(true);
       router.push('/campaigns');
     });
   };

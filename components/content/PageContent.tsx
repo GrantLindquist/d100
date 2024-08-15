@@ -2,6 +2,7 @@
 
 import {
   Box,
+  Button,
   Container,
   Divider,
   Fab,
@@ -14,7 +15,6 @@ import {
 } from '@mui/material';
 import { Article, Quest, Section as SectionType } from '@/types/Unit';
 import ArticleAside from '@/components/content/ArticleAside';
-import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -32,6 +32,7 @@ import { useUser } from '@/hooks/useUser';
 import { useCampaign } from '@/hooks/useCampaign';
 import ImageList from '@/components/content/ImageList';
 import LootTable from '@/components/content/LootTable';
+import AddIcon from '@mui/icons-material/Add';
 
 const Section = (props: { section: SectionType }) => {
   return (
@@ -44,7 +45,6 @@ const Section = (props: { section: SectionType }) => {
   );
 };
 
-// TODO: Figure out how to have my cake (onFocus id state) and eat it too (one click to access TextField)
 const EditableSection = (props: { section: SectionType }) => {
   return (
     <Stack spacing={2}>
@@ -52,7 +52,6 @@ const EditableSection = (props: { section: SectionType }) => {
         name={`title-${props.section.id}`}
         defaultValue={props.section.title}
         placeholder="Section Title"
-        // onFocus={() => setFocusedSectionId(props.section.id)}
         sx={{
           '& .MuiInputBase-input': {
             fontSize: props.section.isHeader ? '4rem' : '2rem',
@@ -69,7 +68,6 @@ const EditableSection = (props: { section: SectionType }) => {
         name={`body-${props.section.id}`}
         defaultValue={props.section.body}
         placeholder="Section Body"
-        // onFocus={() => setFocusedSectionId(props.section.id)}
         sx={{
           '& .MuiInputBase-input': {
             fontStyle: 'italic',
@@ -88,11 +86,11 @@ const EditableSection = (props: { section: SectionType }) => {
   );
 };
 
+// TODO: Last section is deleted instead of selected section
 export const PageContent = () => {
   const [content, setContent] = useState<Article | Quest | null>(null);
   const [isEditing, setEditing] = useState<boolean>(false);
-  const [isAdding, setAdding] = useState<boolean>(false);
-  const [focusedSectionId, setFocusedSectionId] = useState<string | null>(null);
+  const focusedSectionId = useRef<string | null>(null);
 
   const sectionsFormRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -148,7 +146,6 @@ export const PageContent = () => {
       };
       setContent(newArticle);
       isEditing && setEditing(false);
-      isAdding && setAdding(false);
 
       await updateDoc(doc(db, 'units', content.id), {
         sections: sectionsData,
@@ -202,7 +199,6 @@ export const PageContent = () => {
   const handleAddSection = () => {
     if (content && user) {
       handleCloseAddMenu();
-      setAdding(true);
       const newSection = {
         id: generateUUID(),
         title: '',
@@ -219,15 +215,19 @@ export const PageContent = () => {
     }
   };
 
-  const handleDeleteSection = () => {
+  const handleDeleteSection = async () => {
     if (content) {
+      const newSections = [...content.sections].filter(
+        (a) => a.id !== focusedSectionId.current
+      );
       const newArticle = {
         ...content,
-        sections: [...content.sections].filter(
-          (a) => a.id !== focusedSectionId
-        ),
+        sections: newSections,
       };
-      setFocusedSectionId(null);
+      await updateDoc(doc(db, 'units', content.id), {
+        sections: newSections,
+      });
+      focusedSectionId.current = null;
       setContent(newArticle);
     }
   };
@@ -257,6 +257,11 @@ export const PageContent = () => {
                   {content.sections.map((section, index) => (
                     <div key={index} style={{ paddingBottom: '28px' }}>
                       <Box
+                        onFocus={() => {
+                          if (!section.isHeader) {
+                            focusedSectionId.current = section.id;
+                          }
+                        }}
                         sx={
                           isEditing ||
                           (section.title.length <= 0 &&
@@ -278,6 +283,15 @@ export const PageContent = () => {
                     </div>
                   ))}
                 </form>
+                {isEditing && (
+                  <Button
+                    startIcon={<AddIcon />}
+                    onClick={handleAddSection}
+                    sx={{ color: 'grey' }}
+                  >
+                    Add Section
+                  </Button>
+                )}
                 {content.type === 'quest' && (
                   <div style={{ paddingBottom: '28px' }}>
                     <LootTable questId={content.id} isEditing={isEditing} />
@@ -305,9 +319,6 @@ export const PageContent = () => {
             bottom: 16,
           }}
         >
-          <Fab size="small" onClick={handleClickAddMenu}>
-            <AddIcon />
-          </Fab>
           <Menu
             anchorEl={anchor}
             open={addMenuOpen}
@@ -324,34 +335,35 @@ export const PageContent = () => {
             ref={fileInputRef}
             onChange={handleFileChange}
           />
-          {(isEditing || isAdding) && (
-            <Fab
-              size="small"
-              onClick={() => {
-                sectionsFormRef.current &&
-                  sectionsFormRef.current.dispatchEvent(
-                    new Event('submit', {
-                      cancelable: true,
-                      bubbles: true,
-                    })
-                  );
-              }}
-            >
-              <CheckIcon />
-            </Fab>
-          )}
-          {!isEditing && (
+          {isEditing ? (
+            <>
+              <Fab
+                size="small"
+                onClick={() => {
+                  sectionsFormRef.current &&
+                    sectionsFormRef.current.dispatchEvent(
+                      new Event('submit', {
+                        cancelable: true,
+                        bubbles: true,
+                      })
+                    );
+                }}
+              >
+                <CheckIcon />
+              </Fab>
+              <Fab
+                size="small"
+                disabled={!Boolean(focusedSectionId)}
+                onClick={handleDeleteSection}
+              >
+                <DeleteIcon />
+              </Fab>
+            </>
+          ) : (
             <Fab size="small" onClick={() => setEditing(true)}>
               <EditIcon />
             </Fab>
           )}
-          <Fab
-            size="small"
-            disabled={!Boolean(focusedSectionId)}
-            onClick={handleDeleteSection}
-          >
-            <DeleteIcon />
-          </Fab>
         </Stack>
       </Box>
     </Container>
