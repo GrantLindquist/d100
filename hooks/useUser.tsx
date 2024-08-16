@@ -8,10 +8,10 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { getUserFromSession, setUserSession } from '@/utils/userSession';
 import { User } from '@/types/User';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
+import { getUserFromSession } from '@/utils/userSession';
 
 const UserContext = createContext<{
   user: User | null;
@@ -25,14 +25,15 @@ const UserContext = createContext<{
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [listening, setListening] = useState(false);
+  // TODO: Figure out a better way to do this
+  const [listening, setListening] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const sessionUser = await getUserFromSession();
-      if (sessionUser?.user) {
+      const result = await getUserFromSession();
+      if (result?.user || listening) {
         const unsubscribe = onSnapshot(
-          doc(db, 'users', sessionUser.user.id),
+          doc(db, 'users', result.user.id),
           (userDocSnap) => {
             if (userDocSnap.exists()) {
               setUser(userDocSnap.data() as User);
@@ -46,16 +47,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     };
     fetchUser();
   }, [listening]);
-
-  // Listens for changes to user.campaignIds & updates session to be read from middleware
-  useEffect(() => {
-    const updateSessionCampaignIds = async () => {
-      if (user?.campaignIds) {
-        await setUserSession(user);
-      }
-    };
-    updateSessionCampaignIds();
-  }, [user?.campaignIds]);
 
   const signOutUser = () => {
     setUser(null);

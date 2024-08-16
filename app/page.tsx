@@ -8,7 +8,7 @@ import {
 } from 'firebase/auth';
 import db, { auth } from '@/utils/firebase';
 import { User, UserBase } from '@/types/User';
-import { doc, getDoc, setDoc } from '@firebase/firestore';
+import { doc, setDoc } from '@firebase/firestore';
 import { setUserSession } from '@/utils/userSession';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -22,12 +22,12 @@ export default function AuthPage() {
     signInWithPopup(auth, provider).then(async (result) => {
       // Define user values from google
       const user = result.user;
-      let session = {
+      let session: UserBase = {
         displayName: user.displayName,
         email: user.email,
         photoURL: user.photoURL,
         id: user.uid,
-      } as UserBase;
+      };
       // If creating account, set new user doc w/ default values
       const additionalUserInfo = getAdditionalUserInfo(result);
       if (additionalUserInfo?.isNewUser) {
@@ -37,13 +37,6 @@ export default function AuthPage() {
           createdAt: Date.now(),
         } as User;
         await setDoc(doc(db, 'users', user.uid), session);
-      } else {
-        const userDocSnap = await getDoc(doc(db, 'users', user.uid));
-        session = {
-          ...session,
-          campaignIds: userDocSnap.data()?.campaignIds ?? [],
-          createdAt: userDocSnap.data()?.createdAt ?? Date.now(),
-        } as User;
       }
       // Set session
       await setUserSession(session);

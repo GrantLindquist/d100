@@ -28,7 +28,6 @@ const CreateCampaignModal = () => {
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      console.log(user);
       if (user) {
         const newCampaignId = generateUUID();
         const baseCollectionId = generateUUID();

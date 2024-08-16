@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 
 const UserButton = () => {
   const router = useRouter();
-  const { user, signOutUser } = useUser();
+  const { user, signOutUser, setListening } = useUser();
   const { isUserDm } = useCampaign();
 
   const [anchor, setAnchor] = useState(null);
@@ -31,6 +31,7 @@ const UserButton = () => {
     await signOut(auth);
     await clearSession();
     router.push('/');
+    setListening(false);
   };
 
   return (
