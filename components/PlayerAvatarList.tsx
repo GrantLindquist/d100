@@ -1,33 +1,14 @@
-import { useEffect, useState } from 'react';
 import { Avatar, Stack, Tooltip, Typography } from '@mui/material';
-import { doc, getDoc } from '@firebase/firestore';
-import db from '@/utils/firebase';
-import { User } from '@/types/User';
+import { UserBase } from '@/types/User';
 
-const PlayerAvatarList = (props: { playerIds: string[] }) => {
-  const [players, setPlayers] = useState<User[]>([]);
-
-  useEffect(() => {
-    const fetchPlayerAvatarUrls = async () => {
-      let players = [];
-      for (let id of props.playerIds) {
-        const playerDocSnap = await getDoc(doc(db, 'users', id));
-        if (playerDocSnap.exists()) {
-          players.push(playerDocSnap.data() as User);
-        }
-      }
-      setPlayers(players);
-    };
-    fetchPlayerAvatarUrls();
-  }, [props.playerIds]);
-
+const PlayerAvatarList = (props: { players: UserBase[] }) => {
   return (
     <Stack direction={'row'} spacing={-1} alignItems={'center'}>
       <Typography variant={'subtitle2'} color={'grey'} pr={3}>
-        {players.length}&nbsp;player
-        {players.length > 1 ? 's' : ''}
+        {props.players.length}&nbsp;player
+        {props.players.length > 1 ? 's' : ''}
       </Typography>
-      {players.map((player, index) => (
+      {props.players.map((player, index) => (
         <div key={index}>
           <Tooltip title={player.displayName}>
             <Avatar
@@ -36,7 +17,7 @@ const PlayerAvatarList = (props: { playerIds: string[] }) => {
               sx={{
                 width: 30,
                 height: 30,
-                zIndex: players.length - index,
+                zIndex: props.players.length - index,
                 border: (theme) =>
                   `2px ${theme.palette.background.default} solid`,
               }}

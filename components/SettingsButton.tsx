@@ -1,5 +1,6 @@
 'use client';
 import {
+  Avatar,
   Box,
   IconButton,
   Menu,
@@ -13,9 +14,12 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { useCampaign } from '@/hooks/useCampaign';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
+import { useUser } from '@/hooks/useUser';
 
 const SettingsButton = () => {
   const { campaign } = useCampaign();
+  const { user } = useUser();
+
   const [anchor, setAnchor] = useState(null);
   const [copiedId, setCopiedId] = useState(false);
   const open = Boolean(anchor);
@@ -41,8 +45,37 @@ const SettingsButton = () => {
       <IconButton onClick={handleClick}>
         <SettingsIcon />
       </IconButton>
-      <Menu anchorEl={anchor} open={open} onClose={handleClose}>
-        <MenuItem>Manage players</MenuItem>
+      <Menu
+        anchorEl={anchor}
+        open={open}
+        onClose={handleClose}
+        transformOrigin={{ horizontal: 'center', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+      >
+        {campaign && campaign.players.length > 1 && (
+          <>
+            <Box px={2} py={1}>
+              Manage Players:
+            </Box>
+            {campaign.players.map((player, index) => {
+              if (player.id !== user?.id) {
+                return (
+                  <MenuItem key={index}>
+                    <Avatar
+                      src={player.photoURL ?? ''}
+                      alt={player.displayName ?? 'Player'}
+                      sx={{
+                        width: 30,
+                        height: 30,
+                      }}
+                    />
+                    <Typography>{player.displayName}</Typography>
+                  </MenuItem>
+                );
+              }
+            })}
+          </>
+        )}
         <Box px={2} py={1}>
           <Typography>Invite players:</Typography>
           <Paper sx={{ mt: 1 }}>

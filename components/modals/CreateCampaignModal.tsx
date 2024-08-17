@@ -36,7 +36,15 @@ const CreateCampaignModal = () => {
           title: campaignTitle,
           baseCollectionId: baseCollectionId,
           dmId: user.id,
-          playerIds: [user.id],
+          players: [
+            {
+              id: user.id,
+              displayName: user.displayName,
+              email: user.email,
+              photoURL: user.photoURL,
+            },
+          ],
+          pendingPlayers: [],
         };
         const baseCollection: Collection = {
           id: baseCollectionId,
@@ -52,6 +60,7 @@ const CreateCampaignModal = () => {
           hidden: false,
           unitIds: [],
         };
+        console.log(newCampaign);
         // TODO: Error handling
         await runTransaction(db, async (transaction) => {
           transaction.set(doc(db, 'campaigns', newCampaignId), newCampaign);

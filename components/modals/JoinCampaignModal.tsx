@@ -32,16 +32,18 @@ const JoinCampaignModal = () => {
         );
         if (campaignDocSnap.exists()) {
           await runTransaction(db, async (transaction) => {
-            transaction.update(doc(db, 'users', user.id), {
-              campaignIds: arrayUnion(campaignId),
-            });
             transaction.update(doc(db, 'campaigns', campaignId), {
-              playerIds: arrayUnion(user.id),
+              pendingPlayers: arrayUnion({
+                id: user.id,
+                displayName: user.displayName,
+                email: user.email,
+                photoURL: user.photoURL,
+              }),
             });
           });
           setOpen(false);
           displayAlert({
-            message: `Successfully joined campaign.`,
+            message: `Request to join "${campaignDocSnap.data().title}" sent.`,
           });
         } else {
           setDisplayErrorMsg(true);

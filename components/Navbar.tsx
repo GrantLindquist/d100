@@ -6,9 +6,10 @@ import SettingsButton from '@/components/SettingsButton';
 import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 import { usePathname } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
+import NotificationButton from '@/components/NotificationButton';
 
 const Navbar = () => {
-  const { campaign } = useCampaign();
+  const { isUserDm } = useCampaign();
   const pathname = usePathname();
   if (pathname !== '/') {
     return (
@@ -20,8 +21,13 @@ const Navbar = () => {
             <NavBreadcrumbs />
           </Stack>
           <Stack direction={'row'} spacing={1}>
-            {campaign && <SettingsButton />}
-            <Divider orientation={'vertical'} flexItem />
+            {isUserDm && (
+              <>
+                <NotificationButton />
+                <SettingsButton />
+                <Divider orientation={'vertical'} flexItem />
+              </>
+            )}
             <UserButton />
           </Stack>
         </Toolbar>

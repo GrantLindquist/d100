@@ -30,6 +30,9 @@ const CampaignTab = (props: { campaignId: string }) => {
     return () => unsubscribe();
   }, [props.campaignId]);
 
+  if (!loading && !campaign) {
+    return null;
+  }
   return (
     <div
       onClick={() =>
@@ -62,7 +65,7 @@ const CampaignTab = (props: { campaignId: string }) => {
                     {campaign.title}
                   </Typography>
                   <Stack direction={'row'} spacing={2}>
-                    <PlayerAvatarList playerIds={campaign.playerIds} />
+                    <PlayerAvatarList players={campaign.players} />
                   </Stack>
                 </>
               )}

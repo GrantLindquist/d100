@@ -6,7 +6,6 @@ import { clearSession } from '@/utils/userSession';
 import { auth } from '@/utils/firebase';
 import { signOut } from 'firebase/auth';
 import { useCampaign } from '@/hooks/useCampaign';
-import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import { useRouter } from 'next/navigation';
 
 const UserButton = () => {
@@ -47,7 +46,6 @@ const UserButton = () => {
           }}
         />
         {user?.displayName}
-        {isUserDm && <WorkspacePremiumIcon />}
       </Button>
       <Menu anchorEl={anchor} open={open} onClose={handleClose}>
         <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
