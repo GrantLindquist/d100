@@ -9,20 +9,134 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useCampaign } from '@/hooks/useCampaign';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { useUser } from '@/hooks/useUser';
+import { UserBase } from '@/types/User';
+import {
+  arrayRemove,
+  doc,
+  onSnapshot,
+  runTransaction,
+} from '@firebase/firestore';
+import db from '@/utils/firebase';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useAlert } from '@/hooks/useAlert';
+
+const PlayerList = (props: { players: UserBase[] }) => {
+  const { user } = useUser();
+  const { campaign } = useCampaign();
+  const { displayAlert } = useAlert();
+
+  const [hoveredPlayer, setHoveredPlayer] = useState<UserBase | null>(null);
+
+  const [anchor, setAnchor] = useState(null);
+  const open = Boolean(anchor);
+
+  const handleClick = (event: any) => {
+    setAnchor(event.currentTarget);
+  };
+
+  const handleKickPlayer = async () => {
+    if (campaign && hoveredPlayer) {
+      setAnchor(null);
+      await runTransaction(db, async (transaction) => {
+        transaction.update(doc(db, 'campaigns', campaign.id), {
+          players: arrayRemove(hoveredPlayer),
+        });
+        transaction.update(doc(db, 'users', hoveredPlayer.id), {
+          campaignIds: arrayRemove(campaign.id),
+        });
+      });
+      displayAlert({
+        message: `${hoveredPlayer.displayName} was kicked from the campaign.`,
+      });
+    }
+  };
+
+  const handleHoverPlayer = (player: UserBase | null) => {
+    if (anchor === null) {
+      setHoveredPlayer(player);
+    }
+  };
+
+  return (
+    <Box onMouseLeave={() => handleHoverPlayer(null)}>
+      {props.players.map((player, index) => {
+        if (player.id !== user?.id) {
+          return (
+            <MenuItem key={index} onMouseOver={() => handleHoverPlayer(player)}>
+              <Avatar
+                src={player.photoURL ?? ''}
+                alt={player.displayName ?? 'Player'}
+                sx={{
+                  width: 20,
+                  height: 20,
+                  mr: 1,
+                }}
+              />
+              <Typography flexGrow={1}>{player.displayName}</Typography>
+              <IconButton
+                disabled={player.id !== hoveredPlayer?.id}
+                disableRipple
+                disableFocusRipple
+                onClick={handleClick}
+                sx={{
+                  padding: 0,
+                }}
+              >
+                {player.id === hoveredPlayer?.id && (
+                  <MoreVertIcon
+                    sx={{
+                      width: 20,
+                      height: 20,
+                    }}
+                  />
+                )}
+              </IconButton>
+              <Menu
+                anchorEl={anchor}
+                open={open}
+                onClose={() => setAnchor(null)}
+                transformOrigin={{ horizontal: 'center', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+              >
+                <MenuItem onClick={handleKickPlayer}>Kick Player</MenuItem>
+                <MenuItem disabled>Change Permissions</MenuItem>
+              </Menu>
+            </MenuItem>
+          );
+        }
+      })}
+    </Box>
+  );
+};
 
 const SettingsButton = () => {
   const { campaign } = useCampaign();
-  const { user } = useUser();
 
   const [anchor, setAnchor] = useState(null);
   const [copiedId, setCopiedId] = useState(false);
   const open = Boolean(anchor);
+
+  const [players, setPlayers] = useState<UserBase[]>([]);
+  useEffect(() => {
+    if (campaign) {
+      const unsubscribe = onSnapshot(
+        doc(db, 'campaigns', campaign.id),
+        (campaignDocSnap) => {
+          if (campaignDocSnap.exists()) {
+            setPlayers(campaignDocSnap.data().players);
+          }
+        }
+      );
+
+      return () => unsubscribe();
+    }
+  }, [campaign?.id]);
 
   const handleClick = (event: any) => {
     setAnchor(event.currentTarget);
@@ -52,29 +166,13 @@ const SettingsButton = () => {
         transformOrigin={{ horizontal: 'center', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
       >
-        {campaign && campaign.players.length > 1 && (
-          <>
+        {campaign && players.length > 1 && (
+          <div>
             <Box px={2} py={1}>
               Manage Players:
             </Box>
-            {campaign.players.map((player, index) => {
-              if (player.id !== user?.id) {
-                return (
-                  <MenuItem key={index}>
-                    <Avatar
-                      src={player.photoURL ?? ''}
-                      alt={player.displayName ?? 'Player'}
-                      sx={{
-                        width: 30,
-                        height: 30,
-                      }}
-                    />
-                    <Typography>{player.displayName}</Typography>
-                  </MenuItem>
-                );
-              }
-            })}
-          </>
+            <PlayerList players={players} />
+          </div>
         )}
         <Box px={2} py={1}>
           <Typography>Invite players:</Typography>

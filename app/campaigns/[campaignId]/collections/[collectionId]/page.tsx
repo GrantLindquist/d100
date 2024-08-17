@@ -8,6 +8,7 @@ import { useCampaign } from '@/hooks/useCampaign';
 import { useUser } from '@/hooks/useUser';
 import { useRouter } from 'next/navigation';
 
+// TODO: Patch bug where collection information does not appear and page is blank
 export default function CollectionPage({
   params,
 }: {

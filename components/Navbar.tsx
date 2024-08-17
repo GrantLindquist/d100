@@ -9,7 +9,7 @@ import { useCampaign } from '@/hooks/useCampaign';
 import NotificationButton from '@/components/NotificationButton';
 
 const Navbar = () => {
-  const { isUserDm } = useCampaign();
+  const { campaign, isUserDm } = useCampaign();
   const pathname = usePathname();
   if (pathname !== '/') {
     return (
@@ -17,8 +17,12 @@ const Navbar = () => {
         <Toolbar>
           <Stack direction={'row'} spacing={2} sx={{ flexGrow: 1 }}>
             <Link href={'/campaigns'}>All Campaigns</Link>
-            <Divider orientation={'vertical'} flexItem />
-            <NavBreadcrumbs />
+            {campaign && (
+              <>
+                <Divider orientation={'vertical'} flexItem />
+                <NavBreadcrumbs />
+              </>
+            )}
           </Stack>
           <Stack direction={'row'} spacing={1}>
             {isUserDm && (
