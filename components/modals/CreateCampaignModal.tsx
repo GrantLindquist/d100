@@ -29,52 +29,59 @@ const CreateCampaignModal = () => {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (user) {
-        const newCampaignId = generateUUID();
-        const baseCollectionId = generateUUID();
-        const newCampaign: Campaign = {
-          id: newCampaignId,
-          title: campaignTitle,
-          baseCollectionId: baseCollectionId,
-          dmId: user.id,
-          players: [
-            {
-              id: user.id,
-              displayName: user.displayName,
-              email: user.email,
-              photoURL: user.photoURL,
-            },
-          ],
-          pendingPlayers: [],
-        };
-        const baseCollection: Collection = {
-          id: baseCollectionId,
-          campaignId: newCampaignId,
-          title: campaignTitle,
-          type: 'collection',
-          breadcrumbs: [
-            {
-              title: campaignTitle,
-              url: `/campaigns/${newCampaignId}/collections/${baseCollectionId}`,
-            },
-          ],
-          hidden: false,
-          unitIds: [],
-        };
-        console.log(newCampaign);
-        // TODO: Error handling
-        await runTransaction(db, async (transaction) => {
-          transaction.set(doc(db, 'campaigns', newCampaignId), newCampaign);
-          transaction.set(doc(db, 'units', baseCollectionId), baseCollection);
-          transaction.update(doc(db, 'users', user.id), {
-            campaignIds: arrayUnion(newCampaignId),
-          });
-        });
+        try {
+          const newCampaignId = generateUUID();
+          const baseCollectionId = generateUUID();
+          const newCampaign: Campaign = {
+            id: newCampaignId,
+            title: campaignTitle,
+            baseCollectionId: baseCollectionId,
+            dmId: user.id,
+            players: [
+              {
+                id: user.id,
+                displayName: user.displayName,
+                email: user.email,
+                photoURL: user.photoURL,
+              },
+            ],
+            pendingPlayers: [],
+          };
+          const baseCollection: Collection = {
+            id: baseCollectionId,
+            campaignId: newCampaignId,
+            title: campaignTitle,
+            type: 'collection',
+            breadcrumbs: [
+              {
+                title: campaignTitle,
+                url: `/campaigns/${newCampaignId}/collections/${baseCollectionId}`,
+              },
+            ],
+            hidden: false,
+            unitIds: [],
+          };
 
+          await runTransaction(db, async (transaction) => {
+            transaction.set(doc(db, 'campaigns', newCampaignId), newCampaign);
+            transaction.set(doc(db, 'units', baseCollectionId), baseCollection);
+            transaction.update(doc(db, 'users', user.id), {
+              campaignIds: arrayUnion(newCampaignId),
+            });
+          });
+
+          displayAlert({
+            message: `Successfully created campaign: ${campaignTitle}`,
+            link: `/campaigns/${newCampaignId}/collections/${baseCollectionId}`,
+          });
+        } catch (e: any) {
+          displayAlert({
+            message: 'An error occurred while creating your campaign.',
+            isError: true,
+            errorType: e.name,
+          });
+        }
         setOpen(false);
-        displayAlert({
-          message: `Successfully created campaign: ${campaignTitle}`,
-          link: `/campaigns/${newCampaignId}/collections/${baseCollectionId}`,
-        });
       }
     };
 

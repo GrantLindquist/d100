@@ -76,55 +76,63 @@ const CreateUnitModal = () => {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (modalState && user && campaign) {
-        const newUnitId = generateUUID();
-        let newUnitObj: Unit = {
-          id: newUnitId,
-          title: unitTitle,
-          type: modalState,
-          campaignId: campaign.id,
-          breadcrumbs: generateBreadcrumbs(newUnitId),
-          hidden: isHiddenChecked,
-        };
-        const defaultSection: Section = {
-          id: generateUUID(),
-          title: unitTitle,
-          body: '',
-          isHeader: true,
-          authorId: user.id,
-        };
+        try {
+          const newUnitId = generateUUID();
+          let newUnitObj: Unit = {
+            id: newUnitId,
+            title: unitTitle,
+            type: modalState,
+            campaignId: campaign.id,
+            breadcrumbs: generateBreadcrumbs(newUnitId),
+            hidden: isHiddenChecked,
+          };
+          const defaultSection: Section = {
+            id: generateUUID(),
+            title: unitTitle,
+            body: '',
+            isHeader: true,
+            authorId: user.id,
+          };
 
-        if (modalState === 'article') {
-          newUnitObj = {
-            ...newUnitObj,
-            imageUrls: [],
-            sections: [defaultSection],
-          } as Article;
-        } else if (modalState === 'quest') {
-          newUnitObj = {
-            ...newUnitObj,
-            imageUrls: [],
-            loot: [],
-            sections: [defaultSection],
-            complete: false,
-          } as Quest;
-        } else if (modalState === 'collection') {
-          newUnitObj = {
-            ...newUnitObj,
-            unitIds: [],
-          } as Collection;
-        }
+          if (modalState === 'article') {
+            newUnitObj = {
+              ...newUnitObj,
+              imageUrls: [],
+              sections: [defaultSection],
+            } as Article;
+          } else if (modalState === 'quest') {
+            newUnitObj = {
+              ...newUnitObj,
+              imageUrls: [],
+              loot: [],
+              sections: [defaultSection],
+              complete: false,
+            } as Quest;
+          } else if (modalState === 'collection') {
+            newUnitObj = {
+              ...newUnitObj,
+              unitIds: [],
+            } as Collection;
+          }
 
-        await runTransaction(db, async (transaction) => {
-          transaction.set(doc(db, 'units', newUnitId), newUnitObj);
-          transaction.update(doc(db, 'units', collectionId), {
-            unitIds: arrayUnion(newUnitId),
+          await runTransaction(db, async (transaction) => {
+            transaction.set(doc(db, 'units', newUnitId), newUnitObj);
+            transaction.update(doc(db, 'units', collectionId), {
+              unitIds: arrayUnion(newUnitId),
+            });
           });
-        });
 
-        displayAlert({
-          message: `Successfully created ${unitDisplayValue}: ${unitTitle}`,
-          link: `/campaigns/${campaign?.id}/${modalState}s/${newUnitId}`,
-        });
+          displayAlert({
+            message: `Successfully created ${unitDisplayValue}: ${unitTitle}`,
+            link: `/campaigns/${campaign?.id}/${modalState}s/${newUnitId}`,
+          });
+        } catch (e: any) {
+          displayAlert({
+            message: `An error occurred while creating the ${modalState}.`,
+            isError: true,
+            errorType: e.name,
+          });
+        }
         setModalState(null);
       }
     };

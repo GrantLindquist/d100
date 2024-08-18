@@ -5,13 +5,13 @@ import { useState } from 'react';
 import { clearSession } from '@/utils/userSession';
 import { auth } from '@/utils/firebase';
 import { signOut } from 'firebase/auth';
-import { useCampaign } from '@/hooks/useCampaign';
 import { useRouter } from 'next/navigation';
+import { useAlert } from '@/hooks/useAlert';
 
 const UserButton = () => {
   const router = useRouter();
   const { user, signOutUser, setListening } = useUser();
-  const { isUserDm } = useCampaign();
+  const { displayAlert } = useAlert();
 
   const [anchor, setAnchor] = useState(null);
   const open = Boolean(anchor);
@@ -25,12 +25,20 @@ const UserButton = () => {
   };
 
   const handleSignOut = async () => {
-    handleClose();
-    signOutUser();
-    await signOut(auth);
-    await clearSession();
-    router.push('/');
-    setListening(false);
+    try {
+      handleClose();
+      signOutUser();
+      await signOut(auth);
+      await clearSession();
+      router.push('/');
+      setListening(false);
+    } catch (e: any) {
+      displayAlert({
+        message: 'An error occurred while signing out.',
+        isError: true,
+        errorType: e.name,
+      });
+    }
   };
 
   return (

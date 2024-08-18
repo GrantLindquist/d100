@@ -8,16 +8,14 @@ import { useCampaign } from '@/hooks/useCampaign';
 import { useUser } from '@/hooks/useUser';
 import { useRouter } from 'next/navigation';
 
-// TODO: Patch bug where collection information does not appear and page is blank
 export default function CollectionPage({
   params,
 }: {
   params: { collectionId: string };
 }) {
   const { user } = useUser();
-  const { campaign } = useCampaign();
+  const { campaign, currentUnit } = useCampaign();
   const router = useRouter();
-  const { currentUnit } = useCampaign();
   const [collection, setCollection] = useState<Collection | null>(null);
 
   useEffect(() => {

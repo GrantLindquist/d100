@@ -27,26 +27,34 @@ const JoinCampaignModal = () => {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (user) {
-        const campaignDocSnap = await getDoc(
-          doc(db, 'campaigns', campaignId.trim())
-        );
-        if (campaignDocSnap.exists()) {
-          await runTransaction(db, async (transaction) => {
-            transaction.update(doc(db, 'campaigns', campaignId), {
-              pendingPlayers: arrayUnion({
-                id: user.id,
-                displayName: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-              }),
+        try {
+          const campaignDocSnap = await getDoc(
+            doc(db, 'campaigns', campaignId.trim())
+          );
+          if (campaignDocSnap.exists()) {
+            await runTransaction(db, async (transaction) => {
+              transaction.update(doc(db, 'campaigns', campaignId), {
+                pendingPlayers: arrayUnion({
+                  id: user.id,
+                  displayName: user.displayName,
+                  email: user.email,
+                  photoURL: user.photoURL,
+                }),
+              });
             });
-          });
-          setOpen(false);
+            setOpen(false);
+            displayAlert({
+              message: `Request to join "${campaignDocSnap.data().title}" sent.`,
+            });
+          } else {
+            setDisplayErrorMsg(true);
+          }
+        } catch (e: any) {
           displayAlert({
-            message: `Request to join "${campaignDocSnap.data().title}" sent.`,
+            message: 'An error occurred while joining the campaign.',
+            isError: true,
+            errorType: e.name,
           });
-        } else {
-          setDisplayErrorMsg(true);
         }
       }
     };

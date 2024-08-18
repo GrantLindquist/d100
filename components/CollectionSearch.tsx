@@ -35,6 +35,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import KeyIcon from '@mui/icons-material/Key';
 import DescriptionIcon from '@mui/icons-material/Description';
+import { useAlert } from '@/hooks/useAlert';
 
 const UnitTab = (props: {
   unit: Unit;
@@ -124,6 +125,7 @@ const CollectionSearch = (props: {
   collectionId: string;
 }) => {
   const { isUserDm } = useCampaign();
+  const { displayAlert } = useAlert();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [units, setUnits] = useState<Unit[]>([]);
@@ -133,24 +135,32 @@ const CollectionSearch = (props: {
 
   useEffect(() => {
     const fetchUnits = async () => {
-      let units: Unit[] = [];
-      const chunkSize = 30;
-      const chunks = [];
-      for (let i = 0; i < props.unitIds.length; i += chunkSize) {
-        chunks.push(props.unitIds.slice(i, i + chunkSize));
-      }
+      try {
+        let units: Unit[] = [];
+        const chunkSize = 30;
+        const chunks = [];
+        for (let i = 0; i < props.unitIds.length; i += chunkSize) {
+          chunks.push(props.unitIds.slice(i, i + chunkSize));
+        }
 
-      for (const chunk of chunks) {
-        const unitQuery = query(
-          collection(db, 'units'),
-          where('id', 'in', chunk)
-        );
-        const unitQuerySnap = await getDocs(unitQuery);
-        unitQuerySnap.forEach((doc) => {
-          units.push(doc.data() as Unit);
+        for (const chunk of chunks) {
+          const unitQuery = query(
+            collection(db, 'units'),
+            where('id', 'in', chunk)
+          );
+          const unitQuerySnap = await getDocs(unitQuery);
+          unitQuerySnap.forEach((doc) => {
+            units.push(doc.data() as Unit);
+          });
+        }
+        setUnits(units);
+      } catch (e: any) {
+        displayAlert({
+          message: 'An error occurred while fetching articles.',
+          isError: true,
+          errorType: e.name,
         });
       }
-      setUnits(units);
     };
 
     props.unitIds.length > 0 ? fetchUnits() : setUnits([]);
@@ -175,12 +185,20 @@ const CollectionSearch = (props: {
   };
 
   const handleDeleteUnits = async () => {
-    setEditing(false);
-    for (let unitId of selectedUnitIds) {
-      await updateDoc(doc(db, 'units', props.collectionId), {
-        unitIds: arrayRemove(unitId),
+    try {
+      for (let unitId of selectedUnitIds) {
+        await updateDoc(doc(db, 'units', props.collectionId), {
+          unitIds: arrayRemove(unitId),
+        });
+      }
+    } catch (e: any) {
+      displayAlert({
+        message: 'An error occurred while deleting articles.',
+        isError: true,
+        errorType: e.name,
       });
     }
+    setEditing(false);
   };
 
   return (

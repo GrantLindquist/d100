@@ -42,18 +42,26 @@ const PlayerList = (props: { players: UserBase[] }) => {
 
   const handleKickPlayer = async () => {
     if (campaign && hoveredPlayer) {
-      setAnchor(null);
-      await runTransaction(db, async (transaction) => {
-        transaction.update(doc(db, 'campaigns', campaign.id), {
-          players: arrayRemove(hoveredPlayer),
+      try {
+        setAnchor(null);
+        await runTransaction(db, async (transaction) => {
+          transaction.update(doc(db, 'campaigns', campaign.id), {
+            players: arrayRemove(hoveredPlayer),
+          });
+          transaction.update(doc(db, 'users', hoveredPlayer.id), {
+            campaignIds: arrayRemove(campaign.id),
+          });
         });
-        transaction.update(doc(db, 'users', hoveredPlayer.id), {
-          campaignIds: arrayRemove(campaign.id),
+        displayAlert({
+          message: `${hoveredPlayer.displayName} was kicked from the campaign.`,
         });
-      });
-      displayAlert({
-        message: `${hoveredPlayer.displayName} was kicked from the campaign.`,
-      });
+      } catch (e: any) {
+        displayAlert({
+          message: `An error occurred while kicking ${hoveredPlayer.displayName}.`,
+          isError: true,
+          errorType: e.name,
+        });
+      }
     }
   };
 

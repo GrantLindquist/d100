@@ -33,6 +33,7 @@ import { useCampaign } from '@/hooks/useCampaign';
 import ImageList from '@/components/content/ImageList';
 import LootTable from '@/components/content/LootTable';
 import AddIcon from '@mui/icons-material/Add';
+import { useAlert } from '@/hooks/useAlert';
 
 const Section = (props: { section: SectionType }) => {
   return (
@@ -86,17 +87,17 @@ const EditableSection = (props: { section: SectionType }) => {
   );
 };
 
-// TODO: Last section is deleted instead of selected section
 export const PageContent = () => {
   const [content, setContent] = useState<Article | Quest | null>(null);
   const [isEditing, setEditing] = useState<boolean>(false);
-  const focusedSectionId = useRef<string | null>(null);
+  const [focusedSectionId, setFocusedSectionId] = useState<string | null>(null);
 
   const sectionsFormRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { user } = useUser();
   const { campaign, currentUnit } = useCampaign();
+  const { displayAlert } = useAlert();
 
   const [anchor, setAnchor] = useState(null);
   const addMenuOpen = Boolean(anchor);
@@ -121,35 +122,44 @@ export const PageContent = () => {
     event.preventDefault();
 
     if (content) {
-      const formData = new FormData(event.currentTarget);
-      const sectionsData = content.sections
-        .map((section) => {
-          const title = formData.get(`title-${section.id}`) as string;
-          const body = formData.get(`body-${section.id}`) as string;
+      try {
+        const formData = new FormData(event.currentTarget);
+        const sectionsData = content.sections
+          .map((section) => {
+            const title = formData.get(`title-${section.id}`) as string;
+            const body = formData.get(`body-${section.id}`) as string;
 
-          if (title.trim()) {
-            return {
-              id: section.id,
-              isHeader: section.isHeader || false,
-              authorId: section.authorId || '',
-              title,
-              body,
-            } as SectionType;
-          }
-          return null;
-        })
-        .filter((section): section is SectionType => section !== null);
+            if (title.trim()) {
+              return {
+                id: section.id,
+                isHeader: section.isHeader || false,
+                authorId: section.authorId || '',
+                title,
+                body,
+              } as SectionType;
+            }
+            return null;
+          })
+          .filter((section): section is SectionType => section !== null);
 
-      const newArticle = {
-        ...content,
-        sections: sectionsData,
-      };
-      setContent(newArticle);
-      isEditing && setEditing(false);
+        const newArticle = {
+          ...content,
+          sections: sectionsData,
+        };
+        setContent(newArticle);
+        setFocusedSectionId(null);
+        isEditing && setEditing(false);
 
-      await updateDoc(doc(db, 'units', content.id), {
-        sections: sectionsData,
-      });
+        await updateDoc(doc(db, 'units', content.id), {
+          sections: sectionsData,
+        });
+      } catch (e: any) {
+        displayAlert({
+          message: 'An error occurred while saving the article.',
+          isError: true,
+          errorType: e.name,
+        });
+      }
     }
   };
 
@@ -162,36 +172,52 @@ export const PageContent = () => {
 
   const handleDeleteImage = async (index: number) => {
     if (content) {
-      const imageUrl = content.imageUrls[index];
-      const newArticle = {
-        ...content,
-        imageUrls: content.imageUrls.filter((url) => url !== imageUrl),
-      };
-      setContent(newArticle);
+      try {
+        const imageUrl = content.imageUrls[index];
+        const newArticle = {
+          ...content,
+          imageUrls: content.imageUrls.filter((url) => url !== imageUrl),
+        };
+        setContent(newArticle);
 
-      await updateDoc(doc(db, 'units', content.id), {
-        imageUrls: arrayRemove(imageUrl),
-      });
-      await deleteObject(ref(storage, imageUrl));
+        await updateDoc(doc(db, 'units', content.id), {
+          imageUrls: arrayRemove(imageUrl),
+        });
+        await deleteObject(ref(storage, imageUrl));
+      } catch (e: any) {
+        displayAlert({
+          message: 'An error occurred while deleting the image.',
+          isError: true,
+          errorType: e.name,
+        });
+      }
     }
   };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (content && campaign) {
-      const files = event.target.files;
-      if (files) {
-        for (let file of files) {
-          const imageId = file.name + '-' + generateUUID();
-          const imageRef = ref(
-            storage,
-            `${campaign.title}-${campaign.id}/${imageId}`
-          );
-          await uploadBytes(imageRef, file);
-          const fileUrl = await getDownloadURL(imageRef);
-          await updateDoc(doc(db, 'units', content.id), {
-            imageUrls: arrayUnion(fileUrl),
-          });
+      try {
+        const files = event.target.files;
+        if (files) {
+          for (let file of files) {
+            const imageId = file.name + '-' + generateUUID();
+            const imageRef = ref(
+              storage,
+              `${campaign.title}-${campaign.id}/${imageId}`
+            );
+            await uploadBytes(imageRef, file);
+            const fileUrl = await getDownloadURL(imageRef);
+            await updateDoc(doc(db, 'units', content.id), {
+              imageUrls: arrayUnion(fileUrl),
+            });
+          }
         }
+      } catch (e: any) {
+        displayAlert({
+          message: 'An error occurred while uploading files.',
+          isError: true,
+          errorType: e.name,
+        });
       }
     }
   };
@@ -215,20 +241,29 @@ export const PageContent = () => {
     }
   };
 
+  // TODO: This is updated correctly in firebase, but not in state ??? but it also is ??? WTF
   const handleDeleteSection = async () => {
     if (content) {
-      const newSections = [...content.sections].filter(
-        (a) => a.id !== focusedSectionId.current
-      );
-      const newArticle = {
-        ...content,
-        sections: newSections,
-      };
-      await updateDoc(doc(db, 'units', content.id), {
-        sections: newSections,
-      });
-      focusedSectionId.current = null;
-      setContent(newArticle);
+      try {
+        const newSections = [...content.sections].filter(
+          (a) => a.id !== focusedSectionId
+        );
+        const newArticle = {
+          ...content,
+          sections: newSections,
+        };
+        await updateDoc(doc(db, 'units', content.id), {
+          sections: newSections,
+        });
+        setContent(newArticle);
+        setFocusedSectionId(null);
+      } catch (e: any) {
+        displayAlert({
+          message: 'An error occurred while deleting the section.',
+          isError: true,
+          errorType: e.name,
+        });
+      }
     }
   };
 
@@ -257,9 +292,9 @@ export const PageContent = () => {
                   {content.sections.map((section, index) => (
                     <div key={index} style={{ paddingBottom: '28px' }}>
                       <Box
-                        onFocus={() => {
+                        onClick={() => {
                           if (!section.isHeader) {
-                            focusedSectionId.current = section.id;
+                            setFocusedSectionId(section.id);
                           }
                         }}
                         sx={

@@ -25,7 +25,6 @@ const UserContext = createContext<{
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  // TODO: Figure out a better way to do this
   const [listening, setListening] = useState<boolean>(false);
 
   useEffect(() => {

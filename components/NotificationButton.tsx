@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import BellIcon from '@mui/icons-material/Notifications';
 import { UserBase } from '@/types/User';
+import { useAlert } from '@/hooks/useAlert';
 
 interface Notification {
   message: string;
@@ -31,26 +32,43 @@ const PendingPlayerAction = (props: {
   campaignId: string;
   player: UserBase;
 }) => {
+  const { displayAlert } = useAlert();
   const campaignDoc = doc(db, 'campaigns', props.campaignId);
 
   const handleAcceptPlayer = async () => {
-    await runTransaction(db, async (transaction) => {
-      transaction.update(campaignDoc, {
-        pendingPlayers: arrayRemove(props.player),
+    try {
+      await runTransaction(db, async (transaction) => {
+        transaction.update(campaignDoc, {
+          pendingPlayers: arrayRemove(props.player),
+        });
+        transaction.update(campaignDoc, {
+          players: arrayUnion(props.player),
+        });
+        transaction.update(doc(db, 'users', props.player.id), {
+          campaignIds: arrayUnion(props.campaignId),
+        });
       });
-      transaction.update(campaignDoc, {
-        players: arrayUnion(props.player),
+    } catch (e: any) {
+      displayAlert({
+        message: `An error occurred while accepting the player.`,
+        isError: true,
+        errorType: e.name,
       });
-      transaction.update(doc(db, 'users', props.player.id), {
-        campaignIds: arrayUnion(props.campaignId),
-      });
-    });
+    }
   };
 
   const handleDenyPlayer = async () => {
-    await updateDoc(campaignDoc, {
-      pendingPlayers: arrayRemove(props.player),
-    });
+    try {
+      await updateDoc(campaignDoc, {
+        pendingPlayers: arrayRemove(props.player),
+      });
+    } catch (e: any) {
+      displayAlert({
+        message: `An error occurred while denying the player.`,
+        isError: true,
+        errorType: e.name,
+      });
+    }
   };
 
   return (
@@ -68,6 +86,7 @@ const PendingPlayerAction = (props: {
 
 const NotificationButton = () => {
   const { campaign } = useCampaign();
+  const { displayAlert } = useAlert();
 
   const [anchor, setAnchor] = useState(null);
   const open = Boolean(anchor);
@@ -76,28 +95,36 @@ const NotificationButton = () => {
 
   useEffect(() => {
     if (campaign) {
-      const unsubscribe = onSnapshot(
-        doc(db, 'campaigns', campaign.id),
-        (campaignDocSnap) => {
-          let notificationData: Notification[] = [];
-          if (campaignDocSnap.exists()) {
-            for (let player of campaignDocSnap.data().pendingPlayers) {
-              notificationData.push({
-                message: `${player.displayName} has requested to join your campaign.`,
-                action: (
-                  <PendingPlayerAction
-                    campaignId={campaign.id}
-                    player={player}
-                  />
-                ),
-              });
+      try {
+        const unsubscribe = onSnapshot(
+          doc(db, 'campaigns', campaign.id),
+          (campaignDocSnap) => {
+            let notificationData: Notification[] = [];
+            if (campaignDocSnap.exists()) {
+              for (let player of campaignDocSnap.data().pendingPlayers) {
+                notificationData.push({
+                  message: `${player.displayName} has requested to join your campaign.`,
+                  action: (
+                    <PendingPlayerAction
+                      campaignId={campaign.id}
+                      player={player}
+                    />
+                  ),
+                });
+              }
+              setNotifications(notificationData);
             }
-            setNotifications(notificationData);
           }
-        }
-      );
+        );
 
-      return () => unsubscribe();
+        return () => unsubscribe();
+      } catch (e: any) {
+        displayAlert({
+          message: `An error occurred while loading notifications.`,
+          isError: true,
+          errorType: e.name,
+        });
+      }
     }
   }, [campaign?.id]);
 

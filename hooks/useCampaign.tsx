@@ -72,7 +72,7 @@ export const CampaignProvider = ({ children }: { children: ReactNode }) => {
         unsubscribe();
       };
     }
-  }, [currentUnitId]);
+  }, [campaignId, currentUnitId]);
 
   return (
     <CampaignContext.Provider

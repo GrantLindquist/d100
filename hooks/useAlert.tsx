@@ -6,13 +6,14 @@ import {
   useContext,
   useState,
 } from 'react';
-import { Button, Snackbar } from '@mui/material';
+import { Box, Button, Snackbar, Stack, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
 interface Alert {
   message: string;
   link?: string;
   isError?: boolean;
+  errorType?: string;
 }
 
 const AlertContext = createContext<{
@@ -45,21 +46,37 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
     router.push(link);
   };
 
+  // TODO: Entire app needs a style overhaul
   return (
     <AlertContext.Provider value={{ displayAlert }}>
-      <Snackbar
-        open={open}
-        autoHideDuration={3000}
-        onClose={handleClose}
-        message={alert.message}
-        action={
-          alert.link && (
-            <Button onClick={() => handleNavigate(alert.link ?? '')}>
-              Open
-            </Button>
-          )
-        }
-      />
+      <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+        <Box
+          sx={{
+            width: 500,
+            backgroundColor: 'black',
+            borderRadius: '5px',
+            ...(alert.isError
+              ? {
+                  borderLeft: '8px solid red',
+                }
+              : {}),
+          }}
+        >
+          <Box p={1}>
+            <Stack direction={'row'}>
+              <Typography>{alert.message}</Typography>
+              {alert.link && (
+                <Button onClick={() => handleNavigate(alert.link ?? '')}>
+                  Open
+                </Button>
+              )}
+            </Stack>
+            {alert.errorType && (
+              <Typography sx={{ color: 'grey' }}>{alert.errorType}</Typography>
+            )}
+          </Box>
+        </Box>
+      </Snackbar>
       {children}
     </AlertContext.Provider>
   );
