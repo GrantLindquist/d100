@@ -39,7 +39,7 @@ export interface Section {
 
 export interface Breadcrumb {
   url: string;
-  title: string;
+  unitId: string;
 }
 
 export interface Loot {

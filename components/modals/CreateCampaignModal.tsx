@@ -54,7 +54,7 @@ const CreateCampaignModal = () => {
             type: 'collection',
             breadcrumbs: [
               {
-                title: campaignTitle,
+                unitId: baseCollectionId,
                 url: `/campaigns/${newCampaignId}/collections/${baseCollectionId}`,
               },
             ],

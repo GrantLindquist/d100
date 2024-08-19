@@ -65,7 +65,7 @@ const CreateUnitModal = () => {
       if (currentUnit?.type === 'collection' && campaign) {
         let breadcrumbs = currentUnit.breadcrumbs;
         breadcrumbs.push({
-          title: unitTitle,
+          unitId: newUnitId,
           url: `/campaigns/${campaign.id}/${modalState}s/${newUnitId}`,
         });
         return breadcrumbs;

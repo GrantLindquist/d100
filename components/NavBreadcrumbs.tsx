@@ -2,9 +2,29 @@
 import { Breadcrumbs, Typography } from '@mui/material';
 import { useCampaign } from '@/hooks/useCampaign';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import db from '@/utils/firebase';
+import { doc, getDoc } from '@firebase/firestore';
 
 const NavBreadcrumbs = () => {
   const { currentUnit } = useCampaign();
+  const [crumbTitles, setCrumbTitles] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchCrumbTitles = async () => {
+      if (currentUnit) {
+        let titles = [];
+        for (let crumb of currentUnit.breadcrumbs) {
+          const unitDocSnap = await getDoc(doc(db, 'units', crumb.unitId));
+          if (unitDocSnap.exists()) {
+            titles.push(unitDocSnap.data().title);
+          }
+        }
+        setCrumbTitles(titles);
+      }
+    };
+    fetchCrumbTitles();
+  }, [currentUnit?.id]);
 
   return (
     <>
@@ -14,7 +34,7 @@ const NavBreadcrumbs = () => {
             if (index < currentUnit.breadcrumbs.length - 1) {
               return (
                 <Link key={index} href={breadcrumb.url}>
-                  {breadcrumb.title}
+                  {crumbTitles[index] ?? breadcrumb.url}
                 </Link>
               );
             } else {
