@@ -6,6 +6,7 @@ import {
   Modal,
   Stack,
   TextField,
+  Tooltip,
 } from '@mui/material';
 import { MODAL_STYLE } from '@/utils/globals';
 import { FormEvent, useState } from 'react';
@@ -14,6 +15,7 @@ import db from '@/utils/firebase';
 import { useUser } from '@/hooks/useUser';
 import LoginIcon from '@mui/icons-material/Login';
 import { useAlert } from '@/hooks/useAlert';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 const JoinCampaignModal = () => {
   const [open, setOpen] = useState(false);
@@ -22,39 +24,43 @@ const JoinCampaignModal = () => {
     const { user } = useUser();
     const { displayAlert } = useAlert();
     const [campaignId, setCampaignId] = useState('');
-    const [displayErrorMsg, setDisplayErrorMsg] = useState(false);
+    const [displayErrorMsg, setDisplayErrorMsg] = useState<string | null>(null);
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (user) {
-        try {
-          const campaignDocSnap = await getDoc(
-            doc(db, 'campaigns', campaignId.trim())
-          );
-          if (campaignDocSnap.exists()) {
-            await runTransaction(db, async (transaction) => {
-              transaction.update(doc(db, 'campaigns', campaignId), {
-                pendingPlayers: arrayUnion({
-                  id: user.id,
-                  displayName: user.displayName,
-                  email: user.email,
-                  photoURL: user.photoURL,
-                }),
+        if (!user.campaignIds.includes(campaignId)) {
+          try {
+            const campaignDocSnap = await getDoc(
+              doc(db, 'campaigns', campaignId.trim())
+            );
+            if (campaignDocSnap.exists()) {
+              await runTransaction(db, async (transaction) => {
+                transaction.update(doc(db, 'campaigns', campaignId), {
+                  pendingPlayers: arrayUnion({
+                    id: user.id,
+                    displayName: user.displayName,
+                    email: user.email,
+                    photoURL: user.photoURL,
+                  }),
+                });
               });
-            });
-            setOpen(false);
+              setOpen(false);
+              displayAlert({
+                message: `Request to join "${campaignDocSnap.data().title}" sent.`,
+              });
+            } else {
+              setDisplayErrorMsg('There is no existing campaign of this ID');
+            }
+          } catch (e: any) {
             displayAlert({
-              message: `Request to join "${campaignDocSnap.data().title}" sent.`,
+              message: 'An error occurred while joining the campaign.',
+              isError: true,
+              errorType: e.name,
             });
-          } else {
-            setDisplayErrorMsg(true);
           }
-        } catch (e: any) {
-          displayAlert({
-            message: 'An error occurred while joining the campaign.',
-            isError: true,
-            errorType: e.name,
-          });
+        } else {
+          setDisplayErrorMsg('You are already a member of this campaign.');
         }
       }
     };
@@ -69,18 +75,24 @@ const JoinCampaignModal = () => {
       <>
         <form onSubmit={handleSubmit}>
           <Stack direction={'column'} spacing={1}>
-            <InputLabel>Campaign ID</InputLabel>
+            <Stack direction={'row'} spacing={1} alignItems={'center'}>
+              <InputLabel>Campaign ID</InputLabel>
+              <Tooltip
+                title={`A campaign's ID can be found by accessing Settings > Invite Players inside a campaign.`}
+                placement={'top'}
+              >
+                <InfoOutlinedIcon
+                  sx={{ color: 'grey', height: 20, width: 20 }}
+                />
+              </Tooltip>
+            </Stack>
             <TextField
               variant={'outlined'}
               size={'small'}
               fullWidth
               onChange={handleInputChange}
-              error={displayErrorMsg}
-              helperText={
-                displayErrorMsg
-                  ? 'There is no existing campaign with this ID.'
-                  : ''
-              }
+              error={Boolean(displayErrorMsg)}
+              helperText={displayErrorMsg}
             />
             <Button type={'submit'}>Join Campaign</Button>
           </Stack>

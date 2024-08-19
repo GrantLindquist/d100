@@ -8,7 +8,7 @@ import {
   TextField,
 } from '@mui/material';
 import { MODAL_STYLE } from '@/utils/globals';
-import { FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import { generateUUID } from '@/utils/uuid';
 import { Campaign } from '@/types/Campaign';
@@ -85,8 +85,7 @@ const CreateCampaignModal = () => {
       }
     };
 
-    const handleInputChange = (event: Object) => {
-      // @ts-ignore
+    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value;
       setCampaignTitle(value);
     };
@@ -101,7 +100,9 @@ const CreateCampaignModal = () => {
             fullWidth
             onChange={handleInputChange}
           />
-          <Button type={'submit'}>Create new Campaign</Button>
+          <Button type={'submit'} disabled={!campaignTitle.trim()}>
+            Create new Campaign
+          </Button>
         </Stack>
       </form>
     );

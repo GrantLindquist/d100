@@ -7,6 +7,7 @@ import {
   MenuItem,
   Paper,
   Stack,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -87,6 +88,7 @@ const PlayerList = (props: { players: UserBase[] }) => {
                 }}
               />
               <Typography flexGrow={1}>{player.displayName}</Typography>
+
               <IconButton
                 disabled={player.id !== hoveredPlayer?.id}
                 disableRipple
@@ -105,6 +107,7 @@ const PlayerList = (props: { players: UserBase[] }) => {
                   />
                 )}
               </IconButton>
+
               <Menu
                 anchorEl={anchor}
                 open={open}
@@ -164,9 +167,11 @@ const SettingsButton = () => {
 
   return (
     <>
-      <IconButton onClick={handleClick}>
-        <SettingsIcon />
-      </IconButton>
+      <Tooltip title={'Settings'}>
+        <IconButton onClick={handleClick}>
+          <SettingsIcon />
+        </IconButton>
+      </Tooltip>
       <Menu
         anchorEl={anchor}
         open={open}

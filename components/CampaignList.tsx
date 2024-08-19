@@ -1,6 +1,16 @@
 'use client';
-import { Box, Card, Grid, Skeleton, Stack, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import {
+  Box,
+  Card,
+  Grid,
+  IconButton,
+  Menu,
+  MenuItem,
+  Skeleton,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { memo, useEffect, useState } from 'react';
 import { Campaign } from '@/types/Campaign';
 import { useUser } from '@/hooks/useUser';
 import { doc, onSnapshot } from '@firebase/firestore';
@@ -8,11 +18,19 @@ import db from '@/utils/firebase';
 import { useRouter } from 'next/navigation';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import PlayerAvatarList from '@/components/PlayerAvatarList';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CampaignActionsModal from '@/components/modals/CampaignActionsModal';
 
-const CampaignTab = (props: { campaignId: string }) => {
+const CampaignTab = (props: {
+  campaignId: string;
+  displayActions: boolean;
+}) => {
   const router = useRouter();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
+  const [modalState, setModalState] = useState<'edit' | 'delete' | null>(null);
+
+  const [anchor, setAnchor] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -30,13 +48,20 @@ const CampaignTab = (props: { campaignId: string }) => {
     return () => unsubscribe();
   }, [props.campaignId]);
 
+  const handleClick = (event: any) => {
+    event.stopPropagation();
+    setAnchor(event.currentTarget);
+  };
+
   if (!loading && !campaign) {
     return null;
   }
+
   return (
     <div
       onClick={() =>
         campaign &&
+        !anchor &&
         router.push(
           `campaigns/${props.campaignId}/collections/${campaign.baseCollectionId}`
         )
@@ -60,14 +85,54 @@ const CampaignTab = (props: { campaignId: string }) => {
           ) : (
             <>
               {campaign && (
-                <>
-                  <Typography variant={'h6'} fontWeight={BOLD_FONT_WEIGHT}>
-                    {campaign.title}
-                  </Typography>
-                  <Stack direction={'row'} spacing={2}>
+                <Stack direction={'row'}>
+                  <Box flexGrow={1}>
+                    <Typography variant={'h6'} fontWeight={BOLD_FONT_WEIGHT}>
+                      {campaign.title}
+                    </Typography>
                     <PlayerAvatarList players={campaign.players} />
-                  </Stack>
-                </>
+                  </Box>
+                  {(props.displayActions || anchor) && (
+                    <IconButton
+                      onClick={handleClick}
+                      disableRipple
+                      disableFocusRipple
+                      sx={{
+                        paddingRight: 0,
+                        width: '10%',
+                      }}
+                    >
+                      <MoreVertIcon
+                        sx={{
+                          width: 20,
+                          height: 20,
+                        }}
+                      />
+                    </IconButton>
+                  )}
+                  <Menu
+                    anchorEl={anchor}
+                    open={Boolean(anchor)}
+                    onClose={() => setAnchor(null)}
+                    transformOrigin={{ horizontal: 'center', vertical: 'top' }}
+                    anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+                  >
+                    <MenuItem onClick={() => setModalState('edit')}>
+                      Edit
+                    </MenuItem>
+                    <MenuItem onClick={() => setModalState('delete')}>
+                      Delete
+                    </MenuItem>
+                  </Menu>
+                  <CampaignActionsModal
+                    campaign={campaign}
+                    modalState={modalState}
+                    handleClose={() => {
+                      setModalState(null);
+                      setAnchor(null);
+                    }}
+                  />
+                </Stack>
               )}
             </>
           )}
@@ -77,8 +142,18 @@ const CampaignTab = (props: { campaignId: string }) => {
   );
 };
 
+const CampaignTabMemo = memo(CampaignTab, (prevProps, nextProps) => {
+  return (
+    prevProps.campaignId === nextProps.campaignId &&
+    prevProps.displayActions === nextProps.displayActions
+  );
+});
+
 const CampaignList = () => {
   const { user } = useUser();
+  const [hoveredCampaignId, setHoveredCampaignId] = useState<string | null>(
+    null
+  );
 
   if (user) {
     return (
@@ -88,14 +163,19 @@ const CampaignList = () => {
         </Typography>
 
         <Grid container spacing={2}>
-          {user.campaignIds.map((id) => (
+          {user.campaignIds.map((id, index) => (
             <Grid
               item
-              md={user.campaignIds.length <= 1 ? 12 : 6}
+              key={index}
               xs={12}
-              key={id}
+              md={user.campaignIds.length <= 1 ? 12 : 6}
+              onMouseEnter={() => setHoveredCampaignId(id)}
+              onMouseLeave={() => setHoveredCampaignId(null)}
             >
-              <CampaignTab campaignId={id} />
+              <CampaignTabMemo
+                campaignId={id}
+                displayActions={id === hoveredCampaignId}
+              />
             </Grid>
           ))}
         </Grid>

@@ -17,6 +17,7 @@ import {
   IconButton,
   Menu,
   Stack,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import BellIcon from '@mui/icons-material/Notifications';
@@ -139,9 +140,11 @@ const NotificationButton = () => {
         overlap={'circular'}
         color={'primary'}
       >
-        <IconButton onClick={handleClick}>
-          <BellIcon />
-        </IconButton>
+        <Tooltip title={'Notifications'}>
+          <IconButton onClick={handleClick}>
+            <BellIcon />
+          </IconButton>
+        </Tooltip>
       </Badge>
       <Menu
         anchorEl={anchor}
