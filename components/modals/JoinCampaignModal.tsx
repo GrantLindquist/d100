@@ -8,7 +8,7 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material';
-import { MODAL_STYLE } from '@/utils/globals';
+import { MODAL_STYLE, PLAYER_INVITATIONS_FEATURE_FLAG } from '@/utils/globals';
 import { FormEvent, useState } from 'react';
 import { arrayUnion, doc, getDoc, runTransaction } from '@firebase/firestore';
 import db from '@/utils/firebase';
@@ -29,21 +29,27 @@ const JoinCampaignModal = () => {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (user) {
-        if (!user.campaignIds.includes(campaignId)) {
+        const id = campaignId.trim();
+        if (!user.campaignIds.includes(id)) {
           try {
-            const campaignDocSnap = await getDoc(
-              doc(db, 'campaigns', campaignId.trim())
-            );
+            const campaignDocSnap = await getDoc(doc(db, 'campaigns', id));
             if (campaignDocSnap.exists()) {
               await runTransaction(db, async (transaction) => {
-                transaction.update(doc(db, 'campaigns', campaignId), {
-                  pendingPlayers: arrayUnion({
+                transaction.update(doc(db, 'campaigns', id), {
+                  [PLAYER_INVITATIONS_FEATURE_FLAG
+                    ? 'pendingPlayers'
+                    : 'players']: arrayUnion({
                     id: user.id,
                     displayName: user.displayName,
                     email: user.email,
                     photoURL: user.photoURL,
                   }),
                 });
+                if (!PLAYER_INVITATIONS_FEATURE_FLAG) {
+                  transaction.update(doc(db, 'users', user.id), {
+                    campaignIds: arrayUnion(id),
+                  });
+                }
               });
               setOpen(false);
               displayAlert({

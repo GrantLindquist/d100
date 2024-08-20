@@ -8,6 +8,7 @@ import {
   Grid,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 
@@ -36,6 +37,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import KeyIcon from '@mui/icons-material/Key';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { useAlert } from '@/hooks/useAlert';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 const UnitTab = (props: {
   unit: Unit;
@@ -92,7 +94,14 @@ const UnitTab = (props: {
           }}
         >
           <Stack direction={'row'} spacing={1} flexGrow={1}>
-            {props.icon}
+            <Stack direction={'column'}>
+              {props.icon}
+              {props.unit.hidden && (
+                <Tooltip title={'Hidden from players'}>
+                  <VisibilityOffIcon sx={{ color: 'grey' }} />
+                </Tooltip>
+              )}
+            </Stack>
             <Stack direction={'column'}>
               <Typography fontWeight={BOLD_FONT_WEIGHT}>
                 {props.unit.title}
@@ -191,6 +200,9 @@ const CollectionSearch = (props: {
           unitIds: arrayRemove(unitId),
         });
       }
+      displayAlert({
+        message: `Successfully deleted ${selectedUnitIds.length} item${selectedUnitIds.length > 1 ? 's' : ''}`,
+      });
     } catch (e: any) {
       displayAlert({
         message: 'An error occurred while deleting articles.',
@@ -285,24 +297,40 @@ const CollectionSearch = (props: {
             }}
           >
             {!isEditing ? (
-              <Fab size="small" onClick={() => setEditing(true)}>
-                <EditIcon />
-              </Fab>
+              <Tooltip title={'Edit Items'} placement={'left'}>
+                <Fab size="small" onClick={() => setEditing(true)}>
+                  <EditIcon />
+                </Fab>
+              </Tooltip>
             ) : (
               <>
-                <Fab size="small" onClick={() => setEditing(false)}>
-                  <CheckIcon />
-                </Fab>
-                <Fab size="small" disabled onClick={() => setEditing(false)}>
-                  <DriveFileMoveIcon />
-                </Fab>
-                <Fab
-                  size="small"
-                  disabled={selectedUnitIds.length === 0}
-                  onClick={handleDeleteUnits}
-                >
-                  <DeleteIcon />
-                </Fab>
+                <Tooltip title={'Save Changes'} placement={'left'}>
+                  <Fab size="small" onClick={() => setEditing(false)}>
+                    <CheckIcon />
+                  </Fab>
+                </Tooltip>
+                <Tooltip title={'Move Items'} placement={'left'}>
+                  <span>
+                    <Fab
+                      size="small"
+                      disabled
+                      onClick={() => setEditing(false)}
+                    >
+                      <DriveFileMoveIcon />
+                    </Fab>
+                  </span>
+                </Tooltip>
+                <Tooltip title={'Delete Items'} placement={'left'}>
+                  <span>
+                    <Fab
+                      size="small"
+                      disabled={selectedUnitIds.length === 0}
+                      onClick={handleDeleteUnits}
+                    >
+                      <DeleteIcon />
+                    </Fab>
+                  </span>
+                </Tooltip>
               </>
             )}
           </Stack>

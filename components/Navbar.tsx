@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
 import NotificationButton from '@/components/NotificationButton';
 
+// TODO: "Leave Campaign" option - maybe in user button?
 const Navbar = () => {
   const { campaign, isUserDm } = useCampaign();
   const pathname = usePathname();

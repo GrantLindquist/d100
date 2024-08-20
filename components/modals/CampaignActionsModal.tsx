@@ -24,7 +24,6 @@ import {
 import db from '@/utils/firebase';
 import { useUser } from '@/hooks/useUser';
 
-// TODO: How do I update the breadcrumbs?
 const EditCampaignForm = (props: {
   campaign: Campaign;
   handleClose: Function;

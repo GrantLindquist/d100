@@ -20,12 +20,16 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import PlayerAvatarList from '@/components/PlayerAvatarList';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CampaignActionsModal from '@/components/modals/CampaignActionsModal';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 const CampaignTab = (props: {
   campaignId: string;
   displayActions: boolean;
 }) => {
   const router = useRouter();
+  const { user } = useUser();
+
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [modalState, setModalState] = useState<'edit' | 'delete' | null>(null);
@@ -117,11 +121,19 @@ const CampaignTab = (props: {
                     transformOrigin={{ horizontal: 'center', vertical: 'top' }}
                     anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
                   >
-                    <MenuItem onClick={() => setModalState('edit')}>
-                      Edit
+                    <MenuItem
+                      disabled={user?.id !== campaign.dmId}
+                      onClick={() => setModalState('edit')}
+                    >
+                      <EditIcon sx={{ width: 20, height: 20 }} />
+                      &nbsp; Edit
                     </MenuItem>
-                    <MenuItem onClick={() => setModalState('delete')}>
-                      Delete
+                    <MenuItem
+                      disabled={user?.id !== campaign.dmId}
+                      onClick={() => setModalState('delete')}
+                    >
+                      <DeleteIcon sx={{ width: 20, height: 20 }} />
+                      &nbsp; Delete
                     </MenuItem>
                   </Menu>
                   <CampaignActionsModal
@@ -161,7 +173,6 @@ const CampaignList = () => {
         <Typography align={'center'} variant={'h3'}>
           Your Campaigns
         </Typography>
-
         <Grid container spacing={2}>
           {user.campaignIds.map((id, index) => (
             <Grid

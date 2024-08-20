@@ -30,6 +30,9 @@ import { MODAL_STYLE } from '@/utils/globals';
 import { useCampaign } from '@/hooks/useCampaign';
 import { useUser } from '@/hooks/useUser';
 import { useAlert } from '@/hooks/useAlert';
+import DescriptionIcon from '@mui/icons-material/Description';
+import KeyIcon from '@mui/icons-material/Key';
+import FolderIcon from '@mui/icons-material/Folder';
 
 const CreateUnitModal = () => {
   const { isUserDm, currentUnit } = useCampaign();
@@ -178,14 +181,17 @@ const CreateUnitModal = () => {
         <AddIcon />
       </IconButton>
       <Menu anchorEl={menuAnchor} open={menuOpen} onClose={handleCloseMenu}>
-        <MenuItem onClick={() => setModalState('article')}>
-          Create new Article
-        </MenuItem>
         <MenuItem onClick={() => setModalState('quest')}>
-          Create new Quest
+          <KeyIcon sx={{ width: 20, height: 20 }} />
+          &nbsp; Create new Quest
+        </MenuItem>
+        <MenuItem onClick={() => setModalState('article')}>
+          <DescriptionIcon sx={{ width: 20, height: 20 }} />
+          &nbsp; Create new Article
         </MenuItem>
         <MenuItem onClick={() => setModalState('collection')}>
-          Create new Sub-Collection
+          <FolderIcon sx={{ width: 20, height: 20 }} />
+          &nbsp; Create new Sub-Collection
         </MenuItem>
       </Menu>
       <Modal open={Boolean(modalState)} onClose={() => setModalState(null)}>

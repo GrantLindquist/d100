@@ -7,6 +7,7 @@ import { auth } from '@/utils/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useAlert } from '@/hooks/useAlert';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 const UserButton = () => {
   const router = useRouter();
@@ -56,7 +57,10 @@ const UserButton = () => {
         {user?.displayName}
       </Button>
       <Menu anchorEl={anchor} open={open} onClose={handleClose}>
-        <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
+        <MenuItem onClick={handleSignOut}>
+          <LogoutIcon sx={{ width: 20, height: 20 }} />
+          &nbsp; Sign out
+        </MenuItem>
       </Menu>
     </>
   );

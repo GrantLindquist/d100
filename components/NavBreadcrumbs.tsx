@@ -34,7 +34,7 @@ const NavBreadcrumbs = () => {
             if (index < currentUnit.breadcrumbs.length - 1) {
               return (
                 <Link key={index} href={breadcrumb.url}>
-                  {crumbTitles[index] ?? breadcrumb.url}
+                  {crumbTitles[index] ?? '-'}
                 </Link>
               );
             } else {

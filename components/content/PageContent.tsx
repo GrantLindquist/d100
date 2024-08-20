@@ -1,16 +1,17 @@
 'use client';
 
 import {
+  Avatar,
   Box,
   Button,
   Container,
   Divider,
   Fab,
+  Fade,
   Grid,
-  Menu,
-  MenuItem,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { Article, Quest, Section as SectionType } from '@/types/Unit';
@@ -34,19 +35,45 @@ import ImageList from '@/components/content/ImageList';
 import LootTable from '@/components/content/LootTable';
 import AddIcon from '@mui/icons-material/Add';
 import { useAlert } from '@/hooks/useAlert';
+import { UserBase } from '@/types/User';
 
-const Section = (props: { section: SectionType }) => {
+const Section = (props: { section: SectionType; author: UserBase | null }) => {
+  const [displayAuthor, setDisplayAuthor] = useState(false);
   return (
-    <Stack spacing={2} id={props.section.title}>
-      <Typography variant={props.section.isHeader ? 'h2' : 'h4'}>
-        {props.section.title}
-      </Typography>
-      <Typography>{props.section.body}</Typography>
+    <Stack
+      direction={'row'}
+      onMouseEnter={() => setDisplayAuthor(true)}
+      onMouseLeave={() => setDisplayAuthor(false)}
+    >
+      <Stack spacing={2} id={props.section.title} flexGrow={1}>
+        <Typography variant={props.section.isHeader ? 'h2' : 'h4'}>
+          {props.section.title}
+        </Typography>
+        <Typography>{props.section.body}</Typography>
+      </Stack>
+      {props.author && (
+        <Tooltip title={`Author: ${props.author.displayName}`}>
+          <Fade in={displayAuthor}>
+            <Avatar
+              src={props.author?.photoURL ?? ''}
+              alt={props.author?.displayName ?? 'Player'}
+              sx={{
+                marginTop: 1,
+                width: 30,
+                height: 30,
+              }}
+            />
+          </Fade>
+        </Tooltip>
+      )}
     </Stack>
   );
 };
 
-const EditableSection = (props: { section: SectionType }) => {
+const EditableSection = (props: {
+  section: SectionType;
+  author: UserBase | null;
+}) => {
   return (
     <Stack spacing={2}>
       <TextField
@@ -99,24 +126,13 @@ export const PageContent = () => {
   const { campaign, currentUnit } = useCampaign();
   const { displayAlert } = useAlert();
 
-  const [anchor, setAnchor] = useState(null);
-  const addMenuOpen = Boolean(anchor);
-
   useEffect(() => {
     if (currentUnit?.type === 'article') {
       setContent(currentUnit as Article);
     } else if (currentUnit?.type === 'quest') {
       setContent(currentUnit as Quest);
     }
-  }, [currentUnit]);
-
-  const handleClickAddMenu = (event: any) => {
-    setAnchor(event.currentTarget);
-  };
-
-  const handleCloseAddMenu = () => {
-    setAnchor(null);
-  };
+  }, [currentUnit?.id]);
 
   const handleSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -164,7 +180,6 @@ export const PageContent = () => {
   };
 
   const handleAddImage = () => {
-    handleCloseAddMenu();
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
@@ -174,11 +189,10 @@ export const PageContent = () => {
     if (content) {
       try {
         const imageUrl = content.imageUrls[index];
-        const newArticle = {
+        setContent({
           ...content,
           imageUrls: content.imageUrls.filter((url) => url !== imageUrl),
-        };
-        setContent(newArticle);
+        });
 
         await updateDoc(doc(db, 'units', content.id), {
           imageUrls: arrayRemove(imageUrl),
@@ -197,21 +211,25 @@ export const PageContent = () => {
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (content && campaign) {
       try {
-        const files = event.target.files;
-        if (files) {
-          for (let file of files) {
-            const imageId = file.name + '-' + generateUUID();
-            const imageRef = ref(
-              storage,
-              `${campaign.title}-${campaign.id}/${imageId}`
-            );
-            await uploadBytes(imageRef, file);
-            const fileUrl = await getDownloadURL(imageRef);
-            await updateDoc(doc(db, 'units', content.id), {
-              imageUrls: arrayUnion(fileUrl),
-            });
-          }
+        let urls = [...content.imageUrls];
+        const files = event.target.files ?? [];
+        for (let file of files) {
+          const imageId = file.name + '-' + generateUUID();
+          const imageRef = ref(
+            storage,
+            `${campaign.title}-${campaign.id}/${imageId}`
+          );
+          await uploadBytes(imageRef, file);
+          const fileUrl = await getDownloadURL(imageRef);
+          urls.push(fileUrl);
+          await updateDoc(doc(db, 'units', content.id), {
+            imageUrls: arrayUnion(fileUrl),
+          });
         }
+        setContent({
+          ...content,
+          imageUrls: urls,
+        });
       } catch (e: any) {
         displayAlert({
           message: 'An error occurred while uploading files.',
@@ -224,7 +242,6 @@ export const PageContent = () => {
 
   const handleAddSection = () => {
     if (content && user) {
-      handleCloseAddMenu();
       const newSection = {
         id: generateUUID(),
         title: '',
@@ -241,7 +258,7 @@ export const PageContent = () => {
     }
   };
 
-  // TODO: This is updated correctly in firebase, but not in state ??? but it also is ??? WTF
+  // TODO: Data mismatch between content state and firebase -- also switches between isEditing change
   const handleDeleteSection = async () => {
     if (content) {
       try {
@@ -257,6 +274,7 @@ export const PageContent = () => {
         });
         setContent(newArticle);
         setFocusedSectionId(null);
+        setEditing(false);
       } catch (e: any) {
         displayAlert({
           message: 'An error occurred while deleting the section.',
@@ -276,12 +294,44 @@ export const PageContent = () => {
       >
         {content && (
           <Grid container spacing={3}>
-            <Grid item xs={3}>
-              <Box width={'100%'}>
+            <Grid item xs={12} md={3}>
+              <Box
+                sx={{
+                  position: { sm: 'auto', md: 'fixed' },
+                  width: { xs: '100%', md: '23vw', lg: '19vw' },
+                  px: { xs: 3, md: 0 },
+                }}
+              >
                 <ArticleAside article={content} />
+                {isEditing && (
+                  <Box py={1}>
+                    <Button
+                      startIcon={<AddIcon />}
+                      onClick={handleAddSection}
+                      sx={{ color: 'grey' }}
+                    >
+                      Add Section
+                    </Button>
+                    <Button
+                      startIcon={<AddIcon />}
+                      onClick={handleAddImage}
+                      sx={{ color: 'grey' }}
+                    >
+                      Add Reference Image
+                    </Button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      style={{ display: 'none' }}
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                    />
+                  </Box>
+                )}
               </Box>
             </Grid>
-            <Grid item xs={8}>
+            <Grid item xs={12} md={8}>
               <Box pl={3}>
                 {content.hidden && (
                   <Typography color={'grey'} variant={'subtitle2'}>
@@ -289,44 +339,47 @@ export const PageContent = () => {
                   </Typography>
                 )}
                 <form ref={sectionsFormRef} onSubmit={handleSave}>
-                  {content.sections.map((section, index) => (
-                    <div key={index} style={{ paddingBottom: '28px' }}>
-                      <Box
-                        onClick={() => {
-                          if (!section.isHeader) {
-                            setFocusedSectionId(section.id);
-                          }
-                        }}
-                        sx={
-                          isEditing ||
-                          (section.title.length <= 0 &&
-                            section.body.length <= 0)
-                            ? {}
-                            : { display: 'none' }
-                        }
+                  {content.sections.map((section, index) => {
+                    const author =
+                      campaign?.players.find(
+                        (player) => player.id === section.authorId
+                      ) ?? null;
+                    return (
+                      <div
+                        key={index}
+                        id={section.title}
+                        style={{ paddingBottom: '28px' }}
                       >
-                        <EditableSection section={section} />
-                      </Box>
-                      <Box sx={!isEditing ? {} : { display: 'none' }}>
-                        <Section section={section} />
-                      </Box>
-                      {section.isHeader && (
-                        <Divider
-                          sx={section.body.trim() || isEditing ? { py: 1 } : {}}
-                        />
-                      )}
-                    </div>
-                  ))}
+                        <Box
+                          onClick={() => {
+                            if (!section.isHeader) {
+                              setFocusedSectionId(section.id);
+                            }
+                          }}
+                          sx={
+                            isEditing ||
+                            (section.title.length <= 0 &&
+                              section.body.length <= 0)
+                              ? {}
+                              : { display: 'none' }
+                          }
+                        >
+                          <EditableSection section={section} author={author} />
+                        </Box>
+                        <Box sx={!isEditing ? {} : { display: 'none' }}>
+                          <Section section={section} author={author} />
+                        </Box>
+                        {section.isHeader && (
+                          <Divider
+                            sx={
+                              section.body.trim() || isEditing ? { py: 1 } : {}
+                            }
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
                 </form>
-                {isEditing && (
-                  <Button
-                    startIcon={<AddIcon />}
-                    onClick={handleAddSection}
-                    sx={{ color: 'grey' }}
-                  >
-                    Add Section
-                  </Button>
-                )}
                 {content.type === 'quest' && (
                   <div style={{ paddingBottom: '28px' }}>
                     <LootTable questId={content.id} isEditing={isEditing} />
@@ -354,53 +407,46 @@ export const PageContent = () => {
             bottom: 16,
           }}
         >
-          <Menu
-            anchorEl={anchor}
-            open={addMenuOpen}
-            onClose={handleCloseAddMenu}
-          >
-            <MenuItem onClick={handleAddSection}>Add Section</MenuItem>
-            <MenuItem onClick={handleAddImage}>Add Reference Images</MenuItem>
-          </Menu>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            style={{ display: 'none' }}
-            ref={fileInputRef}
-            onChange={handleFileChange}
-          />
           {isEditing ? (
             <>
-              <Fab
-                size="small"
-                onClick={() => {
-                  sectionsFormRef.current &&
-                    sectionsFormRef.current.dispatchEvent(
-                      new Event('submit', {
-                        cancelable: true,
-                        bubbles: true,
-                      })
-                    );
-                }}
-              >
-                <CheckIcon />
-              </Fab>
-              <Fab
-                size="small"
-                disabled={!Boolean(focusedSectionId)}
-                onClick={handleDeleteSection}
-              >
-                <DeleteIcon />
-              </Fab>
+              <Tooltip title={'Save Changes'} placement={'left'}>
+                <Fab
+                  size="small"
+                  onClick={() => {
+                    sectionsFormRef.current &&
+                      sectionsFormRef.current.dispatchEvent(
+                        new Event('submit', {
+                          cancelable: true,
+                          bubbles: true,
+                        })
+                      );
+                  }}
+                >
+                  <CheckIcon sx={{ color: 'white' }} />
+                </Fab>
+              </Tooltip>
+              <Tooltip title={'Delete Section'} placement={'left'}>
+                <span>
+                  <Fab
+                    size="small"
+                    disabled={!Boolean(focusedSectionId)}
+                    onClick={handleDeleteSection}
+                  >
+                    <DeleteIcon />
+                  </Fab>
+                </span>
+              </Tooltip>
             </>
           ) : (
-            <Fab size="small" onClick={() => setEditing(true)}>
-              <EditIcon />
-            </Fab>
+            <Tooltip title={'Edit Page'} placement={'left'}>
+              <Fab size="small" onClick={() => setEditing(true)}>
+                <EditIcon />
+              </Fab>
+            </Tooltip>
           )}
         </Stack>
       </Box>
+      <Button onClick={() => console.log(content)}>log state</Button>
     </Container>
   );
 };

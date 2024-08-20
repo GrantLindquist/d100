@@ -1,40 +1,55 @@
 import { Article } from '@/types/Unit';
-import { Card, CardContent, Typography } from '@mui/material';
+import { Box, Card, Typography } from '@mui/material';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
+// TODO: Routes do not take player to correct section
 const ArticleAside = (props: { article: Article }) => {
+  const router = useRouter();
   return (
-    <Card
-      sx={{
-        position: 'fixed',
-        width: '19vw',
-      }}
-    >
-      <CardContent>
-        {props.article.sections.map((section, index) => (
-          <Typography
-            key={section.id}
-            py={0.5}
-            sx={
-              index === 0
-                ? {
-                    fontWeight: BOLD_FONT_WEIGHT,
-                  }
-                : {
-                    pl: 3,
-                  }
-            }
-          >
-            <Link href={`#${section.title}`}>{section.title}</Link>
-          </Typography>
-        ))}
+    <Card>
+      <Box py={2} px={3}>
+        {props.article.sections.map((section, index) => {
+          if (!section.title.trim()) {
+            return null;
+          }
+          return (
+            <Typography
+              key={index}
+              py={0.5}
+              sx={{
+                '&:hover': {
+                  cursor: 'pointer',
+                },
+                ...(index === 0
+                  ? {
+                      fontWeight: BOLD_FONT_WEIGHT,
+                    }
+                  : {
+                      pl: 3,
+                    }),
+              }}
+              onClick={() => router.push(`#${section.title}`)}
+            >
+              {section.title}
+            </Typography>
+          );
+        })}
         {props.article.imageUrls.length > 0 && (
-          <Typography py={0.5} pl={3}>
-            <Link href={`#Reference Images`}>Reference Images</Link>
+          <Typography
+            onClick={() => router.push('#Reference Images')}
+            py={0.5}
+            pl={3}
+            sx={{
+              ':hover': {
+                cursor: 'pointer',
+              },
+            }}
+          >
+            Reference Images
           </Typography>
         )}
-      </CardContent>
+      </Box>
     </Card>
   );
 };

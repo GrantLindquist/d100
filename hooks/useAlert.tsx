@@ -62,19 +62,21 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
               : {}),
           }}
         >
-          <Box p={1}>
-            <Stack direction={'row'}>
+          <Stack py={1} px={2} direction={'row'} alignItems={'center'}>
+            <Box flexGrow={1}>
               <Typography>{alert.message}</Typography>
-              {alert.link && (
-                <Button onClick={() => handleNavigate(alert.link ?? '')}>
-                  Open
-                </Button>
+              {alert.errorType && (
+                <Typography sx={{ color: 'grey' }}>
+                  {alert.errorType}
+                </Typography>
               )}
-            </Stack>
-            {alert.errorType && (
-              <Typography sx={{ color: 'grey' }}>{alert.errorType}</Typography>
+            </Box>
+            {alert.link && (
+              <Button onClick={() => handleNavigate(alert.link ?? '')}>
+                Open
+              </Button>
             )}
-          </Box>
+          </Stack>
         </Box>
       </Snackbar>
       {children}
