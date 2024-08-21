@@ -30,7 +30,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchUser = async () => {
       const result = await getUserFromSession();
-      if (result?.user || listening) {
+      if (result?.user) {
         const unsubscribe = onSnapshot(
           doc(db, 'users', result.user.id),
           (userDocSnap) => {
