@@ -193,6 +193,7 @@ const CollectionSearch = (props: {
     setSearchQuery(value);
   };
 
+  // TODO: Handle deleting fire storage images
   const handleDeleteUnits = async () => {
     try {
       for (let unitId of selectedUnitIds) {

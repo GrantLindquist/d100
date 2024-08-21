@@ -86,6 +86,7 @@ const DeleteCampaignForm = (props: {
   const { user } = useUser();
   const [input, setInput] = useState('');
 
+  // TODO: Handle deleting fire storage images
   const handleDeleteCampaign = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
