@@ -19,10 +19,10 @@ import {
   doc,
   getDocs,
   query,
-  updateDoc,
+  runTransaction,
   where,
 } from '@firebase/firestore';
-import db from '@/utils/firebase';
+import db, { storage } from '@/utils/firebase';
 import CreateUnitModal from '@/components/modals/CreateUnitModal';
 import { useRouter } from 'next/navigation';
 import FolderIcon from '@mui/icons-material/Folder';
@@ -38,6 +38,7 @@ import KeyIcon from '@mui/icons-material/Key';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { useAlert } from '@/hooks/useAlert';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { deleteObject, listAll, ref } from '@firebase/storage';
 
 const UnitTab = (props: {
   unit: Unit;
@@ -133,7 +134,7 @@ const CollectionSearch = (props: {
   unitIds: string[];
   collectionId: string;
 }) => {
-  const { isUserDm } = useCampaign();
+  const { isUserDm, campaign } = useCampaign();
   const { displayAlert } = useAlert();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -193,23 +194,34 @@ const CollectionSearch = (props: {
     setSearchQuery(value);
   };
 
-  // TODO: Handle deleting fire storage images
   const handleDeleteUnits = async () => {
-    try {
-      for (let unitId of selectedUnitIds) {
-        await updateDoc(doc(db, 'units', props.collectionId), {
-          unitIds: arrayRemove(unitId),
+    if (campaign) {
+      try {
+        await runTransaction(db, async (transaction) => {
+          for (let unitId of selectedUnitIds) {
+            transaction.update(doc(db, 'units', props.collectionId), {
+              unitIds: arrayRemove(unitId),
+            });
+          }
+          listAll(ref(storage, campaign.id)).then((res) => {
+            res.items.forEach(async (itemRef) => {
+              if (selectedUnitIds.includes(itemRef.name.split('-')[0])) {
+                await deleteObject(itemRef);
+              }
+            });
+          });
+        });
+
+        displayAlert({
+          message: `Successfully deleted ${selectedUnitIds.length} item${selectedUnitIds.length > 1 ? 's' : ''}`,
+        });
+      } catch (e: any) {
+        displayAlert({
+          message: 'An error occurred while deleting articles.',
+          isError: true,
+          errorType: e.name,
         });
       }
-      displayAlert({
-        message: `Successfully deleted ${selectedUnitIds.length} item${selectedUnitIds.length > 1 ? 's' : ''}`,
-      });
-    } catch (e: any) {
-      displayAlert({
-        message: 'An error occurred while deleting articles.',
-        isError: true,
-        errorType: e.name,
-      });
     }
     setEditing(false);
   };

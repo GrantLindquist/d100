@@ -21,8 +21,9 @@ import {
   runTransaction,
   where,
 } from '@firebase/firestore';
-import db from '@/utils/firebase';
+import db, { storage } from '@/utils/firebase';
 import { useUser } from '@/hooks/useUser';
+import { deleteObject, listAll, ref } from '@firebase/storage';
 
 const EditCampaignForm = (props: {
   campaign: Campaign;
@@ -86,7 +87,6 @@ const DeleteCampaignForm = (props: {
   const { user } = useUser();
   const [input, setInput] = useState('');
 
-  // TODO: Handle deleting fire storage images
   const handleDeleteCampaign = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -105,6 +105,12 @@ const DeleteCampaignForm = (props: {
           transaction.delete(doc(db, 'campaigns', props.campaign.id));
           transaction.update(doc(db, 'users', user.id), {
             campaignIds: arrayRemove(props.campaign.id),
+          });
+
+          listAll(ref(storage, props.campaign.id)).then((res) => {
+            res.items.forEach(async (itemRef) => {
+              await deleteObject(itemRef);
+            });
           });
         });
 

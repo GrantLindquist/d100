@@ -214,11 +214,8 @@ export const PageContent = () => {
         let urls = [...content.imageUrls];
         const files = event.target.files ?? [];
         for (let file of files) {
-          const imageId = file.name + '-' + generateUUID();
-          const imageRef = ref(
-            storage,
-            `${campaign.title}-${campaign.id}/${imageId}`
-          );
+          const imageId = content.id + '-' + generateUUID();
+          const imageRef = ref(storage, `${campaign.id}/${imageId}`);
           await uploadBytes(imageRef, file);
           const fileUrl = await getDownloadURL(imageRef);
           urls.push(fileUrl);
@@ -422,7 +419,7 @@ export const PageContent = () => {
                       );
                   }}
                 >
-                  <CheckIcon sx={{ color: 'white' }} />
+                  <CheckIcon />
                 </Fab>
               </Tooltip>
               <Tooltip title={'Delete Section'} placement={'left'}>

@@ -19,6 +19,7 @@ export default function AuthPage() {
   const { displayAlert } = useAlert();
   const router = useRouter();
 
+  // TODO: COOP is blocking oauth
   const handleSignIn = async () => {
     try {
       const provider = new GoogleAuthProvider();
