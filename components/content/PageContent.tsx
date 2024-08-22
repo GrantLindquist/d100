@@ -45,7 +45,7 @@ const Section = (props: { section: SectionType; author: UserBase | null }) => {
       onMouseEnter={() => setDisplayAuthor(true)}
       onMouseLeave={() => setDisplayAuthor(false)}
     >
-      <Stack spacing={2} id={props.section.title} flexGrow={1}>
+      <Stack spacing={2} flexGrow={1}>
         <Typography variant={props.section.isHeader ? 'h2' : 'h4'}>
           {props.section.title}
         </Typography>
@@ -342,11 +342,15 @@ export const PageContent = () => {
                         (player) => player.id === section.authorId
                       ) ?? null;
                     return (
-                      <div
-                        key={index}
-                        id={section.title}
-                        style={{ paddingBottom: '28px' }}
-                      >
+                      <div key={index} style={{ paddingBottom: '28px' }}>
+                        {/* Section title page anchor */}
+                        <span
+                          id={section.title}
+                          style={{
+                            position: 'relative',
+                            top: -90,
+                          }}
+                        ></span>
                         <Box
                           onClick={() => {
                             if (!section.isHeader) {

@@ -9,7 +9,7 @@ const firebaseConfig = {
   projectId: 'dnd-threads',
   storageBucket: 'dnd-threads.appspot.com',
   messagingSenderId: '232498748196',
-  appId: '1:232498748196:web:ea78597641d6af1a2c71b1',
+  appId: '1:232498748196:web:f715947fc5d5ebf12c71b1',
 };
 
 const app = initializeApp(firebaseConfig);

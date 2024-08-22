@@ -10,7 +10,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { memo, useEffect, useState } from 'react';
+import { memo, Suspense, useEffect, useState } from 'react';
 import { Campaign } from '@/types/Campaign';
 import { useUser } from '@/hooks/useUser';
 import { doc, onSnapshot } from '@firebase/firestore';
@@ -183,10 +183,12 @@ const CampaignList = () => {
               onMouseEnter={() => setHoveredCampaignId(id)}
               onMouseLeave={() => setHoveredCampaignId(null)}
             >
-              <CampaignTabMemo
-                campaignId={id}
-                displayActions={id === hoveredCampaignId}
-              />
+              <Suspense fallback={<p>loading...</p>}>
+                <CampaignTabMemo
+                  campaignId={id}
+                  displayActions={id === hoveredCampaignId}
+                />
+              </Suspense>
             </Grid>
           ))}
         </Grid>

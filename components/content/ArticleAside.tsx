@@ -3,7 +3,6 @@ import { Box, Card, Typography } from '@mui/material';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { useRouter } from 'next/navigation';
 
-// TODO: Routes do not take player to correct section
 const ArticleAside = (props: { article: Article }) => {
   const router = useRouter();
   return (
