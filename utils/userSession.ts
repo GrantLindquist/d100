@@ -23,7 +23,13 @@ async function decrypt(input: string): Promise<any> {
 export const setUserSession = async (user: any) => {
   const expires = new Date(Date.now() + SESSION_TIMEOUT);
   const session = await encrypt({ user, expires });
-  cookies().set('session', session, { expires, httpOnly: true });
+  cookies().set('session', session, {
+    expires,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/',
+  });
 };
 
 export const getUserFromSession = async () => {
