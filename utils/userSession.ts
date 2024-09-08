@@ -27,7 +27,7 @@ export const setUserSession = async (user: any) => {
     expires,
     httpOnly: true,
     secure: true,
-    sameSite: 'strict',
+    sameSite: 'none',
     path: '/',
   });
 };
