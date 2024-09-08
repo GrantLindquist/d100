@@ -22,9 +22,11 @@ export default function AuthPage() {
   // TODO: COOP is blocking oauth
   const handleSignIn = async () => {
     try {
+      console.log('signing in...');
       const provider = new GoogleAuthProvider();
       signInWithPopup(auth, provider).then(async (result) => {
         // Define user values from google
+        console.log(result.user);
         const user = result.user;
         let session: UserBase = {
           displayName: user.displayName,
