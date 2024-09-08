@@ -25,7 +25,6 @@ export default function AuthPage() {
       const provider = new GoogleAuthProvider();
       signInWithPopup(auth, provider).then(async (result) => {
         // Define user values from google
-        console.log(result);
         const user = result.user;
         let session: UserBase = {
           displayName: user.displayName,
@@ -49,7 +48,6 @@ export default function AuthPage() {
         router.push('/campaigns');
       });
     } catch (e: any) {
-      console.log(e);
       displayAlert({
         message: 'An error occurred while signing in.',
         isError: true,

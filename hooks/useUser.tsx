@@ -29,8 +29,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
+      console.log('getting user from session...');
       const result = await getUserFromSession();
       if (result?.user) {
+        console.log(result?.user);
         const unsubscribe = onSnapshot(
           doc(db, 'users', result.user.id),
           (userDocSnap) => {
@@ -42,6 +44,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         return () => {
           unsubscribe();
         };
+      } else {
+        console.log('could not retrieve user from session.');
       }
     };
     fetchUser();

@@ -21,6 +21,7 @@ async function decrypt(input: string): Promise<any> {
 }
 
 export const setUserSession = async (user: any) => {
+  console.log('setting user session...');
   const expires = new Date(Date.now() + SESSION_TIMEOUT);
   const session = await encrypt({ user, expires });
   cookies().set('session', session, { expires, httpOnly: true });
