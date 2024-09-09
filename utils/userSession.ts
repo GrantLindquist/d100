@@ -27,8 +27,9 @@ export const setUserSession = async (user: any) => {
     expires,
     httpOnly: true,
     secure: true,
-    sameSite: 'none',
+    sameSite: 'strict',
     path: '/',
+    domain: 'https://dnd-threads-backend--dnd-threads.us-central1.hosted.app/',
   });
 };
 
