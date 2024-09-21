@@ -23,13 +23,14 @@ async function decrypt(input: string): Promise<any> {
 export const setUserSession = async (user: any) => {
   const expires = new Date(Date.now() + SESSION_TIMEOUT);
   const session = await encrypt({ user, expires });
-  cookies().set('session', session, {
-    expires,
+  cookies().set({
+    name: 'session',
+    value: session,
+    expires: expires,
     httpOnly: true,
     secure: true,
     sameSite: 'strict',
     path: '/',
-    domain: 'https://dnd-threads-backend--dnd-threads.us-central1.hosted.app/',
   });
 };
 

@@ -19,36 +19,39 @@ export default function AuthPage() {
   const { displayAlert } = useAlert();
   const router = useRouter();
 
-  // TODO: COOP is blocking oauth
+  // TODO: Session isn't being set in prod
   const handleSignIn = async () => {
     try {
       console.log('signing in...');
+      console.log('env key: ' + process.env.SESSION_ENCRYPTION_KEY);
       const provider = new GoogleAuthProvider();
-      signInWithPopup(auth, provider).then(async (result) => {
-        // Define user values from google
-        console.log(result.user);
-        const user = result.user;
-        let session: UserBase = {
-          displayName: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-          id: user.uid,
-        };
-        // If creating account, set new user doc w/ default values
-        const additionalUserInfo = getAdditionalUserInfo(result);
-        if (additionalUserInfo?.isNewUser) {
-          session = {
-            ...session,
-            campaignIds: [],
-            createdAt: Date.now(),
-          } as User;
-          await setDoc(doc(db, 'users', user.uid), session);
-        }
-        // Set session
-        await setUserSession(session);
-        setListening(true);
-        router.push('/campaigns');
-      });
+      const result = await signInWithPopup(auth, provider);
+
+      // Define user values from Google
+      console.log(result.user);
+      const user = result.user;
+      let session: UserBase = {
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        id: user.uid,
+      };
+
+      // If creating account, set new user doc with default values
+      const additionalUserInfo = getAdditionalUserInfo(result);
+      if (additionalUserInfo?.isNewUser) {
+        session = {
+          ...session,
+          campaignIds: [],
+          createdAt: Date.now(),
+        } as User;
+        await setDoc(doc(db, 'users', user.uid), session);
+      }
+
+      // Set session
+      await setUserSession(session);
+      setListening(true);
+      router.push('/campaigns');
     } catch (e: any) {
       displayAlert({
         message: 'An error occurred while signing in.',
