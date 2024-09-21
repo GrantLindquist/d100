@@ -3,7 +3,7 @@ import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 import { SESSION_TIMEOUT } from '@/utils/globals';
 
-const key = new TextEncoder().encode(process.env.SESSION_ENCRYPTION_KEY);
+const key = new TextEncoder().encode('annihilation_cannon');
 
 async function encrypt(payload: any) {
   return await new SignJWT(payload)

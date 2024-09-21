@@ -1,3 +1,0 @@
-env:
-  - variable: SESSION_ENCRYPTION_KEY
-    value: annihilation_cannon
