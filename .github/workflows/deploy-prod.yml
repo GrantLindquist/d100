@@ -4,39 +4,36 @@ on:
   push:
     branches:
       - prod
+      - dev
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the code from the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Python (if your Pulumi code uses Python)
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      # Step 3: Install Pulumi
-      - name: Install Pulumi
-        run: |
-          curl -fsSL https://get.pulumi.com | sh
-          export PATH=$PATH:/home/runner/.pulumi/bin
-
-      # Step 4: Install Python dependencies & authenticate Pulumi
       - name: Install Python dependencies
         working-directory: infra
         run: |
           venv/Scripts/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Install Pulumi
+        working-directory: infra
+        run: |
+          curl -fsSL https://get.pulumi.com | sh
+          export PATH=$PATH:/home/runner/.pulumi/bin
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      
-      # Step 5: Run Pulumi to deploy your infrastructure
+
       - name: Run Pulumi
         working-directory: infra
         run: pulumi up --yes
