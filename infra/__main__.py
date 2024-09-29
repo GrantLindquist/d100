@@ -41,7 +41,7 @@ cd /home/ec2-user/dnd-threads
 npm install
 npm run build
 
-nohup npm start -p 3000 &
+nohup next start -p 3000 &
 """,
     tags={
       "Name": "dnd-threads",
