@@ -7,8 +7,10 @@ on:
       - dev
 
 jobs:
-  deploy:
+  deploy-prod:
     runs-on: ubuntu-latest
+    environment:
+      name: prod
 
     steps:
       - name: Checkout code
@@ -30,6 +32,8 @@ jobs:
       - name: Install Pulumi
         working-directory: infra
         run: |
+          echo ${{ secrets.AWS_ACCESS_KEY }}
+          echo ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           curl -fsSL https://get.pulumi.com | sh
           export PATH=$PATH:/home/runner/.pulumi/bin
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY }}
