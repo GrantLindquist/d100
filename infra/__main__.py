@@ -25,15 +25,25 @@ group = aws.ec2.SecurityGroup(
 # Configure EC2 instance
 server = aws.ec2.Instance(
     'web-server',
-    instance_type="t2.micro",
+    instance_type="t2.nano",
     vpc_security_group_ids=[group.id],
     ami=ami.id,
     user_data="""#!/bin/bash
-echo \"Hello, World!\" > index.html
-nohup python -m SimpleHTTPServer 80 &
+yum update -y
+
+curl -sL https://rpm.nodesource.com/setup_14.x | bash -
+yum install -y nodejs git
+
+git clone -b prod https://github.com/GrantLindquist/dnd-threads.git /home/ec2-user/dnd-threads
+cd /home/ec2-user/dnd-threads
+
+npm install
+npm run build
+
+nohup npm start -p 3000 &
 """,
     tags={
-      "Name": "web-server",
+      "Name": "dnd-threads",
     },
 )
 
