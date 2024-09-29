@@ -26,7 +26,7 @@ group = aws.ec2.SecurityGroup(
 # Configure EC2 instance
 server = aws.ec2.Instance(
     'web-server',
-    instance_type="t2.nano",
+    instance_type="t3.nano",
     vpc_security_group_ids=[group.id],
     ami=ami.id,
     user_data="""#!/bin/bash
