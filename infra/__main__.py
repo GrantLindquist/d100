@@ -16,6 +16,7 @@ group = aws.ec2.SecurityGroup(
     ingress=[
         {'protocol': 'icmp', 'from_port': 8, 'to_port': 0, 'cidr_blocks': ['0.0.0.0/0']},
         {'protocol': 'tcp', 'from_port': 80, 'to_port': 80, 'cidr_blocks': ['0.0.0.0/0']},
+        {'protocol': 'tcp', 'from_port': 3000, 'to_port': 3000, 'cidr_blocks': ['0.0.0.0/0']},
     ],
     egress=[
         {'protocol': 'tcp', 'from_port': 80, 'to_port': 80, 'cidr_blocks': ['0.0.0.0/0']},
