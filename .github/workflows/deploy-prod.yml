@@ -42,4 +42,6 @@ jobs:
         working-directory: infra
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_KEY }}
-        run: pulumi up --yes
+        run: |
+          pulumi stack select prod
+          pulumi up --yes
