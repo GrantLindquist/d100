@@ -16,10 +16,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build image
+      - name: Build & Push image to Dockerhub
         run: |
           docker login -u glindquist -p ${{ secrets.DOCKERHUB_TOKEN }}
           docker build -t glindquist/dnd-threads:latest .
+          docker push glindquist/dnd-threads:latest 
 
       - name: Set up Python
         uses: actions/setup-python@v4
