@@ -1,8 +1,7 @@
 FROM node:18 AS builder
 
-WORKDIR /app
-
 COPY package*.json ./
+
 RUN npm install
 
 COPY . .
@@ -13,9 +12,7 @@ RUN npm prune --production
 
 FROM node:18-slim AS runner
 
-WORKDIR /app
-
-COPY --from=builder /app ./
+COPY --from=builder ./ ./
 
 EXPOSE 3000
 
