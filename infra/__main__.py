@@ -70,7 +70,7 @@ task_definition = aws.ecs.TaskDefinition("app-task",
         "image": "glindquist/dnd-threads:latest",
         "portMappings": [{
             "containerPort": 3000,
-            "hostPort": 80,
+            "hostPort": 3000,
             "protocol": "tcp"
         }]
     }])
