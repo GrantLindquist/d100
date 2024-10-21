@@ -23,8 +23,8 @@ group = aws.ec2.SecurityGroup(
         },
         {
             "protocol": "tcp",
-            "from_port": 3000,
-            "to_port": 3000,
+            "from_port": 80,
+            "to_port": 80,
             "cidr_blocks": ["0.0.0.0/0"],
         },
     ],
@@ -69,8 +69,8 @@ task_definition = aws.ecs.TaskDefinition("app-task",
         "name": "dnd-threads",
         "image": "glindquist/dnd-threads:latest",
         "portMappings": [{
-            "containerPort": 3000,
-            "hostPort": 3000,
+            "containerPort": 80,
+            "hostPort": 80,
             "protocol": "tcp"
         }]
     }])
