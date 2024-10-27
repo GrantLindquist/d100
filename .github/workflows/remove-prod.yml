@@ -1,11 +1,11 @@
-name: Deploy app every Saturday morning
+name: Undeploy app Saturday evening
 
 on:
   schedule:
-    - cron: '0 17 * * 7'
+    - cron: '0 18 * * 6'
 
 jobs:
-  deploy-prod:
+  remove-prod:
     if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     environment:
@@ -14,12 +14,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Build & Push image to Dockerhub
-        run: |
-          docker login -u glindquist -p ${{ secrets.DOCKERHUB_TOKEN }}
-          docker build -t glindquist/dnd-threads:latest .
-          docker push glindquist/dnd-threads:latest 
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -49,4 +43,4 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_KEY }}
         run: |
           pulumi stack select prod
-          pulumi up -y
+          pulumi destroy -y

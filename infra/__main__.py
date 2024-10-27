@@ -2,6 +2,8 @@ import pulumi
 import pulumi_aws as aws
 import json
 
+# TODO: Make IP address publicly accessible
+
 # Create ECS cluster
 cluster = aws.ecs.Cluster("cluster")
 
@@ -89,4 +91,3 @@ service = aws.ecs.Service("app-svc",
     opts=pulumi.ResourceOptions(depends_on=[task_definition])
 )
 
-pulumi.export("service_name", service.name)
