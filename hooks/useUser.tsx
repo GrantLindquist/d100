@@ -31,6 +31,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const fetchUser = async () => {
       console.log('getting user from session...');
       const result = await getUserFromSession();
+      console.log('Testing redeployment');
       if (result?.user) {
         console.log(result?.user);
         const unsubscribe = onSnapshot(

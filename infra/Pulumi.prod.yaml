@@ -1,2 +1,2 @@
 config:
-  aws:region: us-wast-1
+  aws:region: us-west-1
