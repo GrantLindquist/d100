@@ -19,7 +19,6 @@ export default function AuthPage() {
   const { displayAlert } = useAlert();
   const router = useRouter();
 
-  // TODO: Session isn't being set in prod - prod env is undefined???
   const handleSignIn = async () => {
     try {
       console.log('signing in...');

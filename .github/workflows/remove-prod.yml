@@ -1,8 +1,9 @@
 name: Undeploy app Saturday evening
 
+# Runs at 1:00AM UTC Sunday (6:00PM PST Saturday)
 on:
   schedule:
-    - cron: '0 18 * * 6'
+    - cron: '0 1 * * 7'
 
 jobs:
   remove-prod:
