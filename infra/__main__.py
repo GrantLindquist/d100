@@ -2,7 +2,7 @@ import pulumi
 import pulumi_aws as aws
 import json
 
-# TODO: Make IP address publicly accessible
+# TODO: Make access point consistent (either via domain name or consistent IP)
 
 # Create ECS cluster
 cluster = aws.ecs.Cluster("cluster")

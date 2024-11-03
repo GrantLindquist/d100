@@ -1,9 +1,9 @@
-name: Deploy app every Saturday morning
+name: Deploy app Saturday morning
 
-# TODO: Change to Saturday at 10AM
+# Runs at 5:00PM UTC Saturday (10:00AM PST Saturday)
 on:
   schedule:
-    - cron: '0 1 * * 1'
+    - cron: '0 17 * * 6'
 
 jobs:
   deploy-prod:

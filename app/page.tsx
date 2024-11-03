@@ -21,7 +21,6 @@ export default function AuthPage() {
 
   const handleSignIn = async () => {
     try {
-      console.log('signing in...');
       console.log('env key: ' + process.env.SESSION_ENCRYPTION_KEY);
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);

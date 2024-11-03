@@ -37,6 +37,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { useAlert } from '@/hooks/useAlert';
 import { UserBase } from '@/types/User';
 
+// TODO: Fix warning: "" was passed as src prop
 const Section = (props: { section: SectionType; author: UserBase | null }) => {
   const [displayAuthor, setDisplayAuthor] = useState(false);
   return (
@@ -383,7 +384,7 @@ export const PageContent = () => {
                 </form>
                 {content.type === 'quest' && (
                   <div style={{ paddingBottom: '28px' }}>
-                    <LootTable questId={content.id} isEditing={isEditing} />
+                    <LootTable questId={content.id} />
                   </div>
                 )}
                 {content.imageUrls.length > 0 && (
@@ -447,7 +448,7 @@ export const PageContent = () => {
           )}
         </Stack>
       </Box>
-      <Button onClick={() => console.log(content)}>log state</Button>
+      {/*<Button onClick={() => console.log(content)}>log state</Button>*/}
     </Container>
   );
 };
