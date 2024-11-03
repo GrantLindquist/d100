@@ -68,7 +68,7 @@ const ImageList = (props: {
         >
           <img
             style={{ height: '100%' }}
-            src={backdropIndex !== null ? props.imageUrls[backdropIndex] : ''}
+            src={backdropIndex !== null ? props.imageUrls[backdropIndex] : '-'}
             alt={'Resized Reference Image'}
           />
           <Paper

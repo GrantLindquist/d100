@@ -78,7 +78,7 @@ const UserButton = () => {
     <>
       <Button onClick={handleClick}>
         <Avatar
-          src={user?.photoURL ?? ''}
+          src={user?.photoURL ?? '-'}
           alt={'Current User'}
           sx={{
             width: 30,

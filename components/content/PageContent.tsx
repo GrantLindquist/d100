@@ -52,12 +52,12 @@ const Section = (props: { section: SectionType; author: UserBase | null }) => {
         </Typography>
         <Typography>{props.section.body}</Typography>
       </Stack>
-      {props.author && (
+      {props.author?.photoURL && (
         <Tooltip title={`Author: ${props.author.displayName}`}>
           <Fade in={displayAuthor}>
             <Avatar
-              src={props.author?.photoURL ?? ''}
-              alt={props.author?.displayName ?? 'Player'}
+              src={props.author.photoURL}
+              alt={props.author.displayName ?? 'Player'}
               sx={{
                 marginTop: 1,
                 width: 30,
