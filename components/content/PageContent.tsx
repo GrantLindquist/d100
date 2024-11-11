@@ -95,6 +95,7 @@ const EditableSection = (props: {
           '& .MuiInputBase-input': {
             fontSize: props.section.isHeader ? '4rem' : '2rem',
             fontStyle: 'italic',
+            fontWeight: BOLD_FONT_WEIGHT,
             p: 0,
           },
           '& .MuiOutlinedInput-notchedOutline': {

@@ -18,18 +18,30 @@ const SubheaderAsideSx = {
   paddingY: 0.5,
 };
 
+// TODO: Deny images w/ an overly tall aspect ratio
 const ArticleAside = (props: { article: Article }) => {
   const router = useRouter();
   return (
     <Card>
       {props.article.imageUrls.length > 0 && (
         <img
-          style={{ width: '100%' }}
+          style={{
+            width: '100%',
+            maxHeight: '400px',
+          }}
           src={props.article.imageUrls[0]}
           alt={'Resized Reference Image'}
         />
       )}
-      <Box py={2} px={3}>
+      {/* TODO: Style scroller, maybe globally? */}
+      <Box
+        py={2}
+        px={3}
+        maxHeight={300}
+        sx={{
+          overflowY: 'auto',
+        }}
+      >
         {props.article.sections.map((section, index) => {
           if (!section.title.trim()) {
             return null;

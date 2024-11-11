@@ -245,24 +245,23 @@ const CollectionSearch = (props: {
       {units && (
         <>
           <Grid container spacing={1} py={2} pr={1}>
-            {searchQuery.trim().length === 0 &&
-              units
-                .filter((unit) => unit.type === 'collection')
-                .map((collection) => {
-                  if (!isUserDm && collection.hidden) {
-                    return null;
-                  }
-                  return (
-                    <Grid key={collection.id} item xs={12} sm={6} lg={4}>
-                      <UnitTab
-                        unit={collection}
-                        icon={<FolderIcon />}
-                        isEditing={isEditing}
-                        updateState={updateSelectedUnitIds}
-                      />
-                    </Grid>
-                  );
-                })}
+            {units
+              .filter((unit) => unit.type === 'collection')
+              .map((collection) => {
+                if (!isUserDm && collection.hidden) {
+                  return null;
+                }
+                return (
+                  <Grid key={collection.id} item xs={12} sm={6} lg={4}>
+                    <UnitTab
+                      unit={collection}
+                      icon={<FolderIcon />}
+                      isEditing={isEditing}
+                      updateState={updateSelectedUnitIds}
+                    />
+                  </Grid>
+                );
+              })}
           </Grid>
           <Masonry spacing={1} columns={{ xs: 1, sm: 2, md: 3, lg: 4 }}>
             {units
