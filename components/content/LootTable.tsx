@@ -24,6 +24,7 @@ import { CurrencyType, Loot } from '@/types/Unit';
 import { doc, onSnapshot, updateDoc } from '@firebase/firestore';
 import { useAlert } from '@/hooks/useAlert';
 import db from '@/utils/firebase';
+import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 
 const EditableTable = (props: { questId: string }) => {
   const { displayAlert } = useAlert();
@@ -142,7 +143,12 @@ const EditableTable = (props: { questId: string }) => {
 
   return (
     <>
-      <Typography id={'Loot Table'} variant="h4" pb={2}>
+      <Typography
+        id={'Loot Table'}
+        fontWeight={BOLD_FONT_WEIGHT}
+        variant="h4"
+        pb={2}
+      >
         Loot ({calculateCurrencyTotal()}gp)
       </Typography>
       <TableContainer>

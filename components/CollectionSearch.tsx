@@ -4,8 +4,8 @@ import { ChangeEvent, ReactNode, useEffect, useState } from 'react';
 import {
   Card,
   Checkbox,
-  Fab,
   Grid,
+  IconButton,
   Stack,
   TextField,
   Tooltip,
@@ -70,7 +70,7 @@ const UnitTab = (props: {
           cursor: 'pointer',
           ':hover': !props.isEditing
             ? {
-                backgroundColor: 'rgba(255,255,255, .05)',
+                backgroundColor: 'rgba(28, 28, 28)',
               }
             : {},
         }}
@@ -301,7 +301,6 @@ const CollectionSearch = (props: {
           </Masonry>
           <Stack
             direction="column"
-            spacing={1}
             p={3}
             sx={{
               position: 'fixed',
@@ -311,37 +310,37 @@ const CollectionSearch = (props: {
           >
             {!isEditing ? (
               <Tooltip title={'Edit Items'} placement={'left'}>
-                <Fab size="small" onClick={() => setEditing(true)}>
+                <IconButton size="large" onClick={() => setEditing(true)}>
                   <EditIcon />
-                </Fab>
+                </IconButton>
               </Tooltip>
             ) : (
               <>
                 <Tooltip title={'Save Changes'} placement={'left'}>
-                  <Fab size="small" onClick={() => setEditing(false)}>
+                  <IconButton size="large" onClick={() => setEditing(false)}>
                     <CheckIcon />
-                  </Fab>
+                  </IconButton>
                 </Tooltip>
                 <Tooltip title={'Move Items'} placement={'left'}>
                   <span>
-                    <Fab
-                      size="small"
+                    <IconButton
+                      size="large"
                       disabled
                       onClick={() => setEditing(false)}
                     >
                       <DriveFileMoveIcon />
-                    </Fab>
+                    </IconButton>
                   </span>
                 </Tooltip>
                 <Tooltip title={'Delete Items'} placement={'left'}>
                   <span>
-                    <Fab
-                      size="small"
+                    <IconButton
+                      size="large"
                       disabled={selectedUnitIds.length === 0}
                       onClick={handleDeleteUnits}
                     >
                       <DeleteIcon />
-                    </Fab>
+                    </IconButton>
                   </span>
                 </Tooltip>
               </>

@@ -1,13 +1,16 @@
 'use client';
-import { Breadcrumbs, Typography } from '@mui/material';
+import { Breadcrumbs, Typography, useTheme } from '@mui/material';
 import { useCampaign } from '@/hooks/useCampaign';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import db from '@/utils/firebase';
 import { doc, getDoc } from '@firebase/firestore';
+import { LINK_STYLE } from '@/utils/globals';
+import { useRouter } from 'next/navigation';
 
 const NavBreadcrumbs = () => {
   const { currentUnit } = useCampaign();
+  const router = useRouter();
+  const theme = useTheme();
   const [crumbTitles, setCrumbTitles] = useState<string[]>([]);
 
   useEffect(() => {
@@ -33,9 +36,14 @@ const NavBreadcrumbs = () => {
           {currentUnit.breadcrumbs.map((breadcrumb, index) => {
             if (index < currentUnit.breadcrumbs.length - 1) {
               return (
-                <Link key={index} href={breadcrumb.url}>
+                <Typography
+                  key={index}
+                  sx={LINK_STYLE}
+                  color={theme.palette.primary.main}
+                  onClick={() => router.push(breadcrumb.url)}
+                >
                   {crumbTitles[index] ?? '-'}
-                </Link>
+                </Typography>
               );
             } else {
               return <Typography key={index}>{currentUnit.title}</Typography>;

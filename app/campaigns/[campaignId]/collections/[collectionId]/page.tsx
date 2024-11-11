@@ -30,23 +30,32 @@ export default function CollectionPage({
   }, [currentUnit, user?.id, campaign?.id]);
 
   return (
-    <Container>
-      {collection && (
-        <Box
-          sx={{
-            pt: 12,
-            px: { xs: 2, sm: 4, md: 8, lg: 12 },
-          }}
-        >
-          <Typography align="center" variant={'h3'} py={3}>
-            {collection?.title}
-          </Typography>
-          <CollectionSearch
-            unitIds={collection.unitIds}
-            collectionId={collection.id}
-          />
-        </Box>
-      )}
-    </Container>
+    <Box
+      sx={{
+        height: '100vh',
+        backgroundImage: 'url(/images/moonbg.svg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <Container>
+        {collection && (
+          <Box
+            sx={{
+              pt: 12,
+              px: { xs: 2, sm: 4, md: 8, lg: 12 },
+            }}
+          >
+            <Typography align="center" variant={'h3'} py={3}>
+              {collection?.title}
+            </Typography>
+            <CollectionSearch
+              unitIds={collection.unitIds}
+              collectionId={collection.id}
+            />
+          </Box>
+        )}
+      </Container>
+    </Box>
   );
 }

@@ -2,7 +2,6 @@ export const SESSION_TIMEOUT: number = 604800000;
 
 export const BOLD_FONT_WEIGHT = 600;
 
-// TODO: Implement this feature flag better
 export const PLAYER_INVITATIONS_FEATURE_FLAG = false;
 
 export const MODAL_STYLE = {
@@ -15,4 +14,11 @@ export const MODAL_STYLE = {
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
+};
+
+export const LINK_STYLE = {
+  '&:hover': {
+    cursor: 'pointer',
+  },
+  fontWeight: BOLD_FONT_WEIGHT,
 };

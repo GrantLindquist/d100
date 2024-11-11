@@ -10,7 +10,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { memo, Suspense, useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Campaign } from '@/types/Campaign';
 import { useUser } from '@/hooks/useUser';
 import { doc, onSnapshot } from '@firebase/firestore';
@@ -76,7 +76,7 @@ const CampaignTab = (props: {
         sx={{
           cursor: 'pointer',
           ':hover': {
-            backgroundColor: 'rgba(255,255,255, .05)',
+            backgroundColor: 'rgba(28, 28, 28)',
           },
         }}
       >
@@ -167,12 +167,12 @@ const CampaignList = () => {
     null
   );
 
-  if (user) {
-    return (
-      <>
-        <Typography align={'center'} variant={'h3'}>
-          Your Campaigns
-        </Typography>
+  return (
+    <>
+      <Typography align={'center'} variant={'h3'}>
+        Your Campaigns
+      </Typography>
+      {user && (
         <Grid container spacing={2}>
           {user.campaignIds.map((id, index) => (
             <Grid
@@ -183,18 +183,15 @@ const CampaignList = () => {
               onMouseEnter={() => setHoveredCampaignId(id)}
               onMouseLeave={() => setHoveredCampaignId(null)}
             >
-              <Suspense fallback={<p>loading...</p>}>
-                <CampaignTabMemo
-                  campaignId={id}
-                  displayActions={id === hoveredCampaignId}
-                />
-              </Suspense>
+              <CampaignTabMemo
+                campaignId={id}
+                displayActions={id === hoveredCampaignId}
+              />
             </Grid>
           ))}
         </Grid>
-      </>
-    );
-  }
-  return null;
+      )}
+    </>
+  );
 };
 export default CampaignList;

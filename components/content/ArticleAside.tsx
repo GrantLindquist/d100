@@ -45,12 +45,20 @@ const ArticleAside = (props: { article: Article }) => {
           );
         })}
         {props.article.type === 'quest' && (
-          <Typography
-            onClick={() => router.push('#Loot Table')}
-            sx={HeaderAsideSx}
-          >
-            Loot Table
-          </Typography>
+          <>
+            <Typography
+              onClick={() => router.push('#Quest Timeline')}
+              sx={HeaderAsideSx}
+            >
+              Quest Timeline
+            </Typography>
+            <Typography
+              onClick={() => router.push('#Loot Table')}
+              sx={HeaderAsideSx}
+            >
+              Loot Table
+            </Typography>
+          </>
         )}
         {props.article.imageUrls.length > 0 && (
           <Typography

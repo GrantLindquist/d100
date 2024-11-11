@@ -24,6 +24,8 @@ import BellIcon from '@mui/icons-material/Notifications';
 import { UserBase } from '@/types/User';
 import { useAlert } from '@/hooks/useAlert';
 
+// TODO: Fix warning: ref.element is no longer accessible
+
 interface Notification {
   message: string;
   action?: ReactNode;

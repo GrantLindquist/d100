@@ -31,6 +31,12 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
   const darkTheme = createTheme({
     palette: {
       mode: 'dark',
+      primary: {
+        main: '#8970FF',
+      },
+      secondary: {
+        main: '#FF956F',
+      },
     },
   });
 

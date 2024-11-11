@@ -1,5 +1,12 @@
 'use client';
-import { Box, Button, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { useUser } from '@/hooks/useUser';
 import {
   getAdditionalUserInfo,
@@ -11,17 +18,20 @@ import { User, UserBase } from '@/types/User';
 import { doc, setDoc } from '@firebase/firestore';
 import { setUserSession } from '@/utils/userSession';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useAlert } from '@/hooks/useAlert';
+import { useEffect } from 'react';
 
 export default function AuthPage() {
   const { user, setListening } = useUser();
   const { displayAlert } = useAlert();
   const router = useRouter();
 
+  useEffect(() => {
+    user && router.push('/campaigns');
+  }, [user]);
+
   const handleSignIn = async () => {
     try {
-      console.log('env key: ' + process.env.SESSION_ENCRYPTION_KEY);
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
 
@@ -49,7 +59,6 @@ export default function AuthPage() {
       // Set session
       await setUserSession(session);
       setListening(true);
-      router.push('/campaigns');
     } catch (e: any) {
       displayAlert({
         message: 'An error occurred while signing in.',
@@ -60,15 +69,30 @@ export default function AuthPage() {
   };
 
   return (
-    <Box p={5}>
-      {user ? (
-        <>
-          <Typography>You are already signed in. </Typography>
-          <Link href={'/campaigns'}>Go to your Campaigns</Link>
-        </>
-      ) : (
-        <Button onClick={handleSignIn}>Sign-in with Google</Button>
-      )}
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      height="100vh"
+      sx={{
+        backgroundImage: 'url(/images/moonbg.svg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <Card elevation={3} sx={{ p: 4, width: 400 }}>
+        <CardContent>
+          <Stack spacing={2} alignItems="center">
+            <Typography variant="h5">Sign In</Typography>
+            <Typography variant="body2" color="textSecondary" align="center">
+              Sign in with your Google account to start managing your campaigns.
+            </Typography>
+            <Button onClick={handleSignIn} variant="contained" fullWidth>
+              Sign in with Google
+            </Button>
+          </Stack>
+        </CardContent>
+      </Card>
     </Box>
   );
 }

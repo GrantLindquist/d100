@@ -6,9 +6,9 @@ import {
   Button,
   Container,
   Divider,
-  Fab,
   Fade,
   Grid,
+  IconButton,
   Stack,
   TextField,
   Tooltip,
@@ -36,6 +36,7 @@ import LootTable from '@/components/content/LootTable';
 import AddIcon from '@mui/icons-material/Add';
 import { useAlert } from '@/hooks/useAlert';
 import { UserBase } from '@/types/User';
+import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 
 // TODO: Fix warning: "" was passed as src prop
 const Section = (props: { section: SectionType; author: UserBase | null }) => {
@@ -47,10 +48,19 @@ const Section = (props: { section: SectionType; author: UserBase | null }) => {
       onMouseLeave={() => setDisplayAuthor(false)}
     >
       <Stack spacing={2} flexGrow={1}>
-        <Typography variant={props.section.isHeader ? 'h2' : 'h4'}>
+        <Typography
+          fontWeight={BOLD_FONT_WEIGHT}
+          variant={props.section.isHeader ? 'h2' : 'h4'}
+        >
           {props.section.title}
         </Typography>
-        <Typography>{props.section.body}</Typography>
+        <Typography
+          sx={{
+            whiteSpace: 'pre-line',
+          }}
+        >
+          {props.section.body}
+        </Typography>
       </Stack>
       {props.author?.photoURL && (
         <Tooltip title={`Author: ${props.author.displayName}`}>
@@ -133,7 +143,11 @@ export const PageContent = () => {
     } else if (currentUnit?.type === 'quest') {
       setContent(currentUnit as Quest);
     }
-  }, [currentUnit?.id]);
+  }, [currentUnit]);
+
+  const focusedSectionTitle =
+    content?.sections.find((section) => section.id == focusedSectionId)
+      ?.title ?? 'Section';
 
   const handleSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -383,9 +397,12 @@ export const PageContent = () => {
                   })}
                 </form>
                 {content.type === 'quest' && (
-                  <div style={{ paddingBottom: '28px' }}>
-                    <LootTable questId={content.id} />
-                  </div>
+                  <>
+                    {/*<QuestTimeline questId={content.id} />*/}
+                    <div style={{ paddingBottom: '28px' }}>
+                      <LootTable questId={content.id} />
+                    </div>
+                  </>
                 )}
                 {content.imageUrls.length > 0 && (
                   <div style={{ paddingBottom: '28px' }}>
@@ -401,7 +418,6 @@ export const PageContent = () => {
         )}
         <Stack
           direction="column"
-          spacing={1}
           p={3}
           sx={{
             position: 'fixed',
@@ -412,8 +428,8 @@ export const PageContent = () => {
           {isEditing ? (
             <>
               <Tooltip title={'Save Changes'} placement={'left'}>
-                <Fab
-                  size="small"
+                <IconButton
+                  size="large"
                   onClick={() => {
                     sectionsFormRef.current &&
                       sectionsFormRef.current.dispatchEvent(
@@ -425,25 +441,28 @@ export const PageContent = () => {
                   }}
                 >
                   <CheckIcon />
-                </Fab>
+                </IconButton>
               </Tooltip>
-              <Tooltip title={'Delete Section'} placement={'left'}>
+              <Tooltip
+                title={`Delete ${focusedSectionTitle}`}
+                placement={'left'}
+              >
                 <span>
-                  <Fab
-                    size="small"
+                  <IconButton
+                    size="large"
                     disabled={!Boolean(focusedSectionId)}
                     onClick={handleDeleteSection}
                   >
                     <DeleteIcon />
-                  </Fab>
+                  </IconButton>
                 </span>
               </Tooltip>
             </>
           ) : (
             <Tooltip title={'Edit Page'} placement={'left'}>
-              <Fab size="small" onClick={() => setEditing(true)}>
+              <IconButton size="large" onClick={() => setEditing(true)}>
                 <EditIcon />
-              </Fab>
+              </IconButton>
             </Tooltip>
           )}
         </Stack>

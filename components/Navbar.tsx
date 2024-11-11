@@ -1,22 +1,37 @@
 'use client';
 import UserButton from '@/components/UserButton';
-import { AppBar, Divider, Stack, Toolbar } from '@mui/material';
-import Link from 'next/link';
+import {
+  AppBar,
+  Divider,
+  Stack,
+  Toolbar,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import SettingsButton from '@/components/SettingsButton';
 import NavBreadcrumbs from '@/components/NavBreadcrumbs';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
 import NotificationButton from '@/components/NotificationButton';
+import { LINK_STYLE } from '@/utils/globals';
 
 const Navbar = () => {
   const { campaign, isUserDm } = useCampaign();
   const pathname = usePathname();
+  const router = useRouter();
+  const theme = useTheme();
   if (pathname !== '/') {
     return (
       <AppBar position={'fixed'} sx={{ backgroundColor: 'black' }}>
         <Toolbar>
           <Stack direction={'row'} spacing={2} sx={{ flexGrow: 1 }}>
-            <Link href={'/campaigns'}>All Campaigns</Link>
+            <Typography
+              onClick={() => router.push('/campaigns')}
+              sx={LINK_STYLE}
+              color={theme.palette.primary.main}
+            >
+              All Campaigns
+            </Typography>
             {campaign && (
               <>
                 <Divider orientation={'vertical'} flexItem />
