@@ -37,6 +37,18 @@ const ImageList = (props: {
     }
   };
 
+  const handleDeleteImage = () => {
+    if (backdropIndex !== null) {
+      if (props.imageUrls.length <= 1) {
+        setOpen(false);
+        setBackdropIndex(null);
+      } else if (backdropIndex === props.imageUrls.length - 1) {
+        changeBackdrop(-1);
+      }
+      props.handleDeleteImage(backdropIndex);
+    }
+  };
+
   return (
     <>
       <Typography
@@ -103,15 +115,7 @@ const ImageList = (props: {
                 <KeyboardArrowRightIcon />
               </IconButton>
               <Box sx={{ pl: 4 }}>
-                <IconButton
-                  onClick={() => {
-                    if (backdropIndex !== null) {
-                      setOpen(false);
-                      setBackdropIndex(null);
-                      props.handleDeleteImage(backdropIndex);
-                    }
-                  }}
-                >
+                <IconButton onClick={handleDeleteImage}>
                   <DeleteIcon />
                 </IconButton>
               </Box>

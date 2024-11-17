@@ -19,7 +19,6 @@ const SubheaderAsideSx = {
   paddingY: 0.5,
 };
 
-// TODO: Deny images w/ an overly tall aspect ratio
 const ArticleAside = (props: { article: Article }) => {
   const router = useRouter();
   return (

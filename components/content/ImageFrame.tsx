@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Skeleton } from '@mui/material';
+import { Box, Skeleton } from '@mui/material';
 import { generateUUID } from '@/utils/uuid';
 import { ImageUrl } from '@/types/Unit';
+
+const maxImageHeight = 300;
 
 const ImageFrame = (props: { image: ImageUrl; alt?: string }) => {
   const frameId = useRef(generateUUID());
@@ -25,24 +27,36 @@ const ImageFrame = (props: { image: ImageUrl; alt?: string }) => {
   }, []);
 
   return (
-    <div id={frameId.current} ref={frameRef}>
+    <Box
+      id={frameId.current}
+      ref={frameRef}
+      sx={{
+        flex: 1,
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
       {loading ? (
         <Skeleton
           variant={'rounded'}
-          width={'100%'}
-          height={frameWidth / props.image.ratio}
+          sx={{
+            width: '100%',
+            height: frameWidth / props.image.ratio,
+            maxHeight: maxImageHeight,
+          }}
         />
       ) : (
         <img
           style={{
             width: '100%',
-            height: 'auto',
+            maxWidth: maxImageHeight * props.image.ratio,
+            maxHeight: maxImageHeight,
           }}
           src={props.image.src}
           alt={props.alt ?? ''}
         />
       )}
-    </div>
+    </Box>
   );
 };
 
