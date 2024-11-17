@@ -38,7 +38,6 @@ import { useAlert } from '@/hooks/useAlert';
 import { UserBase } from '@/types/User';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 
-// TODO: Fix warning: "" was passed as src prop
 const Section = (props: { section: SectionType; author: UserBase | null }) => {
   const [displayAuthor, setDisplayAuthor] = useState(false);
   return (

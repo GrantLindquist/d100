@@ -46,7 +46,7 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
     router.push(link);
   };
 
-  // TODO: Entire app needs a style overhaul
+  // TODO: Make this look better
   return (
     <AlertContext.Provider value={{ displayAlert }}>
       <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
