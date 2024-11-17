@@ -14,7 +14,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Article, Quest, Section as SectionType } from '@/types/Unit';
+import { Article, ImageUrl, Quest, Section as SectionType } from '@/types/Unit';
 import ArticleAside from '@/components/content/ArticleAside';
 import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
@@ -126,6 +126,7 @@ const EditableSection = (props: {
   );
 };
 
+// TODO: Provide option to hide and unhide from players
 export const PageContent = () => {
   const [content, setContent] = useState<Article | Quest | null>(null);
   const [isEditing, setEditing] = useState<boolean>(false);
@@ -213,7 +214,7 @@ export const PageContent = () => {
         await updateDoc(doc(db, 'units', content.id), {
           imageUrls: arrayRemove(imageUrl),
         });
-        await deleteObject(ref(storage, imageUrl));
+        await deleteObject(ref(storage, imageUrl.src));
       } catch (e: any) {
         displayAlert({
           message: 'An error occurred while deleting the image.',
@@ -230,14 +231,23 @@ export const PageContent = () => {
         let urls = [...content.imageUrls];
         const files = event.target.files ?? [];
         for (let file of files) {
-          const imageId = content.id + '-' + generateUUID();
-          const imageRef = ref(storage, `${campaign.id}/${imageId}`);
-          await uploadBytes(imageRef, file);
-          const fileUrl = await getDownloadURL(imageRef);
-          urls.push(fileUrl);
-          await updateDoc(doc(db, 'units', content.id), {
-            imageUrls: arrayUnion(fileUrl),
-          });
+          const img = new Image();
+          img.src = URL.createObjectURL(file);
+          img.onload = async () => {
+            const ratio = img.naturalWidth / img.naturalHeight;
+            const imageId = content.id + '-' + generateUUID();
+            const imageRef = ref(storage, `${campaign.id}/${imageId}`);
+            await uploadBytes(imageRef, file);
+            const fileUrl = await getDownloadURL(imageRef);
+            const imageUrl: ImageUrl = {
+              src: fileUrl,
+              ratio: ratio,
+            };
+            urls.push(imageUrl);
+            await updateDoc(doc(db, 'units', content.id), {
+              imageUrls: arrayUnion(imageUrl),
+            });
+          };
         }
         setContent({
           ...content,

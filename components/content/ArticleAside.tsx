@@ -2,6 +2,7 @@ import { Article } from '@/types/Unit';
 import { Box, Card, Typography } from '@mui/material';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { useRouter } from 'next/navigation';
+import ImageFrame from '@/components/content/ImageFrame';
 
 const HeaderAsideSx = {
   '&:hover': {
@@ -24,13 +25,9 @@ const ArticleAside = (props: { article: Article }) => {
   return (
     <Card>
       {props.article.imageUrls.length > 0 && (
-        <img
-          style={{
-            width: '100%',
-            maxHeight: '400px',
-          }}
-          src={props.article.imageUrls[0]}
-          alt={'Resized Reference Image'}
+        <ImageFrame
+          image={props.article.imageUrls[0]}
+          alt={props.article.title}
         />
       )}
       {/* TODO: Style scroller, maybe globally? */}

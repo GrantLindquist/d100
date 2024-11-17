@@ -12,7 +12,13 @@ import {
   Typography,
 } from '@mui/material';
 
-import { Article, Quest, Unit, UnitDisplayValues } from '@/types/Unit';
+import {
+  Article,
+  ImageUrl,
+  Quest,
+  Unit,
+  UnitDisplayValues,
+} from '@/types/Unit';
 import {
   arrayRemove,
   collection,
@@ -39,17 +45,19 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import { useAlert } from '@/hooks/useAlert';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { deleteObject, listAll, ref } from '@firebase/storage';
+import ImageFrame from '@/components/content/ImageFrame';
 
 const UnitTab = (props: {
   unit: Unit;
   icon: ReactNode;
   isEditing: boolean;
   updateState: (removeId: boolean, unitId: string) => void;
-  imageUrl?: string;
+  imageUrl?: ImageUrl;
 }) => {
   const router = useRouter();
   // Changing this state re-renders entire component
   const [isSelected, setSelected] = useState(false);
+
   const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
     setSelected(checked);
@@ -76,14 +84,7 @@ const UnitTab = (props: {
         }}
       >
         {props.imageUrl && (
-          <img
-            style={{
-              width: '100%',
-              height: 'auto',
-            }}
-            src={props.imageUrl}
-            alt={''}
-          />
+          <ImageFrame image={props.imageUrl} alt={props.unit.title} />
         )}
         <Stack
           direction={'row'}

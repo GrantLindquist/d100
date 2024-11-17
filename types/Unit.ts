@@ -21,7 +21,7 @@ export interface Collection extends Unit {
 
 export interface Article extends Unit {
   sections: Section[];
-  imageUrls: string[];
+  imageUrls: ImageUrl[];
 }
 
 export interface Quest extends Article {
@@ -40,6 +40,12 @@ export interface Section {
 export interface Breadcrumb {
   url: string;
   unitId: string;
+}
+
+export interface ImageUrl {
+  src: string;
+  // height / width
+  ratio: number;
 }
 
 export interface Loot {
