@@ -309,176 +309,189 @@ export const PageContent = () => {
   };
 
   return (
-    <Container>
-      <Box
-        sx={{
-          pt: 12,
-        }}
-      >
-        {content && (
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={3}>
-              <Box
-                sx={{
-                  position: { sm: 'auto', md: 'fixed' },
-                  width: { xs: '100%', md: '23vw', lg: '19vw' },
-                  px: { xs: 3, md: 0 },
-                }}
-              >
-                <ArticleAside article={content} />
-                {isEditing && (
-                  <Box py={1}>
-                    <Button
-                      startIcon={<AddIcon />}
-                      onClick={handleAddSection}
-                      sx={{ color: 'grey' }}
-                    >
-                      Add Section
-                    </Button>
-                    <Button
-                      startIcon={<AddIcon />}
-                      onClick={handleAddImage}
-                      sx={{ color: 'grey' }}
-                    >
-                      Add Reference Image
-                    </Button>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      style={{ display: 'none' }}
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                    />
-                  </Box>
-                )}
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={8}>
-              <Box pl={3}>
-                {content.hidden && (
-                  <Typography color={'grey'} variant={'subtitle2'}>
-                    Hidden from players
-                  </Typography>
-                )}
-                <form ref={sectionsFormRef} onSubmit={handleSave}>
-                  {content.sections.map((section, index) => {
-                    const author =
-                      campaign?.players.find(
-                        (player) => player.id === section.authorId
-                      ) ?? null;
-                    return (
-                      <div key={index} style={{ paddingBottom: '28px' }}>
-                        {/* Section title page anchor */}
-                        <span
-                          id={section.title}
-                          style={{
-                            position: 'relative',
-                            top: -90,
-                          }}
-                        ></span>
-                        <Box
-                          onClick={() => {
-                            if (!section.isHeader) {
-                              setFocusedSectionId(section.id);
-                            }
-                          }}
-                          sx={
-                            isEditing ||
-                            (section.title.length <= 0 &&
-                              section.body.length <= 0)
-                              ? {}
-                              : { display: 'none' }
-                          }
-                        >
-                          <EditableSection section={section} author={author} />
-                        </Box>
-                        <Box sx={!isEditing ? {} : { display: 'none' }}>
-                          <Section section={section} author={author} />
-                        </Box>
-                        {section.isHeader && (
-                          <Divider
-                            sx={
-                              section.body.trim() || isEditing ? { py: 1 } : {}
-                            }
-                          />
-                        )}
-                      </div>
-                    );
-                  })}
-                </form>
-                {content.type === 'quest' && (
-                  <>
-                    {/*<QuestTimeline questId={content.id} />*/}
-                    <div style={{ paddingBottom: '28px' }}>
-                      <LootTable questId={content.id} />
-                    </div>
-                  </>
-                )}
-                {content.imageUrls.length > 0 && (
-                  <div style={{ paddingBottom: '28px' }}>
-                    <ImageList
-                      imageUrls={content.imageUrls}
-                      handleDeleteImage={handleDeleteImage}
-                    />
-                  </div>
-                )}
-              </Box>
-            </Grid>
-          </Grid>
-        )}
-        <Stack
-          direction="column"
-          p={3}
+    <Box
+      sx={{
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: '#111111',
+      }}
+    >
+      <Container>
+        <Box
           sx={{
-            position: 'fixed',
-            right: 16,
-            bottom: 16,
+            pt: 12,
           }}
         >
-          {isEditing ? (
-            <>
-              <Tooltip title={'Save Changes'} placement={'left'}>
-                <IconButton
-                  size="large"
-                  onClick={() => {
-                    sectionsFormRef.current &&
-                      sectionsFormRef.current.dispatchEvent(
-                        new Event('submit', {
-                          cancelable: true,
-                          bubbles: true,
-                        })
-                      );
+          {content && (
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={3}>
+                <Box
+                  sx={{
+                    position: { sm: 'auto', md: 'fixed' },
+                    width: { xs: '100%', md: '23vw', lg: '19vw' },
+                    px: { xs: 3, md: 0 },
                   }}
                 >
-                  <CheckIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip
-                title={`Delete ${focusedSectionTitle}`}
-                placement={'left'}
-              >
-                <span>
+                  <ArticleAside article={content} />
+                  {isEditing && (
+                    <Box py={1}>
+                      <Button
+                        startIcon={<AddIcon />}
+                        onClick={handleAddSection}
+                        sx={{ color: 'grey' }}
+                      >
+                        Add Section
+                      </Button>
+                      <Button
+                        startIcon={<AddIcon />}
+                        onClick={handleAddImage}
+                        sx={{ color: 'grey' }}
+                      >
+                        Add Reference Image
+                      </Button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        style={{ display: 'none' }}
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                      />
+                    </Box>
+                  )}
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={8}>
+                <Box pl={3}>
+                  {content.hidden && (
+                    <Typography color={'grey'} variant={'subtitle2'}>
+                      Hidden from players
+                    </Typography>
+                  )}
+                  <form ref={sectionsFormRef} onSubmit={handleSave}>
+                    {content.sections.map((section, index) => {
+                      const author =
+                        campaign?.players.find(
+                          (player) => player.id === section.authorId
+                        ) ?? null;
+                      return (
+                        <div key={index} style={{ paddingBottom: '28px' }}>
+                          {/* Section title page anchor */}
+                          <span
+                            id={section.title}
+                            style={{
+                              position: 'relative',
+                              top: -90,
+                            }}
+                          ></span>
+                          <Box
+                            onClick={() => {
+                              if (!section.isHeader) {
+                                setFocusedSectionId(section.id);
+                              }
+                            }}
+                            sx={
+                              isEditing ||
+                              (section.title.length <= 0 &&
+                                section.body.length <= 0)
+                                ? {}
+                                : { display: 'none' }
+                            }
+                          >
+                            <EditableSection
+                              section={section}
+                              author={author}
+                            />
+                          </Box>
+                          <Box sx={!isEditing ? {} : { display: 'none' }}>
+                            <Section section={section} author={author} />
+                          </Box>
+                          {section.isHeader && (
+                            <Divider
+                              sx={
+                                section.body.trim() || isEditing
+                                  ? { py: 1 }
+                                  : {}
+                              }
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </form>
+                  {content.type === 'quest' && (
+                    <>
+                      {/*<QuestTimeline questId={content.id} />*/}
+                      <div style={{ paddingBottom: '28px' }}>
+                        <LootTable questId={content.id} />
+                      </div>
+                    </>
+                  )}
+                  {content.imageUrls.length > 0 && (
+                    <div style={{ paddingBottom: '28px' }}>
+                      <ImageList
+                        imageUrls={content.imageUrls}
+                        handleDeleteImage={handleDeleteImage}
+                      />
+                    </div>
+                  )}
+                </Box>
+              </Grid>
+            </Grid>
+          )}
+          <Stack
+            direction="column"
+            p={3}
+            sx={{
+              position: 'fixed',
+              right: 16,
+              bottom: 16,
+            }}
+          >
+            {isEditing ? (
+              <>
+                <Tooltip title={'Save Changes'} placement={'left'}>
                   <IconButton
                     size="large"
-                    disabled={!Boolean(focusedSectionId)}
-                    onClick={handleDeleteSection}
+                    onClick={() => {
+                      sectionsFormRef.current &&
+                        sectionsFormRef.current.dispatchEvent(
+                          new Event('submit', {
+                            cancelable: true,
+                            bubbles: true,
+                          })
+                        );
+                    }}
                   >
-                    <DeleteIcon />
+                    <CheckIcon />
                   </IconButton>
-                </span>
+                </Tooltip>
+                <Tooltip
+                  title={`Delete ${focusedSectionTitle}`}
+                  placement={'left'}
+                >
+                  <span>
+                    <IconButton
+                      size="large"
+                      disabled={!Boolean(focusedSectionId)}
+                      onClick={handleDeleteSection}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </>
+            ) : (
+              <Tooltip title={'Edit Page'} placement={'left'}>
+                <IconButton size="large" onClick={() => setEditing(true)}>
+                  <EditIcon />
+                </IconButton>
               </Tooltip>
-            </>
-          ) : (
-            <Tooltip title={'Edit Page'} placement={'left'}>
-              <IconButton size="large" onClick={() => setEditing(true)}>
-                <EditIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-        </Stack>
-      </Box>
-      {/*<Button onClick={() => console.log(content)}>log state</Button>*/}
-    </Container>
+            )}
+          </Stack>
+        </Box>
+        {/*<Button onClick={() => console.log(content)}>log state</Button>*/}
+      </Container>
+    </Box>
   );
 };

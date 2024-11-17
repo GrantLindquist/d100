@@ -37,6 +37,9 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
       secondary: {
         main: '#FF956F',
       },
+      background: {
+        default: '#000000',
+      },
     },
   });
 

@@ -75,7 +75,7 @@ export default function AuthPage() {
       alignItems="center"
       height="100vh"
       sx={{
-        backgroundImage: 'url(/images/moonbg.svg)',
+        backgroundImage: 'url(/images/bg.svg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}

@@ -1,13 +1,6 @@
 'use client';
 import UserButton from '@/components/UserButton';
-import {
-  AppBar,
-  Divider,
-  Stack,
-  Toolbar,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Divider, Stack, Toolbar, Typography, useTheme } from '@mui/material';
 import SettingsButton from '@/components/SettingsButton';
 import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 import { usePathname, useRouter } from 'next/navigation';
@@ -22,35 +15,33 @@ const Navbar = () => {
   const theme = useTheme();
   if (pathname !== '/') {
     return (
-      <AppBar position={'fixed'} sx={{ backgroundColor: 'black' }}>
-        <Toolbar>
-          <Stack direction={'row'} spacing={2} sx={{ flexGrow: 1 }}>
-            <Typography
-              onClick={() => router.push('/campaigns')}
-              sx={LINK_STYLE}
-              color={theme.palette.primary.main}
-            >
-              All Campaigns
-            </Typography>
-            {campaign && (
-              <>
-                <Divider orientation={'vertical'} flexItem />
-                <NavBreadcrumbs />
-              </>
-            )}
-          </Stack>
-          <Stack direction={'row'} spacing={1}>
-            {isUserDm && (
-              <>
-                <NotificationButton />
-                <SettingsButton />
-                <Divider orientation={'vertical'} flexItem />
-              </>
-            )}
-            <UserButton />
-          </Stack>
-        </Toolbar>
-      </AppBar>
+      <Toolbar sx={{ position: 'absolute', top: 0, width: '100%' }}>
+        <Stack direction={'row'} spacing={2} sx={{ flexGrow: 1 }}>
+          <Typography
+            onClick={() => router.push('/campaigns')}
+            sx={LINK_STYLE}
+            color={theme.palette.primary.main}
+          >
+            All Campaigns
+          </Typography>
+          {campaign && (
+            <>
+              <Divider orientation={'vertical'} flexItem />
+              <NavBreadcrumbs />
+            </>
+          )}
+        </Stack>
+        <Stack direction={'row'} spacing={1}>
+          {isUserDm && (
+            <>
+              <NotificationButton />
+              <SettingsButton />
+              <Divider orientation={'vertical'} flexItem />
+            </>
+          )}
+          <UserButton />
+        </Stack>
+      </Toolbar>
     );
   }
   return null;

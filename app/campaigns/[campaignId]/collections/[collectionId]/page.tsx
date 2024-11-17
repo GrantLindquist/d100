@@ -33,7 +33,7 @@ export default function CollectionPage({
     <Box
       sx={{
         height: '100vh',
-        backgroundImage: 'url(/images/moonbg.svg)',
+        backgroundImage: 'url(/images/bg.svg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
