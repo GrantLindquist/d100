@@ -3,6 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { getStorage } from '@firebase/storage';
 
+// TODO: Update firebase security rules
 const firebaseConfig = {
   apiKey: 'AIzaSyBbuUCNnbzvB-rLv582GLrKkeZEcmUB8k8',
   authDomain: 'dnd-threads.firebaseapp.com',
