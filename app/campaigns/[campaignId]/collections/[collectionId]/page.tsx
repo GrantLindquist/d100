@@ -11,11 +11,7 @@ import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
 
-export default function CollectionPage({
-  params,
-}: {
-  params: { collectionId: string };
-}) {
+export default function CollectionPage() {
   const { user } = useUser();
   const { campaign, setBreadcrumbs } = useCampaign();
   const router = useRouter();
