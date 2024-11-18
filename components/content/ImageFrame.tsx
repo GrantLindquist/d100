@@ -3,7 +3,7 @@ import { Box, Skeleton } from '@mui/material';
 import { generateUUID } from '@/utils/uuid';
 import { ImageUrl } from '@/types/Unit';
 
-const maxImageHeight = 300;
+const maxImageHeight = 350;
 
 const ImageFrame = (props: { image: ImageUrl; alt?: string }) => {
   const frameId = useRef(generateUUID());

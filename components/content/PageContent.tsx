@@ -14,13 +14,25 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Article, ImageUrl, Quest, Section as SectionType } from '@/types/Unit';
+import {
+  Article,
+  Breadcrumb,
+  ImageUrl,
+  Quest,
+  Section as SectionType,
+} from '@/types/Unit';
 import ArticleAside from '@/components/content/ArticleAside';
 import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
-import { arrayRemove, arrayUnion, doc, updateDoc } from '@firebase/firestore';
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  onSnapshot,
+  updateDoc,
+} from '@firebase/firestore';
 import db, { storage } from '@/utils/firebase';
 import {
   deleteObject,
@@ -37,7 +49,10 @@ import AddIcon from '@mui/icons-material/Add';
 import { useAlert } from '@/hooks/useAlert';
 import { UserBase } from '@/types/User';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import { getCurrentUnitIdFromUrl } from '@/utils/url';
+import { usePathname } from 'next/navigation';
 
+// TODO: Fix backdrop inconsistency and make ArticleAside move when entire page moves
 const Section = (props: { section: SectionType; author: UserBase | null }) => {
   const [displayAuthor, setDisplayAuthor] = useState(false);
   return (
@@ -135,16 +150,28 @@ export const PageContent = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { user } = useUser();
-  const { campaign, currentUnit } = useCampaign();
+  const { campaign, setBreadcrumbs } = useCampaign();
   const { displayAlert } = useAlert();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (currentUnit?.type === 'article') {
-      setContent(currentUnit as Article);
-    } else if (currentUnit?.type === 'quest') {
-      setContent(currentUnit as Quest);
+    const url = pathname.split('/').slice(1);
+    const unitId = getCurrentUnitIdFromUrl(url);
+    if (unitId) {
+      const unsubscribe = onSnapshot(
+        doc(db, 'units', unitId),
+        (unitDocSnap) => {
+          if (unitDocSnap.exists()) {
+            setContent(unitDocSnap.data() as Article | Quest);
+            setBreadcrumbs(unitDocSnap.data().breadcrumbs as Breadcrumb[]);
+          }
+        }
+      );
+      return () => {
+        unsubscribe();
+      };
     }
-  }, [currentUnit]);
+  }, []);
 
   const focusedSectionTitle =
     content?.sections.find((section) => section.id == focusedSectionId)

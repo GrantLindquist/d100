@@ -4,12 +4,11 @@ import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import { ReactNode, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
-import { getCampaignIdFromUrl, getCurrentUnitIdFromUrl } from '@/utils/url';
+import { getCampaignIdFromUrl } from '@/utils/url';
 
 const AppWrapper = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
-  const { campaign, setCampaignId, currentUnit, setCurrentUnitId } =
-    useCampaign();
+  const { campaign, setCampaignId } = useCampaign();
   const url = pathname.split('/').slice(1);
 
   useEffect(() => {
@@ -19,12 +18,6 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
       setCampaignId(null);
     } else if (urlCampaignId && urlCampaignId !== campaign?.id) {
       setCampaignId(urlCampaignId);
-    }
-
-    // Set current viewed unit
-    const urlUnitId = getCurrentUnitIdFromUrl(url);
-    if (urlUnitId && urlUnitId !== currentUnit?.id) {
-      setCurrentUnitId(urlUnitId);
     }
   }, [pathname]);
 

@@ -17,6 +17,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { generateUUID } from '@/utils/uuid';
 import {
   Article,
+  Breadcrumb,
   Collection,
   Quest,
   Section,
@@ -34,8 +35,8 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import KeyIcon from '@mui/icons-material/Key';
 import FolderIcon from '@mui/icons-material/Folder';
 
-const CreateUnitModal = () => {
-  const { isUserDm, currentUnit } = useCampaign();
+const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {
+  const { isUserDm } = useCampaign();
 
   const [modalState, setModalState] = useState<UnitType | null>(null);
 
@@ -65,8 +66,8 @@ const CreateUnitModal = () => {
       : '';
 
     const generateBreadcrumbs = (newUnitId: string) => {
-      if (currentUnit?.type === 'collection' && campaign) {
-        let breadcrumbs = currentUnit.breadcrumbs;
+      if (campaign) {
+        let breadcrumbs = props.breadcrumbs;
         breadcrumbs.push({
           unitId: newUnitId,
           url: `/campaigns/${campaign.id}/${modalState}s/${newUnitId}`,

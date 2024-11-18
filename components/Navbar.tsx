@@ -2,11 +2,11 @@
 import UserButton from '@/components/UserButton';
 import { Divider, Stack, Toolbar, Typography, useTheme } from '@mui/material';
 import SettingsButton from '@/components/SettingsButton';
-import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
 import NotificationButton from '@/components/NotificationButton';
 import { LINK_STYLE } from '@/utils/globals';
+import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 
 const Navbar = () => {
   const { campaign, isUserDm } = useCampaign();

@@ -14,6 +14,7 @@ import {
 
 import {
   Article,
+  Collection,
   ImageUrl,
   Quest,
   Unit,
@@ -133,7 +134,7 @@ const UnitTab = (props: {
 
 const CollectionSearch = (props: {
   unitIds: string[];
-  collectionId: string;
+  collection: Collection;
 }) => {
   const { isUserDm, campaign } = useCampaign();
   const { displayAlert } = useAlert();
@@ -200,7 +201,7 @@ const CollectionSearch = (props: {
       try {
         await runTransaction(db, async (transaction) => {
           for (let unitId of selectedUnitIds) {
-            transaction.update(doc(db, 'units', props.collectionId), {
+            transaction.update(doc(db, 'units', props.collection.id), {
               unitIds: arrayRemove(unitId),
             });
           }
@@ -236,7 +237,9 @@ const CollectionSearch = (props: {
           onChange={handleInputChange}
           InputProps={{
             startAdornment: <SearchIcon />,
-            endAdornment: <CreateUnitModal />,
+            endAdornment: (
+              <CreateUnitModal breadcrumbs={props.collection.breadcrumbs} />
+            ),
           }}
           sx={{
             width: '70%',
