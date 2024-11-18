@@ -60,7 +60,7 @@ const PlayerList = (props: { players: UserBase[] }) => {
         displayAlert({
           message: `An error occurred while kicking ${hoveredPlayer.displayName}.`,
           isError: true,
-          errorType: e.name,
+          errorType: e.message,
         });
       }
     }

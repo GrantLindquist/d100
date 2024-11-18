@@ -63,7 +63,7 @@ export default function AuthPage() {
       displayAlert({
         message: 'An error occurred while signing in.',
         isError: true,
-        errorType: e.name,
+        errorType: e.message,
       });
     }
   };

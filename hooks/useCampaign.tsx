@@ -29,6 +29,7 @@ const CampaignContext = createContext<{
   setCurrentUnitId: () => {},
 });
 
+// TODO: Switching between collections displays stale data before rendering new data
 export const CampaignProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useUser();
 

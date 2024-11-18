@@ -41,7 +41,7 @@ const UserButton = () => {
       displayAlert({
         message: 'An error occurred while signing out.',
         isError: true,
-        errorType: e.name,
+        errorType: e.message,
       });
     }
   };
@@ -68,7 +68,7 @@ const UserButton = () => {
         displayAlert({
           message: 'An error occurred while leaving the campaign.',
           isError: true,
-          errorType: e.name,
+          errorType: e.message,
         });
       }
     }

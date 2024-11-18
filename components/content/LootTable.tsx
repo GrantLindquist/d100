@@ -49,7 +49,7 @@ const EditableTable = (props: { questId: string }) => {
       displayAlert({
         message: `An error occurred while loading quest loot.`,
         isError: true,
-        errorType: e.name,
+        errorType: e.message,
       });
     }
   }, [props.questId]);
@@ -86,7 +86,7 @@ const EditableTable = (props: { questId: string }) => {
       displayAlert({
         message: `An error occurred while updating the loot table.`,
         isError: true,
-        errorType: e.name,
+        errorType: e.message,
       });
     }
   };

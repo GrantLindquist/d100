@@ -169,7 +169,7 @@ const CollectionSearch = (props: {
         displayAlert({
           message: 'An error occurred while fetching articles.',
           isError: true,
-          errorType: e.name,
+          errorType: e.message,
         });
       }
     };
@@ -220,7 +220,7 @@ const CollectionSearch = (props: {
         displayAlert({
           message: 'An error occurred while deleting articles.',
           isError: true,
-          errorType: e.name,
+          errorType: e.message,
         });
       }
     }

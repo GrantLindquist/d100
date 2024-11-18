@@ -133,7 +133,7 @@ const CreateUnitModal = () => {
           displayAlert({
             message: `An error occurred while creating the ${modalState}.`,
             isError: true,
-            errorType: e.name,
+            errorType: e.message,
           });
         }
         setModalState(null);
