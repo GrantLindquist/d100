@@ -53,7 +53,7 @@ const PendingPlayerAction = (props: {
       displayAlert({
         message: `An error occurred while accepting the player.`,
         isError: true,
-        errorType: e.name,
+        errorType: e.message,
       });
     }
   };
@@ -67,7 +67,7 @@ const PendingPlayerAction = (props: {
       displayAlert({
         message: `An error occurred while denying the player.`,
         isError: true,
-        errorType: e.name,
+        errorType: e.message,
       });
     }
   };
@@ -123,7 +123,7 @@ const NotificationButton = () => {
         displayAlert({
           message: `An error occurred while loading notifications.`,
           isError: true,
-          errorType: e.name,
+          errorType: e.message,
         });
       }
     }

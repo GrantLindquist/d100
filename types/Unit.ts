@@ -21,7 +21,7 @@ export interface Collection extends Unit {
 
 export interface Article extends Unit {
   sections: Section[];
-  imageUrls: string[];
+  imageUrls: ImageUrl[];
 }
 
 export interface Quest extends Article {
@@ -42,10 +42,17 @@ export interface Breadcrumb {
   unitId: string;
 }
 
-export interface Loot {
-  title: string;
-  currencyType: 'pp' | 'gp' | 'sp' | 'cp';
-  currencyQuantity: number | null;
+export interface ImageUrl {
+  src: string;
+  // height / width
+  ratio: number;
 }
 
-export const CurrencyTypeEnum = ['pp', 'gp', 'sp', 'cp'];
+export interface Loot {
+  id: string;
+  title: string;
+  currencyType: 'pp' | 'gp' | 'sp' | 'cp';
+  currencyQuantity: number;
+}
+
+export type CurrencyType = 'pp' | 'gp' | 'sp' | 'cp';

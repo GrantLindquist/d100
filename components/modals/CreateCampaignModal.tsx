@@ -78,7 +78,7 @@ const CreateCampaignModal = () => {
           displayAlert({
             message: 'An error occurred while creating your campaign.',
             isError: true,
-            errorType: e.name,
+            errorType: e.message,
           });
         }
         setOpen(false);

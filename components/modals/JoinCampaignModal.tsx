@@ -62,7 +62,7 @@ const JoinCampaignModal = () => {
             displayAlert({
               message: 'An error occurred while joining the campaign.',
               isError: true,
-              errorType: e.name,
+              errorType: e.message,
             });
           }
         } else {

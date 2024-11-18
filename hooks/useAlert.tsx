@@ -46,20 +46,24 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
     router.push(link);
   };
 
-  // TODO: Entire app needs a style overhaul
   return (
     <AlertContext.Provider value={{ displayAlert }}>
       <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
         <Box
           sx={{
             width: 500,
-            backgroundColor: 'black',
+            backgroundColor: '#111111',
             borderRadius: '5px',
+            borderWidth: 1,
+            borderStyle: 'solid',
+            paddingY: 0.5,
             ...(alert.isError
               ? {
-                  borderLeft: '8px solid red',
+                  borderColor: 'red',
                 }
-              : {}),
+              : {
+                  borderColor: 'rgba(0, 255, 0, .4)',
+                }),
           }}
         >
           <Stack py={1} px={2} direction={'row'} alignItems={'center'}>

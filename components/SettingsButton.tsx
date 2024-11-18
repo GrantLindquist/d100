@@ -60,7 +60,7 @@ const PlayerList = (props: { players: UserBase[] }) => {
         displayAlert({
           message: `An error occurred while kicking ${hoveredPlayer.displayName}.`,
           isError: true,
-          errorType: e.name,
+          errorType: e.message,
         });
       }
     }
@@ -79,7 +79,7 @@ const PlayerList = (props: { players: UserBase[] }) => {
           return (
             <MenuItem key={index} onMouseOver={() => handleHoverPlayer(player)}>
               <Avatar
-                src={player.photoURL ?? ''}
+                src={player.photoURL ?? '-'}
                 alt={player.displayName ?? 'Player'}
                 sx={{
                   width: 20,

@@ -41,7 +41,7 @@ const UserButton = () => {
       displayAlert({
         message: 'An error occurred while signing out.',
         isError: true,
-        errorType: e.name,
+        errorType: e.message,
       });
     }
   };
@@ -68,7 +68,7 @@ const UserButton = () => {
         displayAlert({
           message: 'An error occurred while leaving the campaign.',
           isError: true,
-          errorType: e.name,
+          errorType: e.message,
         });
       }
     }
@@ -78,7 +78,7 @@ const UserButton = () => {
     <>
       <Button onClick={handleClick}>
         <Avatar
-          src={user?.photoURL ?? ''}
+          src={user?.photoURL ?? '-'}
           alt={'Current User'}
           sx={{
             width: 30,

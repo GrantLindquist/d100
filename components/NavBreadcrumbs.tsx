@@ -1,49 +1,53 @@
 'use client';
-import { Breadcrumbs, Typography } from '@mui/material';
+import { Breadcrumbs, Typography, useTheme } from '@mui/material';
 import { useCampaign } from '@/hooks/useCampaign';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import db from '@/utils/firebase';
 import { doc, getDoc } from '@firebase/firestore';
+import { LINK_STYLE } from '@/utils/globals';
+import { useRouter } from 'next/navigation';
 
 const NavBreadcrumbs = () => {
-  const { currentUnit } = useCampaign();
+  const { breadcrumbs } = useCampaign();
+  const router = useRouter();
+  const theme = useTheme();
   const [crumbTitles, setCrumbTitles] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchCrumbTitles = async () => {
-      if (currentUnit) {
-        let titles = [];
-        for (let crumb of currentUnit.breadcrumbs) {
-          const unitDocSnap = await getDoc(doc(db, 'units', crumb.unitId));
-          if (unitDocSnap.exists()) {
-            titles.push(unitDocSnap.data().title);
-          }
+      let titles = [];
+      for (let crumb of breadcrumbs) {
+        const unitDocSnap = await getDoc(doc(db, 'units', crumb.unitId));
+        if (unitDocSnap.exists()) {
+          titles.push(unitDocSnap.data().title);
         }
-        setCrumbTitles(titles);
       }
+      setCrumbTitles(titles);
     };
     fetchCrumbTitles();
-  }, [currentUnit?.id]);
+  }, [breadcrumbs]);
 
   return (
-    <>
-      {currentUnit && (
-        <Breadcrumbs>
-          {currentUnit.breadcrumbs.map((breadcrumb, index) => {
-            if (index < currentUnit.breadcrumbs.length - 1) {
-              return (
-                <Link key={index} href={breadcrumb.url}>
-                  {crumbTitles[index] ?? '-'}
-                </Link>
-              );
-            } else {
-              return <Typography key={index}>{currentUnit.title}</Typography>;
-            }
-          })}
-        </Breadcrumbs>
-      )}
-    </>
+    <Breadcrumbs>
+      {breadcrumbs.map((crumb, index) => {
+        if (index < breadcrumbs.length - 1) {
+          return (
+            <Typography
+              key={index}
+              sx={LINK_STYLE}
+              color={theme.palette.primary.main}
+              onClick={() => router.push(crumb.url)}
+            >
+              {crumbTitles[index] ?? '-'}
+            </Typography>
+          );
+        } else {
+          return (
+            <Typography key={index}>{crumbTitles[index] ?? '-'}</Typography>
+          );
+        }
+      })}
+    </Breadcrumbs>
   );
 };
 export default NavBreadcrumbs;

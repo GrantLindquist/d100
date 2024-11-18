@@ -10,23 +10,23 @@ import {
   useState,
 } from 'react';
 import { useUser } from '@/hooks/useUser';
-import { doc, getDoc, onSnapshot } from '@firebase/firestore';
+import { doc, getDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { Campaign } from '@/types/Campaign';
-import { Unit } from '@/types/Unit';
+import { Breadcrumb } from '@/types/Unit';
 
 const CampaignContext = createContext<{
   campaign: Campaign | null;
   setCampaignId: Dispatch<SetStateAction<string | null>>;
   isUserDm: boolean | null;
-  currentUnit: Unit | null;
-  setCurrentUnitId: Dispatch<SetStateAction<string | null>>;
+  breadcrumbs: Breadcrumb[];
+  setBreadcrumbs: Dispatch<SetStateAction<Breadcrumb[]>>;
 }>({
   campaign: null,
   setCampaignId: () => {},
   isUserDm: null,
-  currentUnit: null,
-  setCurrentUnitId: () => {},
+  breadcrumbs: [],
+  setBreadcrumbs: () => {},
 });
 
 export const CampaignProvider = ({ children }: { children: ReactNode }) => {
@@ -36,8 +36,7 @@ export const CampaignProvider = ({ children }: { children: ReactNode }) => {
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [isUserDm, setIsUserDm] = useState<boolean | null>(null);
 
-  const [currentUnitId, setCurrentUnitId] = useState<string | null>(null);
-  const [currentUnit, setCurrentUnit] = useState<Unit | null>(null);
+  const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]);
 
   useEffect(() => {
     const fetchCampaign = async () => {
@@ -50,29 +49,11 @@ export const CampaignProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setCampaign(null);
         setIsUserDm(null);
-        setCurrentUnit(null);
+        setBreadcrumbs([]);
       }
     };
     fetchCampaign();
   }, [campaignId, user?.id]);
-
-  useEffect(() => {
-    if (currentUnitId) {
-      const unsubscribe = onSnapshot(
-        doc(db, 'units', currentUnitId),
-        (unitDocSnap) => {
-          if (unitDocSnap.exists()) {
-            setCurrentUnit(unitDocSnap.data() as Unit);
-          } else {
-            setCurrentUnit(null);
-          }
-        }
-      );
-      return () => {
-        unsubscribe();
-      };
-    }
-  }, [campaignId, currentUnitId]);
 
   return (
     <CampaignContext.Provider
@@ -80,8 +61,8 @@ export const CampaignProvider = ({ children }: { children: ReactNode }) => {
         campaign,
         setCampaignId,
         isUserDm,
-        currentUnit,
-        setCurrentUnitId,
+        breadcrumbs,
+        setBreadcrumbs,
       }}
     >
       {children}

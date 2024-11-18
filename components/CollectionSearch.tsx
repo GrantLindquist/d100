@@ -4,15 +4,22 @@ import { ChangeEvent, ReactNode, useEffect, useState } from 'react';
 import {
   Card,
   Checkbox,
-  Fab,
   Grid,
+  IconButton,
   Stack,
   TextField,
   Tooltip,
   Typography,
 } from '@mui/material';
 
-import { Article, Quest, Unit, UnitDisplayValues } from '@/types/Unit';
+import {
+  Article,
+  Collection,
+  ImageUrl,
+  Quest,
+  Unit,
+  UnitDisplayValues,
+} from '@/types/Unit';
 import {
   arrayRemove,
   collection,
@@ -39,17 +46,19 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import { useAlert } from '@/hooks/useAlert';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { deleteObject, listAll, ref } from '@firebase/storage';
+import ImageFrame from '@/components/content/ImageFrame';
 
 const UnitTab = (props: {
   unit: Unit;
   icon: ReactNode;
   isEditing: boolean;
   updateState: (removeId: boolean, unitId: string) => void;
-  imageUrl?: string;
+  imageUrl?: ImageUrl;
 }) => {
   const router = useRouter();
   // Changing this state re-renders entire component
   const [isSelected, setSelected] = useState(false);
+
   const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
     setSelected(checked);
@@ -70,20 +79,13 @@ const UnitTab = (props: {
           cursor: 'pointer',
           ':hover': !props.isEditing
             ? {
-                backgroundColor: 'rgba(255,255,255, .05)',
+                backgroundColor: 'rgba(28, 28, 28)',
               }
             : {},
         }}
       >
         {props.imageUrl && (
-          <img
-            style={{
-              width: '100%',
-              height: 'auto',
-            }}
-            src={props.imageUrl}
-            alt={''}
-          />
+          <ImageFrame image={props.imageUrl} alt={props.unit.title} />
         )}
         <Stack
           direction={'row'}
@@ -132,7 +134,7 @@ const UnitTab = (props: {
 
 const CollectionSearch = (props: {
   unitIds: string[];
-  collectionId: string;
+  collection: Collection;
 }) => {
   const { isUserDm, campaign } = useCampaign();
   const { displayAlert } = useAlert();
@@ -168,7 +170,7 @@ const CollectionSearch = (props: {
         displayAlert({
           message: 'An error occurred while fetching articles.',
           isError: true,
-          errorType: e.name,
+          errorType: e.message,
         });
       }
     };
@@ -199,7 +201,7 @@ const CollectionSearch = (props: {
       try {
         await runTransaction(db, async (transaction) => {
           for (let unitId of selectedUnitIds) {
-            transaction.update(doc(db, 'units', props.collectionId), {
+            transaction.update(doc(db, 'units', props.collection.id), {
               unitIds: arrayRemove(unitId),
             });
           }
@@ -219,7 +221,7 @@ const CollectionSearch = (props: {
         displayAlert({
           message: 'An error occurred while deleting articles.',
           isError: true,
-          errorType: e.name,
+          errorType: e.message,
         });
       }
     }
@@ -235,7 +237,9 @@ const CollectionSearch = (props: {
           onChange={handleInputChange}
           InputProps={{
             startAdornment: <SearchIcon />,
-            endAdornment: <CreateUnitModal />,
+            endAdornment: (
+              <CreateUnitModal breadcrumbs={props.collection.breadcrumbs} />
+            ),
           }}
           sx={{
             width: '70%',
@@ -245,24 +249,23 @@ const CollectionSearch = (props: {
       {units && (
         <>
           <Grid container spacing={1} py={2} pr={1}>
-            {searchQuery.trim().length === 0 &&
-              units
-                .filter((unit) => unit.type === 'collection')
-                .map((collection) => {
-                  if (!isUserDm && collection.hidden) {
-                    return null;
-                  }
-                  return (
-                    <Grid key={collection.id} item xs={12} sm={6} lg={4}>
-                      <UnitTab
-                        unit={collection}
-                        icon={<FolderIcon />}
-                        isEditing={isEditing}
-                        updateState={updateSelectedUnitIds}
-                      />
-                    </Grid>
-                  );
-                })}
+            {units
+              .filter((unit) => unit.type === 'collection')
+              .map((collection) => {
+                if (!isUserDm && collection.hidden) {
+                  return null;
+                }
+                return (
+                  <Grid key={collection.id} item xs={12} sm={6} lg={4}>
+                    <UnitTab
+                      unit={collection}
+                      icon={<FolderIcon />}
+                      isEditing={isEditing}
+                      updateState={updateSelectedUnitIds}
+                    />
+                  </Grid>
+                );
+              })}
           </Grid>
           <Masonry spacing={1} columns={{ xs: 1, sm: 2, md: 3, lg: 4 }}>
             {units
@@ -301,7 +304,6 @@ const CollectionSearch = (props: {
           </Masonry>
           <Stack
             direction="column"
-            spacing={1}
             p={3}
             sx={{
               position: 'fixed',
@@ -311,37 +313,37 @@ const CollectionSearch = (props: {
           >
             {!isEditing ? (
               <Tooltip title={'Edit Items'} placement={'left'}>
-                <Fab size="small" onClick={() => setEditing(true)}>
+                <IconButton size="large" onClick={() => setEditing(true)}>
                   <EditIcon />
-                </Fab>
+                </IconButton>
               </Tooltip>
             ) : (
               <>
                 <Tooltip title={'Save Changes'} placement={'left'}>
-                  <Fab size="small" onClick={() => setEditing(false)}>
+                  <IconButton size="large" onClick={() => setEditing(false)}>
                     <CheckIcon />
-                  </Fab>
+                  </IconButton>
                 </Tooltip>
                 <Tooltip title={'Move Items'} placement={'left'}>
                   <span>
-                    <Fab
-                      size="small"
+                    <IconButton
+                      size="large"
                       disabled
                       onClick={() => setEditing(false)}
                     >
                       <DriveFileMoveIcon />
-                    </Fab>
+                    </IconButton>
                   </span>
                 </Tooltip>
                 <Tooltip title={'Delete Items'} placement={'left'}>
                   <span>
-                    <Fab
-                      size="small"
+                    <IconButton
+                      size="large"
                       disabled={selectedUnitIds.length === 0}
                       onClick={handleDeleteUnits}
                     >
                       <DeleteIcon />
-                    </Fab>
+                    </IconButton>
                   </span>
                 </Tooltip>
               </>

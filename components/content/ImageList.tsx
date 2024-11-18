@@ -13,9 +13,12 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Masonry from '@mui/lab/Masonry';
+import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import { ImageUrl } from '@/types/Unit';
+import ImageFrame from '@/components/content/ImageFrame';
 
 const ImageList = (props: {
-  imageUrls: string[];
+  imageUrls: ImageUrl[];
   handleDeleteImage: Function;
 }) => {
   const [backdropIndex, setBackdropIndex] = useState<number | null>(null);
@@ -34,24 +37,41 @@ const ImageList = (props: {
     }
   };
 
+  const handleDeleteImage = () => {
+    if (backdropIndex !== null) {
+      if (props.imageUrls.length <= 1) {
+        setOpen(false);
+        setBackdropIndex(null);
+      } else if (backdropIndex === props.imageUrls.length - 1) {
+        changeBackdrop(-1);
+      }
+      props.handleDeleteImage(backdropIndex);
+    }
+  };
+
   return (
     <>
-      <Typography id={'Reference Images'} variant={'h4'} pb={1}>
+      <Typography
+        id={'Reference Images'}
+        fontWeight={BOLD_FONT_WEIGHT}
+        variant={'h4'}
+        pb={1}
+      >
         Reference Images
       </Typography>
       <Masonry spacing={1}>
-        {props.imageUrls.map((url, index) => {
+        {props.imageUrls.map((image, index) => {
           return (
-            <img
+            <Box
               key={index}
-              alt={`Reference Image #${index}`}
-              src={url}
               style={{ cursor: 'pointer' }}
               onClick={() => {
                 setOpen(true);
                 setBackdropIndex(index);
               }}
-            />
+            >
+              <ImageFrame image={image} alt={`Enlarged image #${index}`} />
+            </Box>
           );
         })}
       </Masonry>
@@ -68,7 +88,9 @@ const ImageList = (props: {
         >
           <img
             style={{ height: '100%' }}
-            src={backdropIndex !== null ? props.imageUrls[backdropIndex] : ''}
+            src={
+              backdropIndex !== null ? props.imageUrls[backdropIndex].src : '-'
+            }
             alt={'Resized Reference Image'}
           />
           <Paper
@@ -93,15 +115,7 @@ const ImageList = (props: {
                 <KeyboardArrowRightIcon />
               </IconButton>
               <Box sx={{ pl: 4 }}>
-                <IconButton
-                  onClick={() => {
-                    if (backdropIndex !== null) {
-                      setOpen(false);
-                      setBackdropIndex(null);
-                      props.handleDeleteImage(backdropIndex);
-                    }
-                  }}
-                >
+                <IconButton onClick={handleDeleteImage}>
                   <DeleteIcon />
                 </IconButton>
               </Box>

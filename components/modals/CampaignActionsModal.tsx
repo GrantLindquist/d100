@@ -50,7 +50,7 @@ const EditCampaignForm = (props: {
       displayAlert({
         message: 'An error occurred while updating your campaign.',
         isError: true,
-        errorType: e.name,
+        errorType: e.message,
       });
     }
   };
@@ -122,7 +122,7 @@ const DeleteCampaignForm = (props: {
         displayAlert({
           message: 'An error occurred while deleting your campaign.',
           isError: true,
-          errorType: e.name,
+          errorType: e.message,
         });
       }
     }

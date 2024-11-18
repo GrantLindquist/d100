@@ -3,10 +3,13 @@
 import { useEffect, useState } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import CollectionSearch from '@/components/CollectionSearch';
-import { Collection } from '@/types/Unit';
+import { Breadcrumb, Collection } from '@/types/Unit';
 import { useCampaign } from '@/hooks/useCampaign';
 import { useUser } from '@/hooks/useUser';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { getCurrentUnitIdFromUrl } from '@/utils/url';
+import { doc, onSnapshot } from '@firebase/firestore';
+import db from '@/utils/firebase';
 
 export default function CollectionPage({
   params,
@@ -14,8 +17,10 @@ export default function CollectionPage({
   params: { collectionId: string };
 }) {
   const { user } = useUser();
-  const { campaign, currentUnit } = useCampaign();
+  const { campaign, setBreadcrumbs } = useCampaign();
   const router = useRouter();
+  const pathname = usePathname();
+
   const [collection, setCollection] = useState<Collection | null>(null);
 
   useEffect(() => {
@@ -23,30 +28,53 @@ export default function CollectionPage({
       if (!user.campaignIds.includes(campaign.id)) {
         router.push('/campaigns/unauthorized');
       } else {
-        currentUnit?.type === 'collection' &&
-          setCollection(currentUnit as Collection);
+        const url = pathname.split('/').slice(1);
+        const unitId = getCurrentUnitIdFromUrl(url);
+        if (unitId) {
+          const unsubscribe = onSnapshot(
+            doc(db, 'units', unitId),
+            (unitDocSnap) => {
+              if (unitDocSnap.exists()) {
+                setCollection(unitDocSnap.data() as Collection);
+                setBreadcrumbs(unitDocSnap.data().breadcrumbs as Breadcrumb[]);
+              }
+            }
+          );
+          return () => {
+            unsubscribe();
+          };
+        }
       }
     }
-  }, [currentUnit, user?.id, campaign?.id]);
+  }, [user?.id, campaign?.id]);
 
   return (
-    <Container>
-      {collection && (
-        <Box
-          sx={{
-            pt: 12,
-            px: { xs: 2, sm: 4, md: 8, lg: 12 },
-          }}
-        >
-          <Typography align="center" variant={'h3'} py={3}>
-            {collection?.title}
-          </Typography>
-          <CollectionSearch
-            unitIds={collection.unitIds}
-            collectionId={collection.id}
-          />
-        </Box>
-      )}
-    </Container>
+    <Box
+      sx={{
+        height: '100vh',
+        backgroundImage: 'url(/images/bg.svg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <Container>
+        {collection && (
+          <Box
+            sx={{
+              pt: 12,
+              px: { xs: 2, sm: 4, md: 8, lg: 12 },
+            }}
+          >
+            <Typography align="center" variant={'h3'} py={3}>
+              {collection?.title}
+            </Typography>
+            <CollectionSearch
+              unitIds={collection.unitIds}
+              collection={collection}
+            />
+          </Box>
+        )}
+      </Container>
+    </Box>
   );
 }

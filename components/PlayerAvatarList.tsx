@@ -12,7 +12,7 @@ const PlayerAvatarList = (props: { players: UserBase[] }) => {
         <div key={index}>
           <Tooltip title={player.displayName}>
             <Avatar
-              src={player.photoURL ?? ''}
+              src={player.photoURL ?? '-'}
               alt={player.displayName ?? 'Player'}
               sx={{
                 width: 30,
