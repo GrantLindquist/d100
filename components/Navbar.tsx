@@ -15,7 +15,17 @@ const Navbar = () => {
   const theme = useTheme();
   if (pathname !== '/') {
     return (
-      <Toolbar sx={{ position: 'absolute', top: 0, width: '100%' }}>
+      <Toolbar
+        sx={{
+          position: 'fixed',
+          top: 0,
+          width: '100%',
+          backgroundColor:
+            pathname.includes('articles') || pathname.includes('quests')
+              ? '#111111'
+              : 'none',
+        }}
+      >
         <Stack direction={'row'} spacing={2} sx={{ flexGrow: 1 }}>
           <Typography
             onClick={() => router.push('/campaigns')}

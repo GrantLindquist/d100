@@ -52,7 +52,6 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { usePathname } from 'next/navigation';
 
-// TODO: Fix backdrop inconsistency and make ArticleAside move when entire page moves
 const Section = (props: { section: SectionType; author: UserBase | null }) => {
   const [displayAuthor, setDisplayAuthor] = useState(false);
   return (
@@ -337,8 +336,7 @@ export const PageContent = () => {
   return (
     <Box
       sx={{
-        width: '100vw',
-        height: '100vh',
+        minHeight: '100vh',
         backgroundColor: '#111111',
       }}
     >

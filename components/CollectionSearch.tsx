@@ -48,6 +48,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { deleteObject, listAll, ref } from '@firebase/storage';
 import ImageFrame from '@/components/content/ImageFrame';
 
+// TODO: Create a skeleton for this
 const UnitTab = (props: {
   unit: Unit;
   icon: ReactNode;
