@@ -27,6 +27,7 @@ import db from '@/utils/firebase';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useAlert } from '@/hooks/useAlert';
 
+// TODO: When menu opens, scrollbar disappears and shifts ui unexpectedly
 const PlayerList = (props: { players: UserBase[] }) => {
   const { user } = useUser();
   const { campaign } = useCampaign();
