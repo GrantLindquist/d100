@@ -88,7 +88,12 @@ const UserButton = () => {
         />
         {user?.displayName}
       </Button>
-      <Menu anchorEl={anchor} open={open} onClose={handleClose}>
+      <Menu
+        anchorEl={anchor}
+        open={open}
+        onClose={handleClose}
+        disableScrollLock
+      >
         <MenuItem onClick={handleSignOut}>
           <LogoutIcon sx={{ width: 20, height: 20 }} />
           &nbsp; Sign out
