@@ -25,7 +25,7 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
     palette: {
       mode: 'dark',
       primary: {
-        main: '#8970FF',
+        main: '#FF9C6D',
       },
       secondary: {
         main: '#FF956F',

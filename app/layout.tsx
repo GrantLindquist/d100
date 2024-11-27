@@ -6,9 +6,8 @@ import { CampaignProvider } from '@/hooks/useCampaign';
 import { UserProvider } from '@/hooks/useUser';
 import { AlertProvider } from '@/hooks/useAlert';
 
-// TODO: Try some awesome caching
 export const metadata: Metadata = {
-  title: 'D&D Threads',
+  title: 'd100',
   description: 'D&D Threads',
 };
 

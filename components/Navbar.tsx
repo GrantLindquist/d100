@@ -18,6 +18,7 @@ const Navbar = () => {
       <Toolbar
         sx={{
           position: 'fixed',
+          zIndex: 2,
           top: 0,
           width: '100%',
           backgroundColor:
