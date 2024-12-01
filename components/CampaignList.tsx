@@ -174,23 +174,37 @@ const CampaignList = () => {
         Your Campaigns
       </Typography>
       {user && (
-        <Grid container spacing={2}>
-          {user.campaignIds.map((id, index) => (
-            <Grid
-              item
-              key={index}
-              xs={12}
-              md={user.campaignIds.length <= 1 ? 12 : 6}
-              onMouseEnter={() => setHoveredCampaignId(id)}
-              onMouseLeave={() => setHoveredCampaignId(null)}
-            >
-              <CampaignTabMemo
-                campaignId={id}
-                displayActions={id === hoveredCampaignId}
-              />
+        <>
+          {user.campaignIds.length > 0 ? (
+            <Grid container spacing={2}>
+              {user.campaignIds.map((id, index) => (
+                <Grid
+                  item
+                  key={index}
+                  xs={12}
+                  md={user.campaignIds.length <= 1 ? 12 : 6}
+                  onMouseEnter={() => setHoveredCampaignId(id)}
+                  onMouseLeave={() => setHoveredCampaignId(null)}
+                >
+                  <CampaignTabMemo
+                    campaignId={id}
+                    displayActions={id === hoveredCampaignId}
+                  />
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
+          ) : (
+            <Typography
+              align={'center'}
+              variant={'h6'}
+              fontWeight={200}
+              color={'grey'}
+              pt={3}
+            >
+              You currently are not enrolled in any campaigns.
+            </Typography>
+          )}
+        </>
       )}
     </>
   );

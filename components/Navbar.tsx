@@ -8,6 +8,7 @@ import NotificationButton from '@/components/NotificationButton';
 import { LINK_STYLE } from '@/utils/globals';
 import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 
+// TODO: Make responsive
 const Navbar = () => {
   const { campaign, isUserDm } = useCampaign();
   const pathname = usePathname();

@@ -9,6 +9,7 @@ import { Outfit } from 'next/font/google';
 
 const font = Outfit({ subsets: ['latin'] });
 
+// TODO: Use inter as secondary font
 const AppWrapper = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const { campaign, setCampaignId } = useCampaign();

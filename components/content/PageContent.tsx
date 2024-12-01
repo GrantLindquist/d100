@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Checkbox,
+  Chip,
   Container,
   Divider,
   Fade,
@@ -53,6 +54,7 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { usePathname } from 'next/navigation';
 
+// TODO: Add shortcuts for creating sections
 const Section = (props: { section: SectionType; author: UserBase | null }) => {
   const [displayAuthor, setDisplayAuthor] = useState(false);
   return (
@@ -102,41 +104,43 @@ const EditableSection = (props: {
 }) => {
   return (
     <Stack spacing={2}>
-      <TextField
-        name={`title-${props.section.id}`}
-        defaultValue={props.section.title}
-        placeholder="Section Title"
-        sx={{
-          '& .MuiInputBase-input': {
-            fontSize: props.section.isHeader ? '4rem' : '2rem',
-            fontStyle: 'italic',
-            fontWeight: BOLD_FONT_WEIGHT,
-            p: 0,
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            border: 'none',
-          },
-        }}
-        fullWidth
-      />
-      <TextField
-        name={`body-${props.section.id}`}
-        defaultValue={props.section.body}
-        placeholder="Section Body"
-        sx={{
-          '& .MuiInputBase-input': {
-            fontStyle: 'italic',
-          },
-          '& .MuiInputBase-root': {
-            p: 0,
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            border: 'none',
-          },
-        }}
-        multiline
-        fullWidth
-      />
+      <div data-section-id={props.section.id}>
+        <TextField
+          name={`title-${props.section.id}`}
+          defaultValue={props.section.title}
+          placeholder="Section Title"
+          sx={{
+            '& .MuiInputBase-input': {
+              fontSize: props.section.isHeader ? '4rem' : '2rem',
+              fontStyle: 'italic',
+              fontWeight: BOLD_FONT_WEIGHT,
+              p: 0,
+            },
+            '& .MuiOutlinedInput-notchedOutline': {
+              border: 'none',
+            },
+          }}
+          fullWidth
+        />
+        <TextField
+          name={`body-${props.section.id}`}
+          defaultValue={props.section.body}
+          placeholder="Section Body"
+          sx={{
+            '& .MuiInputBase-input': {
+              fontStyle: 'italic',
+            },
+            '& .MuiInputBase-root': {
+              p: 0,
+            },
+            '& .MuiOutlinedInput-notchedOutline': {
+              border: 'none',
+            },
+          }}
+          multiline
+          fullWidth
+        />
+      </div>
     </Stack>
   );
 };
@@ -194,6 +198,60 @@ export const PageContent = () => {
       };
     }
   }, []);
+
+  useEffect(() => {
+    const focusSection = (sectionId: string) => {
+      setFocusedSectionId(sectionId);
+      const element = document.querySelector(
+        `[data-section-id="${sectionId}"]`
+      );
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const inputElement = element?.querySelector('input, textarea');
+      // @ts-ignore
+      inputElement?.focus();
+    };
+
+    const handleArrowKeyNavigation = (event: KeyboardEvent) => {
+      if (content && focusedSectionId && event.key === 'ArrowUp') {
+        event.preventDefault();
+        const currentIndex = content.sections.findIndex(
+          (section) => section.id === focusedSectionId
+        );
+        currentIndex > 0 && focusSection(content.sections[currentIndex - 1].id);
+      } else if (content && focusedSectionId && event.key === 'ArrowDown') {
+        event.preventDefault();
+        const currentIndex = content.sections.findIndex(
+          (section) => section.id === focusedSectionId
+        );
+
+        currentIndex < content.sections.length - 1 &&
+          focusSection(content.sections[currentIndex + 1].id);
+      }
+    };
+
+    document.addEventListener('keydown', handleArrowKeyNavigation);
+
+    return () => {
+      document.removeEventListener('keydown', handleArrowKeyNavigation);
+    };
+  }, [content, focusedSectionId]);
+
+  // useEffect(() => {
+  //   const handleKeyShortcut = (event: KeyboardEvent) => {
+  //     if (event.key === 'Tab' && isEditing) {
+  //       handleAddSection();
+  //     }
+  //     // else if (event.key === 'Enter' && isEditing) {
+  //     //   handleAddSection();
+  //     // }
+  //   };
+  //
+  //   document.addEventListener('keydown', handleKeyShortcut);
+  //
+  //   return () => {
+  //     document.removeEventListener('keydown', handleKeyShortcut);
+  //   };
+  // }, [isEditing]);
 
   const focusedSectionTitle =
     content?.sections.find((section) => section.id == focusedSectionId)
@@ -396,7 +454,13 @@ export const PageContent = () => {
                         onClick={handleAddSection}
                         sx={{ color: 'grey' }}
                       >
-                        Add Section
+                        Add Section&nbsp;&nbsp;
+                        <Chip
+                          label={'TAB'}
+                          variant={'outlined'}
+                          size={'small'}
+                          sx={{ borderRadius: '3px' }}
+                        />
                       </Button>
                       <Button
                         startIcon={<AddIcon />}
