@@ -5,6 +5,9 @@ import { ReactNode, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
 import { getCampaignIdFromUrl } from '@/utils/url';
+import { Outfit } from 'next/font/google';
+
+const font = Outfit({ subsets: ['latin'] });
 
 const AppWrapper = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
@@ -33,6 +36,9 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
       background: {
         default: '#000000',
       },
+    },
+    typography: {
+      fontFamily: `${font.style.fontFamily}`,
     },
     components: {
       MuiCssBaseline: {

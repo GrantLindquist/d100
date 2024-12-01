@@ -10,6 +10,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
+import FunCircle from '@/components/FunCircle';
 
 export default function CollectionPage() {
   const { user } = useUser();
@@ -56,16 +57,7 @@ export default function CollectionPage() {
           position: 'fixed',
         }}
       >
-        <Box
-          sx={{
-            backgroundColor: '#121212',
-            width: '75vh',
-            height: '75vh',
-            borderRadius: '50%',
-            position: 'relative',
-            zIndex: -10,
-          }}
-        ></Box>
+        <FunCircle />
       </Box>
       {collection && (
         <Box

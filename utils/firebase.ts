@@ -4,12 +4,13 @@ import { initializeApp } from 'firebase/app';
 import { getStorage } from '@firebase/storage';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyBbuUCNnbzvB-rLv582GLrKkeZEcmUB8k8',
-  authDomain: 'dnd-threads.firebaseapp.com',
-  projectId: 'dnd-threads',
-  storageBucket: 'dnd-threads.appspot.com',
-  messagingSenderId: '232498748196',
-  appId: '1:232498748196:web:f715947fc5d5ebf12c71b1',
+  apiKey: 'AIzaSyDNQybeR-7zmTCjaUIJUFJBzLBy_8enGJM',
+  authDomain: 'd100-7cb14.firebaseapp.com',
+  projectId: 'd100-7cb14',
+  storageBucket: 'd100-7cb14.firebasestorage.app',
+  messagingSenderId: '4289428408',
+  appId: '1:4289428408:web:20660ae963b4d4790e6d4d',
+  measurementId: 'G-01C1C9G01B',
 };
 
 const app = initializeApp(firebaseConfig);
