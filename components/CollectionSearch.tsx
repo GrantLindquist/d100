@@ -2,6 +2,7 @@
 
 import { ChangeEvent, ReactNode, useEffect, useState } from 'react';
 import {
+  Box,
   Card,
   Checkbox,
   Grid,
@@ -48,6 +49,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { deleteObject, listAll, ref } from '@firebase/storage';
 import ImageFrame from '@/components/content/ImageFrame';
 
+// TODO: Create a skeleton for this
 const UnitTab = (props: {
   unit: Unit;
   icon: ReactNode;
@@ -76,6 +78,9 @@ const UnitTab = (props: {
       <Card
         variant="outlined"
         sx={{
+          backgroundColor: 'rgba(0, 0, 0, 0)',
+          borderColor: '#444444',
+          borderWidth: '2px',
           cursor: 'pointer',
           ':hover': !props.isEditing
             ? {
@@ -132,6 +137,8 @@ const UnitTab = (props: {
   );
 };
 
+// TODO: Non-breaking error when deleting unit
+// TODO: Make this responsive
 const CollectionSearch = (props: {
   unitIds: string[];
   collection: Collection;
@@ -228,49 +235,81 @@ const CollectionSearch = (props: {
     setEditing(false);
   };
 
+  const searchResults =
+    units.filter((unit) => unit.type !== 'collection') ?? [];
+
   return (
-    <>
-      <Stack direction={'row'} justifyContent="center">
-        <TextField
-          variant={'outlined'}
-          size={'small'}
-          onChange={handleInputChange}
-          InputProps={{
-            startAdornment: <SearchIcon />,
-            endAdornment: (
-              <CreateUnitModal breadcrumbs={props.collection.breadcrumbs} />
-            ),
-          }}
+    <Grid container columns={24} spacing={3}>
+      <Grid item md={11}>
+        <Box
           sx={{
-            width: '70%',
+            position: 'fixed',
+            height: '80vh',
+            width: '50vh',
           }}
-        />
-      </Stack>
-      {units && (
-        <>
-          <Grid container spacing={1} py={2} pr={1}>
-            {units
-              .filter((unit) => unit.type === 'collection')
-              .map((collection) => {
-                if (!isUserDm && collection.hidden) {
-                  return null;
-                }
-                return (
-                  <Grid key={collection.id} item xs={12} sm={6} lg={4}>
-                    <UnitTab
-                      unit={collection}
-                      icon={<FolderIcon />}
-                      isEditing={isEditing}
-                      updateState={updateSelectedUnitIds}
-                    />
-                  </Grid>
-                );
-              })}
-          </Grid>
-          <Masonry spacing={1} columns={{ xs: 1, sm: 2, md: 3, lg: 4 }}>
-            {units
-              .filter((unit) => unit.type !== 'collection')
-              .map((unit: Unit, index) => {
+        >
+          <Box pt={12}>
+            <Typography variant={'subtitle2'} color={'grey'}>
+              Collection
+            </Typography>
+            <Typography variant={'h3'} fontWeight={BOLD_FONT_WEIGHT} pb={2}>
+              {props.collection.title}
+            </Typography>
+            <TextField
+              variant={'outlined'}
+              size={'small'}
+              onChange={handleInputChange}
+              fullWidth
+              sx={{
+                paddingBottom: 5,
+              }}
+              InputProps={{
+                startAdornment: <SearchIcon />,
+                endAdornment: (
+                  <CreateUnitModal breadcrumbs={props.collection.breadcrumbs} />
+                ),
+              }}
+            />
+            <Box
+              sx={{
+                maxHeight: '40vh',
+                overflowY: 'auto',
+              }}
+            >
+              {units
+                .filter((unit) => unit.type === 'collection')
+                .map((collection) => {
+                  if (!isUserDm && collection.hidden) {
+                    return null;
+                  }
+                  return (
+                    <Box key={collection.id} py={0.75} maxWidth={'80%'}>
+                      <UnitTab
+                        unit={collection}
+                        icon={<FolderIcon />}
+                        isEditing={isEditing}
+                        updateState={updateSelectedUnitIds}
+                      />
+                    </Box>
+                  );
+                })}
+            </Box>
+          </Box>
+        </Box>
+      </Grid>
+      <Grid item md={13}>
+        {units && (
+          <>
+            <Masonry
+              spacing={1}
+              columns={
+                searchResults.length > 2
+                  ? { xs: 1, sm: 2, md: 3 }
+                  : searchResults.length
+              }
+              sx={{ width: '100% ' }}
+            >
+              {searchResults.map((unit: Unit, index) => {
                 if (
                   unit.title
                     .toLowerCase()
@@ -301,57 +340,58 @@ const CollectionSearch = (props: {
                 }
                 return null;
               })}
-          </Masonry>
-          <Stack
-            direction="column"
-            p={3}
-            sx={{
-              position: 'fixed',
-              right: 16,
-              bottom: 16,
-            }}
-          >
-            {!isEditing ? (
-              <Tooltip title={'Edit Items'} placement={'left'}>
-                <IconButton size="large" onClick={() => setEditing(true)}>
-                  <EditIcon />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <>
-                <Tooltip title={'Save Changes'} placement={'left'}>
-                  <IconButton size="large" onClick={() => setEditing(false)}>
-                    <CheckIcon />
+            </Masonry>
+            <Stack
+              direction="column"
+              p={3}
+              sx={{
+                position: 'fixed',
+                right: 16,
+                bottom: 16,
+              }}
+            >
+              {!isEditing ? (
+                <Tooltip title={'Edit Items'} placement={'left'}>
+                  <IconButton size="large" onClick={() => setEditing(true)}>
+                    <EditIcon />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title={'Move Items'} placement={'left'}>
-                  <span>
-                    <IconButton
-                      size="large"
-                      disabled
-                      onClick={() => setEditing(false)}
-                    >
-                      <DriveFileMoveIcon />
+              ) : (
+                <>
+                  <Tooltip title={'Save Changes'} placement={'left'}>
+                    <IconButton size="large" onClick={() => setEditing(false)}>
+                      <CheckIcon />
                     </IconButton>
-                  </span>
-                </Tooltip>
-                <Tooltip title={'Delete Items'} placement={'left'}>
-                  <span>
-                    <IconButton
-                      size="large"
-                      disabled={selectedUnitIds.length === 0}
-                      onClick={handleDeleteUnits}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-              </>
-            )}
-          </Stack>
-        </>
-      )}
-    </>
+                  </Tooltip>
+                  <Tooltip title={'Move Items'} placement={'left'}>
+                    <span>
+                      <IconButton
+                        size="large"
+                        disabled
+                        onClick={() => setEditing(false)}
+                      >
+                        <DriveFileMoveIcon />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                  <Tooltip title={'Delete Items'} placement={'left'}>
+                    <span>
+                      <IconButton
+                        size="large"
+                        disabled={selectedUnitIds.length === 0}
+                        onClick={handleDeleteUnits}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                </>
+              )}
+            </Stack>
+          </>
+        )}
+      </Grid>
+    </Grid>
   );
 };
 export default CollectionSearch;

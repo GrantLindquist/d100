@@ -4,6 +4,7 @@ import {
   Avatar,
   Box,
   Button,
+  Checkbox,
   Container,
   Divider,
   Fade,
@@ -52,7 +53,6 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { usePathname } from 'next/navigation';
 
-// TODO: Fix backdrop inconsistency and make ArticleAside move when entire page moves
 const Section = (props: { section: SectionType; author: UserBase | null }) => {
   const [displayAuthor, setDisplayAuthor] = useState(false);
   return (
@@ -95,6 +95,7 @@ const Section = (props: { section: SectionType; author: UserBase | null }) => {
   );
 };
 
+// TODO: When editing, the sections scroll above navbar
 const EditableSection = (props: {
   section: SectionType;
   author: UserBase | null;
@@ -140,7 +141,28 @@ const EditableSection = (props: {
   );
 };
 
-// TODO: Provide option to hide and unhide from players
+const HideContentCheckbox = (props: { defaultValue: boolean }) => {
+  const [checked, setChecked] = useState(props.defaultValue);
+
+  return (
+    <Stack direction={'row'} alignItems={'center'}>
+      <Checkbox
+        sx={{
+          paddingY: 0,
+          paddingLeft: 0,
+          paddingRight: 1,
+        }}
+        name={'isHidden'}
+        checked={checked}
+        onChange={(event) => setChecked(event.target.checked)}
+      />
+      <Typography color={'grey'} variant={'subtitle2'}>
+        Hidden from players
+      </Typography>
+    </Stack>
+  );
+};
+
 export const PageContent = () => {
   const [content, setContent] = useState<Article | Quest | null>(null);
   const [isEditing, setEditing] = useState<boolean>(false);
@@ -150,7 +172,7 @@ export const PageContent = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { user } = useUser();
-  const { campaign, setBreadcrumbs } = useCampaign();
+  const { campaign, isUserDm, setBreadcrumbs } = useCampaign();
   const { displayAlert } = useAlert();
   const pathname = usePathname();
 
@@ -201,9 +223,12 @@ export const PageContent = () => {
           })
           .filter((section): section is SectionType => section !== null);
 
+        const isHidden = !!formData.get('isHidden');
+
         const newArticle = {
           ...content,
           sections: sectionsData,
+          hidden: isHidden,
         };
         setContent(newArticle);
         setFocusedSectionId(null);
@@ -211,6 +236,7 @@ export const PageContent = () => {
 
         await updateDoc(doc(db, 'units', content.id), {
           sections: sectionsData,
+          hidden: isHidden,
         });
       } catch (e: any) {
         displayAlert({
@@ -337,8 +363,7 @@ export const PageContent = () => {
   return (
     <Box
       sx={{
-        width: '100vw',
-        height: '100vh',
+        minHeight: '100vh',
         backgroundColor: '#111111',
       }}
     >
@@ -353,12 +378,17 @@ export const PageContent = () => {
               <Grid item xs={12} md={3}>
                 <Box
                   sx={{
-                    position: { sm: 'auto', md: 'fixed' },
-                    width: { xs: '100%', md: '23vw', lg: '19vw' },
-                    px: { xs: 3, md: 0 },
+                    position: { xs: 'auto', md: 'fixed' },
+                    width: { md: '23vw', lg: '19vw' },
                   }}
                 >
-                  <ArticleAside article={content} />
+                  <Box
+                    sx={{
+                      display: { xs: 'none', md: 'block' },
+                    }}
+                  >
+                    <ArticleAside article={content} />
+                  </Box>
                   {isEditing && (
                     <Box py={1}>
                       <Button
@@ -389,12 +419,32 @@ export const PageContent = () => {
               </Grid>
               <Grid item xs={12} md={8}>
                 <Box pl={3}>
-                  {content.hidden && (
-                    <Typography color={'grey'} variant={'subtitle2'}>
-                      Hidden from players
-                    </Typography>
-                  )}
                   <form ref={sectionsFormRef} onSubmit={handleSave}>
+                    <Box
+                      sx={{
+                        marginTop: -4,
+                      }}
+                    >
+                      {isEditing ? (
+                        <>
+                          {isUserDm && (
+                            <HideContentCheckbox
+                              defaultValue={content.hidden}
+                            />
+                          )}
+                        </>
+                      ) : (
+                        <Typography
+                          color={'grey'}
+                          variant={'subtitle2'}
+                          sx={{
+                            opacity: content.hidden ? 1 : 0,
+                          }}
+                        >
+                          Hidden from players
+                        </Typography>
+                      )}
+                    </Box>
                     {content.sections.map((section, index) => {
                       const author =
                         campaign?.players.find(

@@ -152,6 +152,7 @@ const NotificationButton = () => {
         onClose={() => setAnchor(null)}
         transformOrigin={{ horizontal: 'center', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+        disableScrollLock
       >
         <Box sx={{ maxWidth: 300, maxHeight: 300 }}>
           {notifications.length > 0 ? (

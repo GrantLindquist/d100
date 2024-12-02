@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Container, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import CollectionSearch from '@/components/CollectionSearch';
 import { Breadcrumb, Collection } from '@/types/Unit';
 import { useCampaign } from '@/hooks/useCampaign';
@@ -10,12 +10,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
+import FunCircle from '@/components/FunCircle';
 
-export default function CollectionPage({
-  params,
-}: {
-  params: { collectionId: string };
-}) {
+export default function CollectionPage() {
   const { user } = useUser();
   const { campaign, setBreadcrumbs } = useCampaign();
   const router = useRouter();
@@ -49,32 +46,34 @@ export default function CollectionPage({
   }, [user?.id, campaign?.id]);
 
   return (
-    <Box
-      sx={{
-        height: '100vh',
-        backgroundImage: 'url(/images/bg.svg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      <Container>
-        {collection && (
-          <Box
-            sx={{
-              pt: 12,
-              px: { xs: 2, sm: 4, md: 8, lg: 12 },
-            }}
-          >
-            <Typography align="center" variant={'h3'} py={3}>
-              {collection?.title}
-            </Typography>
-            <CollectionSearch
-              unitIds={collection.unitIds}
-              collection={collection}
-            />
-          </Box>
-        )}
-      </Container>
-    </Box>
+    <>
+      <Box
+        sx={{
+          height: '100vh',
+          width: '100vw',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          position: 'fixed',
+        }}
+      >
+        <FunCircle />
+      </Box>
+      {collection && (
+        <Box
+          sx={{
+            pt: 12,
+            px: { xs: 2, sm: 4, md: 8, lg: 12 },
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
+          <CollectionSearch
+            unitIds={collection.unitIds}
+            collection={collection}
+          />
+        </Box>
+      )}
+    </>
   );
 }

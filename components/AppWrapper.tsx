@@ -5,6 +5,9 @@ import { ReactNode, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
 import { getCampaignIdFromUrl } from '@/utils/url';
+import { Outfit } from 'next/font/google';
+
+const font = Outfit({ subsets: ['latin'] });
 
 const AppWrapper = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
@@ -25,13 +28,38 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
     palette: {
       mode: 'dark',
       primary: {
-        main: '#8970FF',
+        main: '#FF9C6D',
       },
       secondary: {
         main: '#FF956F',
       },
       background: {
         default: '#000000',
+      },
+    },
+    typography: {
+      fontFamily: `${font.style.fontFamily}`,
+    },
+    components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          html: {
+            // Scrollbar styles
+            scrollbarColor: '#666666 rgba(0, 0, 0, 0)', // thumb and track colors
+
+            '&::-webkit-scrollbar': {
+              width: '8px', // Width of the scrollbar
+              height: '8px', // Height of the scrollbar (for horizontal scroll)
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#666666', // Thumb color
+              borderRadius: '8px', // Round the thumb edges
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: 'rgba(0, 0, 0, 0)', // Track color
+            },
+          },
+        },
       },
     },
   });

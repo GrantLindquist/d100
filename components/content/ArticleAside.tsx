@@ -29,7 +29,6 @@ const ArticleAside = (props: { article: Article }) => {
           alt={props.article.title}
         />
       )}
-      {/* TODO: Style scroller, maybe globally? */}
       <Box
         py={2}
         px={3}

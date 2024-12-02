@@ -114,6 +114,7 @@ const PlayerList = (props: { players: UserBase[] }) => {
                 onClose={() => setAnchor(null)}
                 transformOrigin={{ horizontal: 'center', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+                disableScrollLock
               >
                 <MenuItem onClick={handleKickPlayer}>Kick Player</MenuItem>
                 <MenuItem disabled>Change Permissions</MenuItem>
@@ -178,6 +179,7 @@ const SettingsButton = () => {
         onClose={handleClose}
         transformOrigin={{ horizontal: 'center', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+        disableScrollLock
       >
         {campaign && players.length > 1 && (
           <div>

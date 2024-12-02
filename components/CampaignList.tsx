@@ -120,6 +120,7 @@ const CampaignTab = (props: {
                     onClose={() => setAnchor(null)}
                     transformOrigin={{ horizontal: 'center', vertical: 'top' }}
                     anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+                    disableScrollLock
                   >
                     <MenuItem
                       disabled={user?.id !== campaign.dmId}
