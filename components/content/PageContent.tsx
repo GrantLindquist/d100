@@ -63,7 +63,7 @@ const Section = (props: { section: SectionType; author: UserBase | null }) => {
       onMouseEnter={() => setDisplayAuthor(true)}
       onMouseLeave={() => setDisplayAuthor(false)}
     >
-      <Stack spacing={2} flexGrow={1}>
+      <Box flexGrow={1}>
         <Typography
           fontWeight={BOLD_FONT_WEIGHT}
           variant={props.section.isHeader ? 'h2' : 'h4'}
@@ -77,7 +77,7 @@ const Section = (props: { section: SectionType; author: UserBase | null }) => {
         >
           {props.section.body}
         </Typography>
-      </Stack>
+      </Box>
       {props.author?.photoURL && (
         <Tooltip title={`Author: ${props.author.displayName}`}>
           <Fade in={displayAuthor}>
@@ -103,45 +103,43 @@ const EditableSection = (props: {
   author: UserBase | null;
 }) => {
   return (
-    <Stack spacing={2}>
-      <div data-section-id={props.section.id}>
-        <TextField
-          name={`title-${props.section.id}`}
-          defaultValue={props.section.title}
-          placeholder="Section Title"
-          sx={{
-            '& .MuiInputBase-input': {
-              fontSize: props.section.isHeader ? '4rem' : '2rem',
-              fontStyle: 'italic',
-              fontWeight: BOLD_FONT_WEIGHT,
-              p: 0,
-            },
-            '& .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-          }}
-          fullWidth
-        />
-        <TextField
-          name={`body-${props.section.id}`}
-          defaultValue={props.section.body}
-          placeholder="Section Body"
-          sx={{
-            '& .MuiInputBase-input': {
-              fontStyle: 'italic',
-            },
-            '& .MuiInputBase-root': {
-              p: 0,
-            },
-            '& .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-          }}
-          multiline
-          fullWidth
-        />
-      </div>
-    </Stack>
+    <div data-section-id={props.section.id}>
+      <TextField
+        name={`title-${props.section.id}`}
+        defaultValue={props.section.title}
+        placeholder="Section Title"
+        sx={{
+          '& .MuiInputBase-input': {
+            fontSize: props.section.isHeader ? '4rem' : '2rem',
+            fontStyle: 'italic',
+            fontWeight: BOLD_FONT_WEIGHT,
+            p: 0,
+          },
+          '& .MuiOutlinedInput-notchedOutline': {
+            border: 'none',
+          },
+        }}
+        fullWidth
+      />
+      <TextField
+        name={`body-${props.section.id}`}
+        defaultValue={props.section.body}
+        placeholder="Section Body"
+        sx={{
+          '& .MuiInputBase-input': {
+            fontStyle: 'italic',
+          },
+          '& .MuiInputBase-root': {
+            p: 0,
+          },
+          '& .MuiOutlinedInput-notchedOutline': {
+            border: 'none',
+          },
+        }}
+        multiline
+        fullWidth
+      />
+    </div>
   );
 };
 

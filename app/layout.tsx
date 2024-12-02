@@ -9,6 +9,9 @@ import { AlertProvider } from '@/hooks/useAlert';
 export const metadata: Metadata = {
   title: 'd100',
   description: 'D&D Threads',
+  icons: {
+    icon: '/d100.svg',
+  },
 };
 
 export default function RootLayout({

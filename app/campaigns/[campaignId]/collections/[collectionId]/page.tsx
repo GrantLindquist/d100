@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, useMediaQuery, useTheme } from '@mui/material';
 import CollectionSearch from '@/components/CollectionSearch';
 import { Breadcrumb, Collection } from '@/types/Unit';
 import { useCampaign } from '@/hooks/useCampaign';
@@ -17,6 +17,9 @@ export default function CollectionPage() {
   const { campaign, setBreadcrumbs } = useCampaign();
   const router = useRouter();
   const pathname = usePathname();
+
+  const theme = useTheme();
+  const displayFunCircle = useMediaQuery(theme.breakpoints.up('md'));
 
   const [collection, setCollection] = useState<Collection | null>(null);
 
@@ -57,7 +60,7 @@ export default function CollectionPage() {
           position: 'fixed',
         }}
       >
-        <FunCircle />
+        {displayFunCircle && <FunCircle />}
       </Box>
       {collection && (
         <Box

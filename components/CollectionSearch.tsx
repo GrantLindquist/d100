@@ -11,6 +11,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useTheme,
 } from '@mui/material';
 
 import {
@@ -138,13 +139,13 @@ const UnitTab = (props: {
 };
 
 // TODO: Non-breaking error when deleting unit
-// TODO: Make this responsive
 const CollectionSearch = (props: {
   unitIds: string[];
   collection: Collection;
 }) => {
   const { isUserDm, campaign } = useCampaign();
   const { displayAlert } = useAlert();
+  const theme = useTheme();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [units, setUnits] = useState<Unit[]>([]);
@@ -243,12 +244,14 @@ const CollectionSearch = (props: {
       <Grid item md={11}>
         <Box
           sx={{
-            position: 'fixed',
-            height: '80vh',
-            width: '50vh',
+            [theme.breakpoints.up('md')]: {
+              position: 'fixed',
+              height: '80vh',
+              width: '50vh',
+            },
           }}
         >
-          <Box pt={12}>
+          <Box pt={{ md: 12 }}>
             <Typography variant={'subtitle2'} color={'grey'}>
               Collection
             </Typography>
