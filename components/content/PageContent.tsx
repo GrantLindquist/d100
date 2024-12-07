@@ -54,7 +54,7 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { usePathname } from 'next/navigation';
 
-// TODO: Add shortcuts for creating sections
+// TODO: Add option to hide individual sections
 const Section = (props: { section: SectionType; author: UserBase | null }) => {
   const [displayAuthor, setDisplayAuthor] = useState(false);
   return (
@@ -103,7 +103,7 @@ const EditableSection = (props: {
   author: UserBase | null;
 }) => {
   return (
-    <div data-section-id={props.section.id}>
+    <>
       <TextField
         name={`title-${props.section.id}`}
         defaultValue={props.section.title}
@@ -121,25 +121,27 @@ const EditableSection = (props: {
         }}
         fullWidth
       />
-      <TextField
-        name={`body-${props.section.id}`}
-        defaultValue={props.section.body}
-        placeholder="Section Body"
-        sx={{
-          '& .MuiInputBase-input': {
-            fontStyle: 'italic',
-          },
-          '& .MuiInputBase-root': {
-            p: 0,
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            border: 'none',
-          },
-        }}
-        multiline
-        fullWidth
-      />
-    </div>
+      <div data-section-id={props.section.id}>
+        <TextField
+          name={`body-${props.section.id}`}
+          defaultValue={props.section.body}
+          placeholder="Section Body"
+          sx={{
+            '& .MuiInputBase-input': {
+              fontStyle: 'italic',
+            },
+            '& .MuiInputBase-root': {
+              p: 0,
+            },
+            '& .MuiOutlinedInput-notchedOutline': {
+              border: 'none',
+            },
+          }}
+          multiline
+          fullWidth
+        />
+      </div>
+    </>
   );
 };
 
@@ -209,14 +211,22 @@ export const PageContent = () => {
       inputElement?.focus();
     };
 
-    const handleArrowKeyNavigation = (event: KeyboardEvent) => {
+    const handleKeyShortcut = (event: KeyboardEvent) => {
+      if (event.key === 'Tab' && isEditing) {
+        const focusedSectionIndex =
+          content?.sections.findIndex(
+            (section) => section.id === focusedSectionId
+          ) ?? null;
+        focusedSectionIndex && handleAddSection(focusedSectionIndex);
+      }
       if (content && focusedSectionId && event.key === 'ArrowUp') {
         event.preventDefault();
         const currentIndex = content.sections.findIndex(
           (section) => section.id === focusedSectionId
         );
         currentIndex > 0 && focusSection(content.sections[currentIndex - 1].id);
-      } else if (content && focusedSectionId && event.key === 'ArrowDown') {
+      }
+      if (content && focusedSectionId && event.key === 'ArrowDown') {
         event.preventDefault();
         const currentIndex = content.sections.findIndex(
           (section) => section.id === focusedSectionId
@@ -227,29 +237,12 @@ export const PageContent = () => {
       }
     };
 
-    document.addEventListener('keydown', handleArrowKeyNavigation);
+    document.addEventListener('keydown', handleKeyShortcut);
 
     return () => {
-      document.removeEventListener('keydown', handleArrowKeyNavigation);
+      document.removeEventListener('keydown', handleKeyShortcut);
     };
   }, [content, focusedSectionId]);
-
-  // useEffect(() => {
-  //   const handleKeyShortcut = (event: KeyboardEvent) => {
-  //     if (event.key === 'Tab' && isEditing) {
-  //       handleAddSection();
-  //     }
-  //     // else if (event.key === 'Enter' && isEditing) {
-  //     //   handleAddSection();
-  //     // }
-  //   };
-  //
-  //   document.addEventListener('keydown', handleKeyShortcut);
-  //
-  //   return () => {
-  //     document.removeEventListener('keydown', handleKeyShortcut);
-  //   };
-  // }, [isEditing]);
 
   const focusedSectionTitle =
     content?.sections.find((section) => section.id == focusedSectionId)
@@ -371,7 +364,7 @@ export const PageContent = () => {
     }
   };
 
-  const handleAddSection = () => {
+  const handleAddSection = (index?: number) => {
     if (content && user) {
       const newSection = {
         id: generateUUID(),
@@ -381,15 +374,30 @@ export const PageContent = () => {
         authorId: user.id,
       };
 
-      const newArticle = {
-        ...content,
-        sections: [...content.sections, newSection],
-      };
+      const newArticle =
+        index !== undefined
+          ? {
+              ...content,
+              sections: [
+                ...content.sections.slice(0, index + 1),
+                newSection,
+                ...content.sections.slice(index + 1),
+              ],
+            }
+          : {
+              ...content,
+              sections: [...content.sections, newSection],
+            };
+      console.log(newArticle);
       setContent(newArticle);
     }
   };
 
-  // TODO: Data mismatch between content state and firebase -- also switches between isEditing change
+  /*
+   * TODO: Data mismatch between content state and firebase -- also switches between isEditing change
+   *  NOTE: this **MAY** be caused by the fact that section is not "focused" on unless title is clicked.
+   *  clicking on body does not focus section
+   */
   const handleDeleteSection = async () => {
     if (content) {
       try {
@@ -449,7 +457,7 @@ export const PageContent = () => {
                     <Box py={1}>
                       <Button
                         startIcon={<AddIcon />}
-                        onClick={handleAddSection}
+                        onClick={() => handleAddSection()}
                         sx={{ color: 'grey' }}
                       >
                         Add Section&nbsp;&nbsp;
@@ -513,7 +521,7 @@ export const PageContent = () => {
                           (player) => player.id === section.authorId
                         ) ?? null;
                       return (
-                        <div key={index} style={{ paddingBottom: '28px' }}>
+                        <div key={section.id} style={{ paddingBottom: '28px' }}>
                           {/* Section title page anchor */}
                           <span
                             id={section.title}

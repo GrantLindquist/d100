@@ -97,7 +97,7 @@ const UserButton = () => {
           }}
         />
         {displayUserName && (
-          <Typography color={'grey'} variant={'subtitle2'}>
+          <Typography color={'white'} variant={'subtitle2'}>
             {user?.displayName}
           </Typography>
         )}
