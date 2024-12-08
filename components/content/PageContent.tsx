@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  Avatar,
   Box,
   Button,
   Checkbox,
@@ -53,15 +52,23 @@ import { UserBase } from '@/types/User';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { usePathname } from 'next/navigation';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-// TODO: Add option to hide individual sections
-const Section = (props: { section: SectionType; author: UserBase | null }) => {
-  const [displayAuthor, setDisplayAuthor] = useState(false);
+const Section = (props: {
+  section: SectionType;
+  author: UserBase | null;
+  handleHideSection: Function;
+}) => {
+  const { isUserDm } = useCampaign();
+  const [displayHideButton, setDisplayHideButton] = useState(
+    props.section.hidden
+  );
+
   return (
     <Stack
       direction={'row'}
-      onMouseEnter={() => setDisplayAuthor(true)}
-      onMouseLeave={() => setDisplayAuthor(false)}
+      onMouseEnter={() => !props.section.hidden && setDisplayHideButton(true)}
+      onMouseLeave={() => !props.section.hidden && setDisplayHideButton(false)}
     >
       <Box flexGrow={1}>
         <Typography
@@ -78,18 +85,17 @@ const Section = (props: { section: SectionType; author: UserBase | null }) => {
           {props.section.body}
         </Typography>
       </Box>
-      {props.author?.photoURL && (
-        <Tooltip title={`Author: ${props.author.displayName}`}>
-          <Fade in={displayAuthor}>
-            <Avatar
-              src={props.author.photoURL}
-              alt={props.author.displayName ?? 'Player'}
-              sx={{
-                marginTop: 1,
-                width: 30,
-                height: 30,
-              }}
-            />
+      {isUserDm && (
+        <Tooltip
+          title={props.section.hidden ? 'Hidden from players' : 'Hide Section'}
+        >
+          <Fade in={displayHideButton}>
+            <IconButton
+              onClick={() => props.handleHideSection(props.section.id)}
+              sx={{ height: 32 }}
+            >
+              <VisibilityOffIcon sx={{ color: 'grey' }} />
+            </IconButton>
           </Fade>
         </Tooltip>
       )}
@@ -388,8 +394,26 @@ export const PageContent = () => {
               ...content,
               sections: [...content.sections, newSection],
             };
-      console.log(newArticle);
       setContent(newArticle);
+    }
+  };
+
+  const handleHideSection = async (sectionId: string) => {
+    if (content) {
+      const sectionIndex =
+        content?.sections.findIndex((section) => section.id === sectionId) ??
+        null;
+      const newSections = [
+        ...content.sections.slice(0, sectionIndex),
+        {
+          ...content.sections[sectionIndex],
+          hidden: !content.sections[sectionIndex].hidden,
+        },
+        ...content.sections.slice(sectionIndex + 1),
+      ];
+      await updateDoc(doc(db, 'units', content.id), {
+        sections: newSections,
+      });
     }
   };
 
@@ -521,7 +545,14 @@ export const PageContent = () => {
                           (player) => player.id === section.authorId
                         ) ?? null;
                       return (
-                        <div key={section.id} style={{ paddingBottom: '28px' }}>
+                        <Box
+                          key={section.id}
+                          sx={{
+                            paddingBottom: '28px',
+                            display:
+                              !section.hidden || isUserDm ? 'auto' : 'none',
+                          }}
+                        >
                           {/* Section title page anchor */}
                           <span
                             id={section.title}
@@ -550,7 +581,11 @@ export const PageContent = () => {
                             />
                           </Box>
                           <Box sx={!isEditing ? {} : { display: 'none' }}>
-                            <Section section={section} author={author} />
+                            <Section
+                              section={section}
+                              author={author}
+                              handleHideSection={handleHideSection}
+                            />
                           </Box>
                           {section.isHeader && (
                             <Divider
@@ -561,7 +596,7 @@ export const PageContent = () => {
                               }
                             />
                           )}
-                        </div>
+                        </Box>
                       );
                     })}
                   </form>
