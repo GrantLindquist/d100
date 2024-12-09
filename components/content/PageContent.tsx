@@ -53,6 +53,7 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { usePathname } from 'next/navigation';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { outfit } from '@/components/AppWrapper';
 
 const Section = (props: {
   section: SectionType;
@@ -74,18 +75,22 @@ const Section = (props: {
         <Typography
           fontWeight={BOLD_FONT_WEIGHT}
           variant={props.section.isHeader ? 'h2' : 'h4'}
+          sx={{
+            fontFamily: outfit.style.fontFamily,
+          }}
         >
           {props.section.title}
         </Typography>
         <Typography
           sx={{
             whiteSpace: 'pre-line',
+            fontFamily: outfit.style.fontFamily,
           }}
         >
           {props.section.body}
         </Typography>
       </Box>
-      {isUserDm && (
+      {isUserDm && !props.section.isHeader && (
         <Tooltip
           title={props.section.hidden ? 'Hidden from players' : 'Hide Section'}
         >
@@ -103,7 +108,6 @@ const Section = (props: {
   );
 };
 
-// TODO: When editing, the sections scroll above navbar
 const EditableSection = (props: {
   section: SectionType;
   author: UserBase | null;
@@ -120,6 +124,7 @@ const EditableSection = (props: {
             fontStyle: 'italic',
             fontWeight: BOLD_FONT_WEIGHT,
             p: 0,
+            fontFamily: outfit.style.fontFamily,
           },
           '& .MuiOutlinedInput-notchedOutline': {
             border: 'none',
@@ -133,6 +138,7 @@ const EditableSection = (props: {
           defaultValue={props.section.body}
           placeholder="Section Body"
           sx={{
+            fontFamily: outfit.style.fontFamily,
             '& .MuiInputBase-input': {
               fontStyle: 'italic',
             },
@@ -173,6 +179,7 @@ const HideContentCheckbox = (props: { defaultValue: boolean }) => {
   );
 };
 
+// TODO: Remove isEditing state and make page always able to edit + add save option
 export const PageContent = () => {
   const [content, setContent] = useState<Article | Quest | null>(null);
   const [isEditing, setEditing] = useState<boolean>(false);

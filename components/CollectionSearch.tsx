@@ -49,6 +49,7 @@ import { useAlert } from '@/hooks/useAlert';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { deleteObject, listAll, ref } from '@firebase/storage';
 import ImageFrame from '@/components/content/ImageFrame';
+import { outfit } from '@/components/AppWrapper';
 
 // TODO: Create a skeleton for this
 const UnitTab = (props: {
@@ -138,7 +139,6 @@ const UnitTab = (props: {
   );
 };
 
-// TODO: Non-breaking error when deleting unit
 const CollectionSearch = (props: {
   unitIds: string[];
   collection: Collection;
@@ -255,7 +255,14 @@ const CollectionSearch = (props: {
             <Typography variant={'subtitle2'} color={'grey'}>
               Collection
             </Typography>
-            <Typography variant={'h3'} fontWeight={BOLD_FONT_WEIGHT} pb={2}>
+            <Typography
+              variant={'h3'}
+              fontWeight={BOLD_FONT_WEIGHT}
+              pb={2}
+              sx={{
+                fontFamily: outfit.style.fontFamily,
+              }}
+            >
               {props.collection.title}
             </Typography>
             <TextField

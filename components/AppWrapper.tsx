@@ -7,9 +7,8 @@ import { useCampaign } from '@/hooks/useCampaign';
 import { getCampaignIdFromUrl } from '@/utils/url';
 import { Outfit } from 'next/font/google';
 
-const font = Outfit({ subsets: ['latin'] });
+export const outfit = Outfit({ subsets: ['latin'] });
 
-// TODO: Use inter as secondary font
 const AppWrapper = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const { campaign, setCampaignId } = useCampaign();
@@ -35,11 +34,8 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
         main: '#FF956F',
       },
       background: {
-        default: '#000000',
+        default: '#010101',
       },
-    },
-    typography: {
-      fontFamily: `${font.style.fontFamily}`,
     },
     components: {
       MuiCssBaseline: {

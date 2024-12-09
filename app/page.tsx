@@ -74,11 +74,6 @@ export default function AuthPage() {
       justifyContent="center"
       alignItems="center"
       height="100vh"
-      sx={{
-        backgroundImage: 'url(/images/bg.svg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
     >
       <Card elevation={3} sx={{ p: 4, width: 400 }}>
         <CardContent>

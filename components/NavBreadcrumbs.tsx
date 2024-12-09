@@ -28,7 +28,17 @@ const NavBreadcrumbs = () => {
   }, [breadcrumbs]);
 
   return (
-    <Breadcrumbs>
+    <Breadcrumbs
+      separator={
+        <Typography
+          sx={{
+            color: 'grey',
+          }}
+        >
+          {'>'}
+        </Typography>
+      }
+    >
       {breadcrumbs.map((crumb, index) => {
         if (index < breadcrumbs.length - 1) {
           return (

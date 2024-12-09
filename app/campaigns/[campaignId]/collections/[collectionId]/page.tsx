@@ -10,7 +10,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
-import FunCircle from '@/components/FunCircle';
 
 export default function CollectionPage() {
   const { user } = useUser();
@@ -19,7 +18,7 @@ export default function CollectionPage() {
   const pathname = usePathname();
 
   const theme = useTheme();
-  const displayFunCircle = useMediaQuery(theme.breakpoints.up('md'));
+  const displayBgImage = useMediaQuery(theme.breakpoints.up('md'));
 
   const [collection, setCollection] = useState<Collection | null>(null);
 
@@ -60,7 +59,9 @@ export default function CollectionPage() {
           position: 'fixed',
         }}
       >
-        {displayFunCircle && <FunCircle />}
+        {displayBgImage && (
+          <img src={'/d100-grey.svg'} style={{ width: '50%' }} />
+        )}
       </Box>
       {collection && (
         <Box

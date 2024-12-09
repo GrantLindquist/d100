@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: 'd100',
   description: 'D&D Threads',
   icons: {
-    icon: '/d100.svg',
+    icon: '/d100-favicon.png',
   },
 };
 

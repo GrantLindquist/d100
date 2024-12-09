@@ -20,6 +20,7 @@ import { useCampaign } from '@/hooks/useCampaign';
 import { arrayRemove, doc, runTransaction } from '@firebase/firestore';
 import { UserBase } from '@/types/User';
 
+// TODO: Signout bug
 const UserButton = () => {
   const router = useRouter();
   const { user, signOutUser, setListening } = useUser();

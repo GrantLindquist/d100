@@ -1,12 +1,21 @@
 'use client';
 import UserButton from '@/components/UserButton';
-import { Divider, Stack, Toolbar, Tooltip, useTheme } from '@mui/material';
+import {
+  Divider,
+  Stack,
+  Toolbar,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import SettingsButton from '@/components/SettingsButton';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
 import NotificationButton from '@/components/NotificationButton';
 import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 import Image from 'next/image';
+import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import { outfit } from '@/components/AppWrapper';
 
 // TODO: Make responsive
 const Navbar = () => {
@@ -25,21 +34,36 @@ const Navbar = () => {
           backgroundColor:
             pathname.includes('articles') || pathname.includes('quests')
               ? '#111111'
-              : '#000000',
+              : '#010101',
         }}
       >
-        <Stack direction={'row'} spacing={2} sx={{ flexGrow: 1 }}>
+        <Stack
+          direction={'row'}
+          spacing={2}
+          sx={{ flexGrow: 1, alignItems: 'center' }}
+        >
           <Tooltip title={'View All Campaigns'}>
             <div
               onClick={() => router.push('/campaigns')}
               style={{ cursor: 'pointer' }}
             >
-              <Image
-                src="/d100.svg"
-                width={26}
-                height={26}
-                alt="All Campaigns"
-              />
+              <Stack direction={'row'} alignItems={'center'} spacing={1}>
+                <Image
+                  src="/d100.png"
+                  width={46}
+                  height={30}
+                  alt="All Campaigns"
+                />
+                <Typography
+                  fontWeight={BOLD_FONT_WEIGHT}
+                  variant={'h5'}
+                  sx={{
+                    fontFamily: outfit.style.fontFamily,
+                  }}
+                >
+                  d100
+                </Typography>
+              </Stack>
             </div>
           </Tooltip>
 
