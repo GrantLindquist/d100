@@ -10,11 +10,6 @@ export default function CampaignsPage() {
       justifyContent="center"
       alignItems="center"
       height="100vh"
-      sx={{
-        backgroundImage: 'url(/images/bg.svg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
     >
       <Container>
         <Box

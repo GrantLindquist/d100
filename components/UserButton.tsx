@@ -1,6 +1,14 @@
 'use client';
 import { useUser } from '@/hooks/useUser';
-import { Avatar, Button, Menu, MenuItem } from '@mui/material';
+import {
+  Avatar,
+  Button,
+  Menu,
+  MenuItem,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 import { useState } from 'react';
 import { clearSession } from '@/utils/userSession';
 import db, { auth } from '@/utils/firebase';
@@ -12,11 +20,14 @@ import { useCampaign } from '@/hooks/useCampaign';
 import { arrayRemove, doc, runTransaction } from '@firebase/firestore';
 import { UserBase } from '@/types/User';
 
+// TODO: Signout bug
 const UserButton = () => {
   const router = useRouter();
   const { user, signOutUser, setListening } = useUser();
   const { campaign, isUserDm } = useCampaign();
   const { displayAlert } = useAlert();
+  const theme = useTheme();
+  const displayUserName = useMediaQuery(theme.breakpoints.up('md'));
 
   const [anchor, setAnchor] = useState(null);
   const open = Boolean(anchor);
@@ -86,7 +97,11 @@ const UserButton = () => {
             marginRight: 1,
           }}
         />
-        {user?.displayName}
+        {displayUserName && (
+          <Typography color={'white'} variant={'subtitle2'}>
+            {user?.displayName}
+          </Typography>
+        )}
       </Button>
       <Menu
         anchorEl={anchor}

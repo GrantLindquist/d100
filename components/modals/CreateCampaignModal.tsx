@@ -17,6 +17,7 @@ import db from '@/utils/firebase';
 import { Collection } from '@/types/Unit';
 import { useUser } from '@/hooks/useUser';
 import { useAlert } from '@/hooks/useAlert';
+import RoundButton from '@/components/RoundButton';
 
 const CreateCampaignModal = () => {
   const [open, setOpen] = useState(false);
@@ -110,9 +111,9 @@ const CreateCampaignModal = () => {
 
   return (
     <>
-      <Button startIcon={<AddIcon />} onClick={() => setOpen(true)}>
+      <RoundButton icon={<AddIcon />} onClick={() => setOpen(true)}>
         Create Campaign
-      </Button>
+      </RoundButton>
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box sx={MODAL_STYLE}>
           <CreateCampaignForm />

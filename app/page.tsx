@@ -1,12 +1,5 @@
 'use client';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useUser } from '@/hooks/useUser';
 import {
   getAdditionalUserInfo,
@@ -20,6 +13,9 @@ import { setUserSession } from '@/utils/userSession';
 import { useRouter } from 'next/navigation';
 import { useAlert } from '@/hooks/useAlert';
 import { useEffect } from 'react';
+import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import { outfit } from '@/components/AppWrapper';
+import RoundButton from '@/components/RoundButton';
 
 export default function AuthPage() {
   const { user, setListening } = useUser();
@@ -70,29 +66,30 @@ export default function AuthPage() {
 
   return (
     <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      height="100vh"
       sx={{
-        backgroundImage: 'url(/images/bg.svg)',
+        height: '100vh',
+        width: '100vw',
+        backgroundImage: 'url(/d100-signin.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
     >
-      <Card elevation={3} sx={{ p: 4, width: 400 }}>
-        <CardContent>
-          <Stack spacing={2} alignItems="center">
-            <Typography variant="h5">Sign In</Typography>
-            <Typography variant="body2" color="textSecondary" align="center">
-              Sign in with your Google account to start managing your campaigns.
-            </Typography>
-            <Button onClick={handleSignIn} variant="contained" fullWidth>
-              Sign in with Google
-            </Button>
-          </Stack>
-        </CardContent>
-      </Card>
+      <Box maxWidth={{ xs: '80%', md: '60%' }} pt={'17%'} px={'10%'}>
+        <Typography
+          variant={'h1'}
+          sx={{
+            fontFamily: outfit.style.fontFamily,
+          }}
+          fontWeight={BOLD_FONT_WEIGHT}
+        >
+          d100
+        </Typography>
+        <Typography pb={4} color="grey">
+          D&D campaign wiki creator, note tracker, information repository, etc.
+          etc. etc. Whatever you want to use it for, really.
+        </Typography>
+        <RoundButton onClick={handleSignIn}>Sign In With Google</RoundButton>
+      </Box>
     </Box>
   );
 }

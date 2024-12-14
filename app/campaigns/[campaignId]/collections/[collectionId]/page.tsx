@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, useMediaQuery, useTheme } from '@mui/material';
 import CollectionSearch from '@/components/CollectionSearch';
 import { Breadcrumb, Collection } from '@/types/Unit';
 import { useCampaign } from '@/hooks/useCampaign';
@@ -10,13 +10,15 @@ import { usePathname, useRouter } from 'next/navigation';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
-import FunCircle from '@/components/FunCircle';
 
 export default function CollectionPage() {
   const { user } = useUser();
   const { campaign, setBreadcrumbs } = useCampaign();
   const router = useRouter();
   const pathname = usePathname();
+
+  const theme = useTheme();
+  const displayBgImage = useMediaQuery(theme.breakpoints.up('md'));
 
   const [collection, setCollection] = useState<Collection | null>(null);
 
@@ -57,7 +59,9 @@ export default function CollectionPage() {
           position: 'fixed',
         }}
       >
-        <FunCircle />
+        {displayBgImage && (
+          <img src={'/d100-grey.svg'} style={{ width: '50%' }} />
+        )}
       </Box>
       {collection && (
         <Box

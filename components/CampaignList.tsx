@@ -22,6 +22,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CampaignActionsModal from '@/components/modals/CampaignActionsModal';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import { outfit } from '@/components/AppWrapper';
 
 const CampaignTab = (props: {
   campaignId: string;
@@ -170,27 +171,48 @@ const CampaignList = () => {
 
   return (
     <>
-      <Typography align={'center'} variant={'h3'}>
+      <Typography
+        sx={{
+          fontFamily: outfit.style.fontFamily,
+        }}
+        fontWeight={BOLD_FONT_WEIGHT}
+        align={'center'}
+        variant={'h3'}
+      >
         Your Campaigns
       </Typography>
       {user && (
-        <Grid container spacing={2}>
-          {user.campaignIds.map((id, index) => (
-            <Grid
-              item
-              key={index}
-              xs={12}
-              md={user.campaignIds.length <= 1 ? 12 : 6}
-              onMouseEnter={() => setHoveredCampaignId(id)}
-              onMouseLeave={() => setHoveredCampaignId(null)}
-            >
-              <CampaignTabMemo
-                campaignId={id}
-                displayActions={id === hoveredCampaignId}
-              />
+        <>
+          {user.campaignIds.length > 0 ? (
+            <Grid container spacing={2}>
+              {user.campaignIds.map((id, index) => (
+                <Grid
+                  item
+                  key={index}
+                  xs={12}
+                  md={user.campaignIds.length <= 1 ? 12 : 6}
+                  onMouseEnter={() => setHoveredCampaignId(id)}
+                  onMouseLeave={() => setHoveredCampaignId(null)}
+                >
+                  <CampaignTabMemo
+                    campaignId={id}
+                    displayActions={id === hoveredCampaignId}
+                  />
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
+          ) : (
+            <Typography
+              align={'center'}
+              variant={'h6'}
+              fontWeight={200}
+              color={'grey'}
+              pt={3}
+            >
+              You currently are not enrolled in any campaigns.
+            </Typography>
+          )}
+        </>
       )}
     </>
   );

@@ -7,7 +7,7 @@ import { useCampaign } from '@/hooks/useCampaign';
 import { getCampaignIdFromUrl } from '@/utils/url';
 import { Outfit } from 'next/font/google';
 
-const font = Outfit({ subsets: ['latin'] });
+export const outfit = Outfit({ subsets: ['latin'] });
 
 const AppWrapper = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
@@ -28,17 +28,14 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
     palette: {
       mode: 'dark',
       primary: {
-        main: '#FF9C6D',
+        main: '#ff6a48',
       },
       secondary: {
         main: '#FF956F',
       },
       background: {
-        default: '#000000',
+        default: '#010101',
       },
-    },
-    typography: {
-      fontFamily: `${font.style.fontFamily}`,
     },
     components: {
       MuiCssBaseline: {

@@ -20,5 +20,4 @@ export const LINK_STYLE = {
   '&:hover': {
     cursor: 'pointer',
   },
-  fontWeight: BOLD_FONT_WEIGHT,
 };

@@ -11,6 +11,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useTheme,
 } from '@mui/material';
 
 import {
@@ -48,6 +49,7 @@ import { useAlert } from '@/hooks/useAlert';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { deleteObject, listAll, ref } from '@firebase/storage';
 import ImageFrame from '@/components/content/ImageFrame';
+import { outfit } from '@/components/AppWrapper';
 
 // TODO: Create a skeleton for this
 const UnitTab = (props: {
@@ -137,14 +139,13 @@ const UnitTab = (props: {
   );
 };
 
-// TODO: Non-breaking error when deleting unit
-// TODO: Make this responsive
 const CollectionSearch = (props: {
   unitIds: string[];
   collection: Collection;
 }) => {
   const { isUserDm, campaign } = useCampaign();
   const { displayAlert } = useAlert();
+  const theme = useTheme();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [units, setUnits] = useState<Unit[]>([]);
@@ -243,16 +244,25 @@ const CollectionSearch = (props: {
       <Grid item md={11}>
         <Box
           sx={{
-            position: 'fixed',
-            height: '80vh',
-            width: '50vh',
+            [theme.breakpoints.up('md')]: {
+              position: 'fixed',
+              height: '80vh',
+              width: '50vh',
+            },
           }}
         >
-          <Box pt={12}>
+          <Box pt={{ md: 12 }}>
             <Typography variant={'subtitle2'} color={'grey'}>
               Collection
             </Typography>
-            <Typography variant={'h3'} fontWeight={BOLD_FONT_WEIGHT} pb={2}>
+            <Typography
+              variant={'h3'}
+              fontWeight={BOLD_FONT_WEIGHT}
+              pb={2}
+              sx={{
+                fontFamily: outfit.style.fontFamily,
+              }}
+            >
               {props.collection.title}
             </Typography>
             <TextField

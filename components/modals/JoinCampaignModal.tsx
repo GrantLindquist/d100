@@ -16,6 +16,7 @@ import { useUser } from '@/hooks/useUser';
 import LoginIcon from '@mui/icons-material/Login';
 import { useAlert } from '@/hooks/useAlert';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import RoundButton from '@/components/RoundButton';
 
 const JoinCampaignModal = () => {
   const [open, setOpen] = useState(false);
@@ -109,9 +110,9 @@ const JoinCampaignModal = () => {
 
   return (
     <>
-      <Button startIcon={<LoginIcon />} onClick={() => setOpen(true)}>
+      <RoundButton icon={<LoginIcon />} onClick={() => setOpen(true)}>
         Join Campaign
-      </Button>
+      </RoundButton>
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box sx={MODAL_STYLE}>
           <JoinCampaignForm />

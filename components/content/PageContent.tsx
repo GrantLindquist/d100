@@ -1,10 +1,10 @@
 'use client';
 
 import {
-  Avatar,
   Box,
   Button,
   Checkbox,
+  Chip,
   Container,
   Divider,
   Fade,
@@ -52,42 +52,55 @@ import { UserBase } from '@/types/User';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { usePathname } from 'next/navigation';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { outfit } from '@/components/AppWrapper';
 
-const Section = (props: { section: SectionType; author: UserBase | null }) => {
-  const [displayAuthor, setDisplayAuthor] = useState(false);
+const Section = (props: {
+  section: SectionType;
+  author: UserBase | null;
+  handleHideSection: Function;
+}) => {
+  const { isUserDm } = useCampaign();
+  const [displayHideButton, setDisplayHideButton] = useState(
+    props.section.hidden
+  );
+
   return (
     <Stack
       direction={'row'}
-      onMouseEnter={() => setDisplayAuthor(true)}
-      onMouseLeave={() => setDisplayAuthor(false)}
+      onMouseEnter={() => !props.section.hidden && setDisplayHideButton(true)}
+      onMouseLeave={() => !props.section.hidden && setDisplayHideButton(false)}
     >
-      <Stack spacing={2} flexGrow={1}>
+      <Box flexGrow={1}>
         <Typography
           fontWeight={BOLD_FONT_WEIGHT}
           variant={props.section.isHeader ? 'h2' : 'h4'}
+          sx={{
+            fontFamily: outfit.style.fontFamily,
+          }}
         >
           {props.section.title}
         </Typography>
         <Typography
           sx={{
             whiteSpace: 'pre-line',
+            fontFamily: outfit.style.fontFamily,
           }}
         >
           {props.section.body}
         </Typography>
-      </Stack>
-      {props.author?.photoURL && (
-        <Tooltip title={`Author: ${props.author.displayName}`}>
-          <Fade in={displayAuthor}>
-            <Avatar
-              src={props.author.photoURL}
-              alt={props.author.displayName ?? 'Player'}
-              sx={{
-                marginTop: 1,
-                width: 30,
-                height: 30,
-              }}
-            />
+      </Box>
+      {isUserDm && !props.section.isHeader && (
+        <Tooltip
+          title={props.section.hidden ? 'Hidden from players' : 'Hide Section'}
+        >
+          <Fade in={displayHideButton}>
+            <IconButton
+              onClick={() => props.handleHideSection(props.section.id)}
+              sx={{ height: 32 }}
+            >
+              <VisibilityOffIcon sx={{ color: 'grey' }} />
+            </IconButton>
           </Fade>
         </Tooltip>
       )}
@@ -95,13 +108,12 @@ const Section = (props: { section: SectionType; author: UserBase | null }) => {
   );
 };
 
-// TODO: When editing, the sections scroll above navbar
 const EditableSection = (props: {
   section: SectionType;
   author: UserBase | null;
 }) => {
   return (
-    <Stack spacing={2}>
+    <>
       <TextField
         name={`title-${props.section.id}`}
         defaultValue={props.section.title}
@@ -112,6 +124,7 @@ const EditableSection = (props: {
             fontStyle: 'italic',
             fontWeight: BOLD_FONT_WEIGHT,
             p: 0,
+            fontFamily: outfit.style.fontFamily,
           },
           '& .MuiOutlinedInput-notchedOutline': {
             border: 'none',
@@ -119,25 +132,28 @@ const EditableSection = (props: {
         }}
         fullWidth
       />
-      <TextField
-        name={`body-${props.section.id}`}
-        defaultValue={props.section.body}
-        placeholder="Section Body"
-        sx={{
-          '& .MuiInputBase-input': {
-            fontStyle: 'italic',
-          },
-          '& .MuiInputBase-root': {
-            p: 0,
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            border: 'none',
-          },
-        }}
-        multiline
-        fullWidth
-      />
-    </Stack>
+      <div data-section-id={props.section.id}>
+        <TextField
+          name={`body-${props.section.id}`}
+          defaultValue={props.section.body}
+          placeholder="Section Body"
+          sx={{
+            fontFamily: outfit.style.fontFamily,
+            '& .MuiInputBase-input': {
+              fontStyle: 'italic',
+            },
+            '& .MuiInputBase-root': {
+              p: 0,
+            },
+            '& .MuiOutlinedInput-notchedOutline': {
+              border: 'none',
+            },
+          }}
+          multiline
+          fullWidth
+        />
+      </div>
+    </>
   );
 };
 
@@ -163,6 +179,7 @@ const HideContentCheckbox = (props: { defaultValue: boolean }) => {
   );
 };
 
+// TODO: Remove isEditing state and make page always able to edit + add save option
 export const PageContent = () => {
   const [content, setContent] = useState<Article | Quest | null>(null);
   const [isEditing, setEditing] = useState<boolean>(false);
@@ -194,6 +211,51 @@ export const PageContent = () => {
       };
     }
   }, []);
+
+  useEffect(() => {
+    const focusSection = (sectionId: string) => {
+      setFocusedSectionId(sectionId);
+      const element = document.querySelector(
+        `[data-section-id="${sectionId}"]`
+      );
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const inputElement = element?.querySelector('input, textarea');
+      // @ts-ignore
+      inputElement?.focus();
+    };
+
+    const handleKeyShortcut = (event: KeyboardEvent) => {
+      if (event.key === 'Tab' && isEditing) {
+        const focusedSectionIndex =
+          content?.sections.findIndex(
+            (section) => section.id === focusedSectionId
+          ) ?? null;
+        focusedSectionIndex && handleAddSection(focusedSectionIndex);
+      }
+      if (content && focusedSectionId && event.key === 'ArrowUp') {
+        event.preventDefault();
+        const currentIndex = content.sections.findIndex(
+          (section) => section.id === focusedSectionId
+        );
+        currentIndex > 0 && focusSection(content.sections[currentIndex - 1].id);
+      }
+      if (content && focusedSectionId && event.key === 'ArrowDown') {
+        event.preventDefault();
+        const currentIndex = content.sections.findIndex(
+          (section) => section.id === focusedSectionId
+        );
+
+        currentIndex < content.sections.length - 1 &&
+          focusSection(content.sections[currentIndex + 1].id);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyShortcut);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyShortcut);
+    };
+  }, [content, focusedSectionId]);
 
   const focusedSectionTitle =
     content?.sections.find((section) => section.id == focusedSectionId)
@@ -315,7 +377,7 @@ export const PageContent = () => {
     }
   };
 
-  const handleAddSection = () => {
+  const handleAddSection = (index?: number) => {
     if (content && user) {
       const newSection = {
         id: generateUUID(),
@@ -325,15 +387,48 @@ export const PageContent = () => {
         authorId: user.id,
       };
 
-      const newArticle = {
-        ...content,
-        sections: [...content.sections, newSection],
-      };
+      const newArticle =
+        index !== undefined
+          ? {
+              ...content,
+              sections: [
+                ...content.sections.slice(0, index + 1),
+                newSection,
+                ...content.sections.slice(index + 1),
+              ],
+            }
+          : {
+              ...content,
+              sections: [...content.sections, newSection],
+            };
       setContent(newArticle);
     }
   };
 
-  // TODO: Data mismatch between content state and firebase -- also switches between isEditing change
+  const handleHideSection = async (sectionId: string) => {
+    if (content) {
+      const sectionIndex =
+        content?.sections.findIndex((section) => section.id === sectionId) ??
+        null;
+      const newSections = [
+        ...content.sections.slice(0, sectionIndex),
+        {
+          ...content.sections[sectionIndex],
+          hidden: !content.sections[sectionIndex].hidden,
+        },
+        ...content.sections.slice(sectionIndex + 1),
+      ];
+      await updateDoc(doc(db, 'units', content.id), {
+        sections: newSections,
+      });
+    }
+  };
+
+  /*
+   * TODO: Data mismatch between content state and firebase -- also switches between isEditing change
+   *  NOTE: this **MAY** be caused by the fact that section is not "focused" on unless title is clicked.
+   *  clicking on body does not focus section
+   */
   const handleDeleteSection = async () => {
     if (content) {
       try {
@@ -393,10 +488,16 @@ export const PageContent = () => {
                     <Box py={1}>
                       <Button
                         startIcon={<AddIcon />}
-                        onClick={handleAddSection}
+                        onClick={() => handleAddSection()}
                         sx={{ color: 'grey' }}
                       >
-                        Add Section
+                        Add Section&nbsp;&nbsp;
+                        <Chip
+                          label={'TAB'}
+                          variant={'outlined'}
+                          size={'small'}
+                          sx={{ borderRadius: '3px' }}
+                        />
                       </Button>
                       <Button
                         startIcon={<AddIcon />}
@@ -451,7 +552,14 @@ export const PageContent = () => {
                           (player) => player.id === section.authorId
                         ) ?? null;
                       return (
-                        <div key={index} style={{ paddingBottom: '28px' }}>
+                        <Box
+                          key={section.id}
+                          sx={{
+                            paddingBottom: '28px',
+                            display:
+                              !section.hidden || isUserDm ? 'auto' : 'none',
+                          }}
+                        >
                           {/* Section title page anchor */}
                           <span
                             id={section.title}
@@ -480,7 +588,11 @@ export const PageContent = () => {
                             />
                           </Box>
                           <Box sx={!isEditing ? {} : { display: 'none' }}>
-                            <Section section={section} author={author} />
+                            <Section
+                              section={section}
+                              author={author}
+                              handleHideSection={handleHideSection}
+                            />
                           </Box>
                           {section.isHeader && (
                             <Divider
@@ -491,7 +603,7 @@ export const PageContent = () => {
                               }
                             />
                           )}
-                        </div>
+                        </Box>
                       );
                     })}
                   </form>
