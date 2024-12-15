@@ -1,5 +1,5 @@
 'use client';
-import { PageContent } from '@/components/content/PageContent';
+import { PageContentV2 } from '@/components/content/PageContentV2';
 import { useEffect } from 'react';
 import { useUser } from '@/hooks/useUser';
 import { useRouter } from 'next/navigation';
@@ -17,5 +17,5 @@ export default function ArticlePage() {
     }
   }, [user?.id, campaign?.id]);
 
-  return <PageContent />;
+  return <PageContentV2 />;
 }

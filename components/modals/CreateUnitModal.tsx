@@ -93,7 +93,12 @@ const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {
           const defaultSection: Section = {
             id: generateUUID(),
             title: unitTitle,
-            body: '',
+            body: [
+              {
+                type: 'paragraph',
+                children: [{ text: '' }],
+              },
+            ],
             isHeader: true,
             authorId: user.id,
           };

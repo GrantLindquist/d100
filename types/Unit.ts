@@ -1,3 +1,5 @@
+import { Node } from 'slate';
+
 export type UnitType = 'article' | 'quest' | 'collection';
 export const UnitEnum = ['article', 'quest', 'collection'];
 export const UnitDisplayValues = {
@@ -33,7 +35,7 @@ export interface Section {
   id: string;
   isHeader: boolean;
   title: string;
-  body: string;
+  body: Node[];
   authorId: string;
   hidden?: boolean;
 }
