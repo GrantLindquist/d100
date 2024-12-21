@@ -19,6 +19,7 @@ const SubheaderAsideSx = {
   paddingY: 0.5,
 };
 
+// TODO: Make this fixed on the y axis but not x axis
 const ArticleAside = (props: { article: Article }) => {
   const router = useRouter();
   return (
@@ -37,20 +38,20 @@ const ArticleAside = (props: { article: Article }) => {
           overflowY: 'auto',
         }}
       >
-        {props.article.sections.map((section, index) => {
-          if (!section.title.trim()) {
-            return null;
-          }
-          return (
-            <Typography
-              key={index}
-              sx={index === 0 ? HeaderAsideSx : SubheaderAsideSx}
-              onClick={() => router.push(`#${section.title}`)}
-            >
-              {section.title}
-            </Typography>
-          );
-        })}
+        {/*{props.article.sections.map((section, index) => {*/}
+        {/*  if (!section.title.trim()) {*/}
+        {/*    return null;*/}
+        {/*  }*/}
+        {/*  return (*/}
+        {/*    <Typography*/}
+        {/*      key={index}*/}
+        {/*      sx={index === 0 ? HeaderAsideSx : SubheaderAsideSx}*/}
+        {/*      onClick={() => router.push(`#${section.title}`)}*/}
+        {/*    >*/}
+        {/*      {section.title}*/}
+        {/*    </Typography>*/}
+        {/*  );*/}
+        {/*})}*/}
         {props.article.type === 'quest' && (
           <>
             <Typography

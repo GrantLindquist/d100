@@ -1,5 +1,5 @@
 'use client';
-import { PageContentV2 } from '@/components/content/PageContentV2';
+import { PageContent } from '@/components/content/PageContent';
 import { useUser } from '@/hooks/useUser';
 import { useCampaign } from '@/hooks/useCampaign';
 import { useRouter } from 'next/navigation';
@@ -17,5 +17,5 @@ export default function QuestPage() {
     }
   }, [user?.id, campaign?.id]);
 
-  return <PageContentV2 />;
+  return <PageContent />;
 }

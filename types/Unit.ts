@@ -22,22 +22,13 @@ export interface Collection extends Unit {
 }
 
 export interface Article extends Unit {
-  sections: Section[];
+  content: Node[];
   imageUrls: ImageUrl[];
 }
 
 export interface Quest extends Article {
   loot: Loot[];
   complete: boolean;
-}
-
-export interface Section {
-  id: string;
-  isHeader: boolean;
-  title: string;
-  body: Node[];
-  authorId: string;
-  hidden?: boolean;
 }
 
 export interface Breadcrumb {

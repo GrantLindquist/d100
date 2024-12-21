@@ -69,7 +69,7 @@ export default function AuthPage() {
       sx={{
         height: '100vh',
         width: '100vw',
-        backgroundImage: 'url(/d100-signin.png)',
+        backgroundImage: 'url(/d100-signin.svg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}

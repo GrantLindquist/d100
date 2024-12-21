@@ -20,7 +20,6 @@ import {
   Breadcrumb,
   Collection,
   Quest,
-  Section,
   Unit,
   UnitType,
 } from '@/types/Unit';
@@ -34,6 +33,19 @@ import { useAlert } from '@/hooks/useAlert';
 import DescriptionIcon from '@mui/icons-material/Description';
 import KeyIcon from '@mui/icons-material/Key';
 import FolderIcon from '@mui/icons-material/Folder';
+
+const generateDefaultContent = (title: string) => {
+  return [
+    {
+      type: 'title',
+      children: [{ text: title, fontStyle: 'title', bold: true }],
+    },
+    {
+      type: 'paragraph',
+      children: [{ text: 'Put some stuff here' }],
+    },
+  ];
+};
 
 const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {
   const { isUserDm } = useCampaign();
@@ -90,31 +102,19 @@ const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {
             breadcrumbs: generateBreadcrumbs(newUnitId),
             hidden: isHiddenChecked,
           };
-          const defaultSection: Section = {
-            id: generateUUID(),
-            title: unitTitle,
-            body: [
-              {
-                type: 'paragraph',
-                children: [{ text: '' }],
-              },
-            ],
-            isHeader: true,
-            authorId: user.id,
-          };
 
           if (modalState === 'article') {
             newUnitObj = {
               ...newUnitObj,
               imageUrls: [],
-              sections: [defaultSection],
+              content: generateDefaultContent(unitTitle),
             } as Article;
           } else if (modalState === 'quest') {
             newUnitObj = {
               ...newUnitObj,
               imageUrls: [],
               loot: [],
-              sections: [defaultSection],
+              content: generateDefaultContent(unitTitle),
               complete: false,
             } as Quest;
           } else if (modalState === 'collection') {
