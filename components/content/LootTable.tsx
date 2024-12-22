@@ -146,7 +146,7 @@ const EditableTable = (props: { questId: string }) => {
       <Typography
         id={'Loot Table'}
         fontWeight={BOLD_FONT_WEIGHT}
-        variant="h4"
+        variant="h2"
         pb={2}
       >
         Loot ({calculateCurrencyTotal()}gp)

@@ -20,7 +20,7 @@ import { useCampaign } from '@/hooks/useCampaign';
 import { arrayRemove, doc, runTransaction } from '@firebase/firestore';
 import { UserBase } from '@/types/User';
 
-// TODO: Signout bug
+// TODO: Signout bug - pushing router to '/' persists collection content ???
 const UserButton = () => {
   const router = useRouter();
   const { user, signOutUser, setListening } = useUser();

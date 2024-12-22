@@ -54,7 +54,7 @@ const ImageList = (props: {
       <Typography
         id={'Reference Images'}
         fontWeight={BOLD_FONT_WEIGHT}
-        variant={'h4'}
+        variant={'h2'}
         pb={1}
       >
         Reference Images

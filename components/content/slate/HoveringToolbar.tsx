@@ -8,8 +8,12 @@ import React, {
 import ReactDOM from 'react-dom';
 import { css, cx } from '@emotion/css';
 import { useFocused, useSlate } from 'slate-react';
-import { Editor } from 'slate';
-import { isMarkActive, toggleMark } from '@/components/content/slate/RichText';
+import { Editor, Transforms } from 'slate';
+import {
+  isElementActive,
+  isMarkActive,
+  toggleMark,
+} from '@/components/content/slate/RichText';
 
 // TODO: Remove IDE errors from this file
 interface BaseProps {
@@ -70,16 +74,17 @@ export const HoveringToolbar = () => {
         }}
       >
         {/*<ButtonGroup>*/}
-        {/*  <IconButton onClick={() => toggleMark(editor, 'format_title')}>*/}
+        {/*  <IconButton onClick={() => toggleMark(editor, 'subtitle')}>*/}
         {/*    <FormatTitleIcon />*/}
         {/*  </IconButton>*/}
-        {/*  <IconButton onClick={() => toggleMark(editor, 'format_bold')}>*/}
+        {/*  <IconButton onClick={() => toggleMark(editor, 'bold')}>*/}
         {/*    <FormatBoldIcon />*/}
         {/*  </IconButton>*/}
-        {/*  <IconButton onClick={() => toggleMark(editor, 'format_italic')}>*/}
+        {/*  <IconButton onClick={() => toggleMark(editor, 'italic')}>*/}
         {/*    <FormatItalicIcon />*/}
         {/*  </IconButton>*/}
         {/*</ButtonGroup>*/}
+        <FormatButton format="subtitle" icon="t" />
         <FormatButton format="bold" icon="b" />
         <FormatButton format="italic" icon="i" />
         <FormatButton format="underlined" icon="u" />
@@ -87,14 +92,33 @@ export const HoveringToolbar = () => {
     </Portal>
   );
 };
-
 const FormatButton = ({ format, icon }) => {
   const editor = useSlate();
+
+  // TODO: editor.children[1] cannot be changed to subtitle
+  const handleClick = () => {
+    if (format === 'subtitle') {
+      const isActive = isElementActive(editor, 'subtitle');
+      console.log(isActive);
+      if (isActive) {
+        Transforms.setNodes(editor, { type: 'paragraph' });
+      } else {
+        Transforms.setNodes(editor, { type: 'subtitle' });
+      }
+    } else {
+      toggleMark(editor, format);
+    }
+  };
+
   return (
     <Button
       reversed
-      active={isMarkActive(editor, format)}
-      onClick={() => toggleMark(editor, format)}
+      active={
+        format === 'subtitle'
+          ? isElementActive(editor, 'subtitle')
+          : isMarkActive(editor, format)
+      }
+      onClick={handleClick}
     >
       {icon}
     </Button>

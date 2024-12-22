@@ -19,7 +19,7 @@ const QuestTimeline = (props: { questId: string }) => {
       <Typography
         id={'Quest Timeline'}
         fontWeight={BOLD_FONT_WEIGHT}
-        variant="h4"
+        variant="h2"
         pb={2}
       >
         Quest Timeline

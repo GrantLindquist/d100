@@ -12,7 +12,6 @@ import {
   Typography,
 } from '@mui/material';
 import { Article, Breadcrumb, ImageUrl, Quest } from '@/types/Unit';
-import ArticleAside from '@/components/content/ArticleAside';
 import {
   ChangeEvent,
   useCallback,
@@ -53,6 +52,7 @@ import {
   withLayout,
 } from '@/components/content/slate/RichText';
 import { HoveringToolbar } from '@/components/content/slate/HoveringToolbar';
+import ArticleAside from '@/components/content/ArticleAside';
 
 const HideContentCheckbox = (props: { defaultValue: boolean }) => {
   const [checked, setChecked] = useState(props.defaultValue);
@@ -91,6 +91,12 @@ export const PageContent = () => {
   const editor = useMemo(() => withLayout(withReact(createEditor())), []);
   const renderElement = useCallback((props: any) => <Element {...props} />, []);
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
+
+  const sectionTitles = editor.children
+    .filter((e) => e.type === 'title' || e.type === 'subtitle') // Filter elements
+    .map((e) => {
+      return e.children.map((child) => child.text).join('');
+    });
 
   useEffect(() => {
     const url = pathname.split('/').slice(1);
@@ -228,7 +234,7 @@ export const PageContent = () => {
                       display: { xs: 'none', md: 'block' },
                     }}
                   >
-                    <ArticleAside article={unit} />
+                    <ArticleAside titles={sectionTitles} article={unit} />
                   </Box>
 
                   <Box py={1}>
@@ -238,6 +244,9 @@ export const PageContent = () => {
                       sx={{ color: 'grey' }}
                     >
                       Add Reference Image
+                    </Button>
+                    <Button onClick={() => console.log(editor.children)}>
+                      Print editor
                     </Button>
                     <input
                       type="file"
@@ -252,6 +261,7 @@ export const PageContent = () => {
               </Grid>
               <Grid item xs={12} md={8}>
                 <Box pl={3}>
+                  {/* TODO: Enable history */}
                   <Slate
                     editor={editor}
                     initialValue={unit.content}
@@ -266,6 +276,7 @@ export const PageContent = () => {
                   >
                     <HoveringToolbar />
                     <Editable
+                      id={'editable'}
                       renderElement={renderElement}
                       renderLeaf={renderLeaf}
                       onDOMBeforeInput={(event: InputEvent) => {

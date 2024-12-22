@@ -32,7 +32,6 @@ export default function AuthPage() {
       const result = await signInWithPopup(auth, provider);
 
       // Define user values from Google
-      console.log(result.user);
       const user = result.user;
       let session: UserBase = {
         displayName: user.displayName,

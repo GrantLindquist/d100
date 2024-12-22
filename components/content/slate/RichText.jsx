@@ -2,18 +2,29 @@ import { Typography } from '@mui/material';
 import { Editor, Element as SlateElement, Node, Transforms } from 'slate';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 
+// TODO: Fix y-spacing, maybe line-height?
 export const Element = ({ children, element }) => {
-  switch (element.type) {
-    case 'title':
-      return (
-        <Typography variant="h1" fontWeight={BOLD_FONT_WEIGHT}>
+  if (element.type === 'title' || element.type === 'subtitle') {
+    return (
+      <>
+        <span
+          id={element.children[0].text}
+          style={{
+            position: 'relative',
+            top: -90,
+          }}
+        ></span>
+        <Typography
+          variant={element.type === 'title' ? 'h1' : 'h2'}
+          fontWeight={BOLD_FONT_WEIGHT}
+          sx={element.type === 'title' ? { marginTop: -2 } : {}}
+        >
           {children}
         </Typography>
-      );
-    case 'subtitle':
-      return <h2>{children}</h2>;
-    case 'paragraph':
-      return <p>{children}</p>;
+      </>
+    );
+  } else {
+    return <p>{children}</p>;
   }
 };
 
@@ -26,7 +37,7 @@ export const Leaf = ({ attributes, children, leaf }) => {
     children = <em>{children}</em>;
   }
 
-  if (leaf.underline) {
+  if (leaf.underlined) {
     children = <u>{children}</u>;
   }
 
@@ -48,10 +59,25 @@ export const isMarkActive = (editor, format) => {
   return marks ? marks[format] === true : false;
 };
 
+export const isElementActive = (editor, type) => {
+  const [match] = Editor.nodes(editor, {
+    match: (n) => SlateElement.isElement(n) && n.type === type,
+  });
+  return !!match;
+};
+
 export const withLayout = (editor) => {
   const { normalizeNode } = editor;
 
   editor.normalizeNode = ([node, path]) => {
+    // Enforces subtitle elements as single-line
+    if (SlateElement.isElement(node) && node.type === 'subtitle') {
+      const textContent = Node.string(node);
+      if (textContent.length <= 0) {
+        Transforms.setNodes(editor, { type: 'paragraph' });
+      }
+    }
+    // Enforces first line in editor as title element
     if (path.length === 0) {
       if (editor.children.length <= 1 && Editor.string(editor, [0, 0]) === '') {
         const title = {

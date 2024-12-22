@@ -1,7 +1,6 @@
 import { Article } from '@/types/Unit';
 import { Box, Card, Typography } from '@mui/material';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
-import { useRouter } from 'next/navigation';
 import ImageFrame from '@/components/content/ImageFrame';
 
 const HeaderAsideSx = {
@@ -19,9 +18,18 @@ const SubheaderAsideSx = {
   paddingY: 0.5,
 };
 
-// TODO: Make this fixed on the y axis but not x axis
-const ArticleAside = (props: { article: Article }) => {
-  const router = useRouter();
+// TODO: Re-implement section titles
+const ArticleAside = (props: { titles: string[]; article: Article }) => {
+  const scrollToTitle = (title: string) => {
+    const targetElement = document.getElementById(title);
+    if (targetElement) {
+      targetElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
   return (
     <Card>
       {props.article.imageUrls.length > 0 && (
@@ -38,30 +46,27 @@ const ArticleAside = (props: { article: Article }) => {
           overflowY: 'auto',
         }}
       >
-        {/*{props.article.sections.map((section, index) => {*/}
-        {/*  if (!section.title.trim()) {*/}
-        {/*    return null;*/}
-        {/*  }*/}
-        {/*  return (*/}
-        {/*    <Typography*/}
-        {/*      key={index}*/}
-        {/*      sx={index === 0 ? HeaderAsideSx : SubheaderAsideSx}*/}
-        {/*      onClick={() => router.push(`#${section.title}`)}*/}
-        {/*    >*/}
-        {/*      {section.title}*/}
-        {/*    </Typography>*/}
-        {/*  );*/}
-        {/*})}*/}
+        {props.titles.map((title, index) => {
+          return (
+            <Typography
+              key={index}
+              sx={index === 0 ? HeaderAsideSx : SubheaderAsideSx}
+              onClick={() => scrollToTitle(title)}
+            >
+              {title}
+            </Typography>
+          );
+        })}
         {props.article.type === 'quest' && (
           <>
             <Typography
-              onClick={() => router.push('#Quest Timeline')}
+              onClick={() => scrollToTitle('Quest Timeline')}
               sx={HeaderAsideSx}
             >
               Quest Timeline
             </Typography>
             <Typography
-              onClick={() => router.push('#Loot Table')}
+              onClick={() => scrollToTitle('Loot Table')}
               sx={HeaderAsideSx}
             >
               Loot Table
@@ -70,7 +75,7 @@ const ArticleAside = (props: { article: Article }) => {
         )}
         {props.article.imageUrls.length > 0 && (
           <Typography
-            onClick={() => router.push('#Reference Images')}
+            onClick={() => scrollToTitle('Reference Images')}
             sx={HeaderAsideSx}
           >
             Reference Images
