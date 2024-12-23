@@ -19,6 +19,7 @@ const SubheaderAsideSx = {
 };
 
 const ArticleAside = (props: { titles: string[]; article: Article }) => {
+  // TODO: Make section title temporarily highlight when this activates
   const scrollToTitle = (title: string) => {
     const targetElement = document.getElementById(title);
     if (targetElement) {
