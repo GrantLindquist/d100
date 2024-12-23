@@ -1,7 +1,7 @@
 import React, {
+  LegacyRef,
   PropsWithChildren,
   ReactNode,
-  Ref,
   useEffect,
   useRef,
 } from 'react';
@@ -21,7 +21,6 @@ import TitleIcon from '@mui/icons-material/Title';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Tooltip } from '@mui/material';
 
-// TODO: Remove IDE errors from this file
 interface BaseProps {
   className: string;
 
@@ -31,7 +30,7 @@ interface BaseProps {
 type OrNull<T> = T | null;
 
 export const HoveringToolbar = () => {
-  const ref = useRef<HTMLDivElement | null>();
+  const ref = useRef<HTMLDivElement | null>(null);
   const editor = useSlate();
   const inFocus = useFocused();
 
@@ -78,7 +77,7 @@ export const HoveringToolbar = () => {
           border-radius: 4px;
           transition: opacity 0.4s;
         `}
-        onMouseDown={(e) => {
+        onMouseDown={(e: MouseEvent) => {
           e.preventDefault();
         }}
       >
@@ -145,7 +144,7 @@ export const Button = React.forwardRef(
         reversed: boolean;
       } & BaseProps
     >,
-    ref: Ref<OrNull<HTMLSpanElement>>
+    ref: LegacyRef<HTMLDivElement>
   ) => (
     <span
       {...props}
@@ -170,7 +169,7 @@ export const Button = React.forwardRef(
 export const Menu = React.forwardRef(
   (
     { className, ...props }: PropsWithChildren<BaseProps>,
-    ref: Ref<OrNull<HTMLDivElement>>
+    ref: LegacyRef<HTMLDivElement>
   ) => (
     <div
       {...props}
