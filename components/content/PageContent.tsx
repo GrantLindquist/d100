@@ -4,29 +4,22 @@ import {
   Box,
   Button,
   Checkbox,
-  Chip,
   Container,
-  Divider,
-  Fade,
   Grid,
   IconButton,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from '@mui/material';
+import { Article, Breadcrumb, ImageUrl, Quest } from '@/types/Unit';
 import {
-  Article,
-  Breadcrumb,
-  ImageUrl,
-  Quest,
-  Section as SectionType,
-} from '@/types/Unit';
-import ArticleAside from '@/components/content/ArticleAside';
-import CheckIcon from '@mui/icons-material/Check';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   arrayRemove,
   arrayUnion,
@@ -42,120 +35,20 @@ import {
   uploadBytes,
 } from '@firebase/storage';
 import { generateUUID } from '@/utils/uuid';
-import { useUser } from '@/hooks/useUser';
 import { useCampaign } from '@/hooks/useCampaign';
 import ImageList from '@/components/content/ImageList';
 import LootTable from '@/components/content/LootTable';
 import AddIcon from '@mui/icons-material/Add';
 import { useAlert } from '@/hooks/useAlert';
-import { UserBase } from '@/types/User';
-import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { usePathname } from 'next/navigation';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { outfit } from '@/components/AppWrapper';
-
-const Section = (props: {
-  section: SectionType;
-  author: UserBase | null;
-  handleHideSection: Function;
-}) => {
-  const { isUserDm } = useCampaign();
-  const [displayHideButton, setDisplayHideButton] = useState(
-    props.section.hidden
-  );
-
-  return (
-    <Stack
-      direction={'row'}
-      onMouseEnter={() => !props.section.hidden && setDisplayHideButton(true)}
-      onMouseLeave={() => !props.section.hidden && setDisplayHideButton(false)}
-    >
-      <Box flexGrow={1}>
-        <Typography
-          fontWeight={BOLD_FONT_WEIGHT}
-          variant={props.section.isHeader ? 'h2' : 'h4'}
-          sx={{
-            fontFamily: outfit.style.fontFamily,
-          }}
-        >
-          {props.section.title}
-        </Typography>
-        <Typography
-          sx={{
-            whiteSpace: 'pre-line',
-            fontFamily: outfit.style.fontFamily,
-          }}
-        >
-          {props.section.body}
-        </Typography>
-      </Box>
-      {isUserDm && !props.section.isHeader && (
-        <Tooltip
-          title={props.section.hidden ? 'Hidden from players' : 'Hide Section'}
-        >
-          <Fade in={displayHideButton}>
-            <IconButton
-              onClick={() => props.handleHideSection(props.section.id)}
-              sx={{ height: 32 }}
-            >
-              <VisibilityOffIcon sx={{ color: 'grey' }} />
-            </IconButton>
-          </Fade>
-        </Tooltip>
-      )}
-    </Stack>
-  );
-};
-
-const EditableSection = (props: {
-  section: SectionType;
-  author: UserBase | null;
-}) => {
-  return (
-    <>
-      <TextField
-        name={`title-${props.section.id}`}
-        defaultValue={props.section.title}
-        placeholder="Section Title"
-        sx={{
-          '& .MuiInputBase-input': {
-            fontSize: props.section.isHeader ? '4rem' : '2rem',
-            fontStyle: 'italic',
-            fontWeight: BOLD_FONT_WEIGHT,
-            p: 0,
-            fontFamily: outfit.style.fontFamily,
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            border: 'none',
-          },
-        }}
-        fullWidth
-      />
-      <div data-section-id={props.section.id}>
-        <TextField
-          name={`body-${props.section.id}`}
-          defaultValue={props.section.body}
-          placeholder="Section Body"
-          sx={{
-            fontFamily: outfit.style.fontFamily,
-            '& .MuiInputBase-input': {
-              fontStyle: 'italic',
-            },
-            '& .MuiInputBase-root': {
-              p: 0,
-            },
-            '& .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-          }}
-          multiline
-          fullWidth
-        />
-      </div>
-    </>
-  );
-};
+import { Editable, Slate, withReact } from 'slate-react';
+import CheckIcon from '@mui/icons-material/Check';
+import { createEditor } from 'slate';
+import { Element, Leaf, withLayout } from '@/components/content/slate/RichText';
+import { HoveringToolbar } from '@/components/content/slate/HoveringToolbar';
+import ArticleAside from '@/components/content/ArticleAside';
+import { withHistory } from 'slate-history';
 
 const HideContentCheckbox = (props: { defaultValue: boolean }) => {
   const [checked, setChecked] = useState(props.defaultValue);
@@ -179,19 +72,46 @@ const HideContentCheckbox = (props: { defaultValue: boolean }) => {
   );
 };
 
-// TODO: Remove isEditing state and make page always able to edit + add save option
+// TODO: Make drag/hover event work when initiated outside of slate editor
 export const PageContent = () => {
-  const [content, setContent] = useState<Article | Quest | null>(null);
-  const [isEditing, setEditing] = useState<boolean>(false);
-  const [focusedSectionId, setFocusedSectionId] = useState<string | null>(null);
+  const [unit, setUnit] = useState<Article | Quest | null>(null);
+  const [isUnsavedChanges, setUnsavedChanges] = useState(false);
+  const [sectionTitles, setSectionTitles] = useState([]);
 
-  const sectionsFormRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { user } = useUser();
-  const { campaign, isUserDm, setBreadcrumbs } = useCampaign();
+  const { campaign, setBreadcrumbs, isUserDm } = useCampaign();
   const { displayAlert } = useAlert();
   const pathname = usePathname();
+
+  const editor = useMemo(
+    () => withLayout(withReact(withHistory(createEditor()))),
+    []
+  );
+
+  const renderElement = useCallback((props: any) => <Element {...props} />, []);
+  const renderLeaf = useCallback(
+    (props: { attributes: any; children: any; leaf: any }) => {
+      if (props.leaf.hidden && !isUserDm) {
+        return <></>;
+      }
+      return <Leaf {...props} />;
+    },
+    [isUserDm]
+  );
+
+  useEffect(() => {
+    const titles = editor.children
+      .filter(
+        (e: any) =>
+          (e.type === 'title' || e.type === 'subtitle') &&
+          (isUserDm || !e.children[0].hidden)
+      )
+      .map((e: any) => {
+        return e.children.map((child: any) => child.text).join('');
+      });
+    setSectionTitles(titles);
+  }, [unit]);
 
   useEffect(() => {
     const url = pathname.split('/').slice(1);
@@ -201,7 +121,7 @@ export const PageContent = () => {
         doc(db, 'units', unitId),
         (unitDocSnap) => {
           if (unitDocSnap.exists()) {
-            setContent(unitDocSnap.data() as Article | Quest);
+            setUnit(unitDocSnap.data() as Article | Quest);
             setBreadcrumbs(unitDocSnap.data().breadcrumbs as Breadcrumb[]);
           }
         }
@@ -212,104 +132,6 @@ export const PageContent = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const focusSection = (sectionId: string) => {
-      setFocusedSectionId(sectionId);
-      const element = document.querySelector(
-        `[data-section-id="${sectionId}"]`
-      );
-      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      const inputElement = element?.querySelector('input, textarea');
-      // @ts-ignore
-      inputElement?.focus();
-    };
-
-    const handleKeyShortcut = (event: KeyboardEvent) => {
-      if (event.key === 'Tab' && isEditing) {
-        const focusedSectionIndex =
-          content?.sections.findIndex(
-            (section) => section.id === focusedSectionId
-          ) ?? null;
-        focusedSectionIndex && handleAddSection(focusedSectionIndex);
-      }
-      if (content && focusedSectionId && event.key === 'ArrowUp') {
-        event.preventDefault();
-        const currentIndex = content.sections.findIndex(
-          (section) => section.id === focusedSectionId
-        );
-        currentIndex > 0 && focusSection(content.sections[currentIndex - 1].id);
-      }
-      if (content && focusedSectionId && event.key === 'ArrowDown') {
-        event.preventDefault();
-        const currentIndex = content.sections.findIndex(
-          (section) => section.id === focusedSectionId
-        );
-
-        currentIndex < content.sections.length - 1 &&
-          focusSection(content.sections[currentIndex + 1].id);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyShortcut);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyShortcut);
-    };
-  }, [content, focusedSectionId]);
-
-  const focusedSectionTitle =
-    content?.sections.find((section) => section.id == focusedSectionId)
-      ?.title ?? 'Section';
-
-  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (content) {
-      try {
-        const formData = new FormData(event.currentTarget);
-        const sectionsData = content.sections
-          .map((section) => {
-            const title = formData.get(`title-${section.id}`) as string;
-            const body = formData.get(`body-${section.id}`) as string;
-
-            if (title.trim()) {
-              return {
-                id: section.id,
-                isHeader: section.isHeader || false,
-                authorId: section.authorId || '',
-                title,
-                body,
-              } as SectionType;
-            }
-            return null;
-          })
-          .filter((section): section is SectionType => section !== null);
-
-        const isHidden = !!formData.get('isHidden');
-
-        const newArticle = {
-          ...content,
-          sections: sectionsData,
-          hidden: isHidden,
-        };
-        setContent(newArticle);
-        setFocusedSectionId(null);
-        isEditing && setEditing(false);
-
-        await updateDoc(doc(db, 'units', content.id), {
-          sections: sectionsData,
-          hidden: isHidden,
-        });
-      } catch (e: any) {
-        displayAlert({
-          message: 'An error occurred while saving the article.',
-          isError: true,
-          errorType: e.name,
-        });
-      }
-    }
-  };
-
   const handleAddImage = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -317,15 +139,15 @@ export const PageContent = () => {
   };
 
   const handleDeleteImage = async (index: number) => {
-    if (content) {
+    if (unit) {
       try {
-        const imageUrl = content.imageUrls[index];
-        setContent({
-          ...content,
-          imageUrls: content.imageUrls.filter((url) => url !== imageUrl),
+        const imageUrl = unit.imageUrls[index];
+        setUnit({
+          ...unit,
+          imageUrls: unit.imageUrls.filter((url) => url !== imageUrl),
         });
 
-        await updateDoc(doc(db, 'units', content.id), {
+        await updateDoc(doc(db, 'units', unit.id), {
           imageUrls: arrayRemove(imageUrl),
         });
         await deleteObject(ref(storage, imageUrl.src));
@@ -340,16 +162,16 @@ export const PageContent = () => {
   };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    if (content && campaign) {
+    if (unit && campaign) {
       try {
-        let urls = [...content.imageUrls];
+        let urls = [...unit.imageUrls];
         const files = event.target.files ?? [];
         for (let file of files) {
           const img = new Image();
           img.src = URL.createObjectURL(file);
           img.onload = async () => {
             const ratio = img.naturalWidth / img.naturalHeight;
-            const imageId = content.id + '-' + generateUUID();
+            const imageId = unit.id + '-' + generateUUID();
             const imageRef = ref(storage, `${campaign.id}/${imageId}`);
             await uploadBytes(imageRef, file);
             const fileUrl = await getDownloadURL(imageRef);
@@ -358,13 +180,13 @@ export const PageContent = () => {
               ratio: ratio,
             };
             urls.push(imageUrl);
-            await updateDoc(doc(db, 'units', content.id), {
+            await updateDoc(doc(db, 'units', unit.id), {
               imageUrls: arrayUnion(imageUrl),
             });
           };
         }
-        setContent({
-          ...content,
+        setUnit({
+          ...unit,
           imageUrls: urls,
         });
       } catch (e: any) {
@@ -377,82 +199,27 @@ export const PageContent = () => {
     }
   };
 
-  const handleAddSection = (index?: number) => {
-    if (content && user) {
-      const newSection = {
-        id: generateUUID(),
-        title: '',
-        body: '',
-        isHeader: false,
-        authorId: user.id,
-      };
-
-      const newArticle =
-        index !== undefined
-          ? {
-              ...content,
-              sections: [
-                ...content.sections.slice(0, index + 1),
-                newSection,
-                ...content.sections.slice(index + 1),
-              ],
-            }
-          : {
-              ...content,
-              sections: [...content.sections, newSection],
-            };
-      setContent(newArticle);
-    }
-  };
-
-  const handleHideSection = async (sectionId: string) => {
-    if (content) {
-      const sectionIndex =
-        content?.sections.findIndex((section) => section.id === sectionId) ??
-        null;
-      const newSections = [
-        ...content.sections.slice(0, sectionIndex),
-        {
-          ...content.sections[sectionIndex],
-          hidden: !content.sections[sectionIndex].hidden,
-        },
-        ...content.sections.slice(sectionIndex + 1),
-      ];
-      await updateDoc(doc(db, 'units', content.id), {
-        sections: newSections,
-      });
-    }
-  };
-
-  /*
-   * TODO: Data mismatch between content state and firebase -- also switches between isEditing change
-   *  NOTE: this **MAY** be caused by the fact that section is not "focused" on unless title is clicked.
-   *  clicking on body does not focus section
-   */
-  const handleDeleteSection = async () => {
-    if (content) {
+  const handleSaveContent = async () => {
+    if (unit) {
       try {
-        const newSections = [...content.sections].filter(
-          (a) => a.id !== focusedSectionId
-        );
-        const newArticle = {
-          ...content,
-          sections: newSections,
-        };
-        await updateDoc(doc(db, 'units', content.id), {
-          sections: newSections,
+        const unitTitle = editor.children[0].children[0].text ?? unit.title;
+        await updateDoc(doc(db, 'units', unit.id), {
+          content: editor.children,
+          title: unitTitle,
         });
-        setContent(newArticle);
-        setFocusedSectionId(null);
-        setEditing(false);
+        displayAlert({
+          message: `Your changes to ${unitTitle} have been saved.`,
+        });
       } catch (e: any) {
         displayAlert({
-          message: 'An error occurred while deleting the section.',
+          message: 'An error occurred while saving changes.',
           isError: true,
-          errorType: e.name,
+          errorType: e.message,
         });
       }
     }
+
+    setUnsavedChanges(false);
   };
 
   return (
@@ -468,7 +235,7 @@ export const PageContent = () => {
             pt: 12,
           }}
         >
-          {content && (
+          {unit && (
             <Grid container spacing={3}>
               <Grid item xs={12} md={3}>
                 <Box
@@ -482,143 +249,74 @@ export const PageContent = () => {
                       display: { xs: 'none', md: 'block' },
                     }}
                   >
-                    <ArticleAside article={content} />
+                    <ArticleAside titles={sectionTitles} article={unit} />
                   </Box>
-                  {isEditing && (
-                    <Box py={1}>
-                      <Button
-                        startIcon={<AddIcon />}
-                        onClick={() => handleAddSection()}
-                        sx={{ color: 'grey' }}
-                      >
-                        Add Section&nbsp;&nbsp;
-                        <Chip
-                          label={'TAB'}
-                          variant={'outlined'}
-                          size={'small'}
-                          sx={{ borderRadius: '3px' }}
-                        />
-                      </Button>
-                      <Button
-                        startIcon={<AddIcon />}
-                        onClick={handleAddImage}
-                        sx={{ color: 'grey' }}
-                      >
-                        Add Reference Image
-                      </Button>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        style={{ display: 'none' }}
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                      />
-                    </Box>
-                  )}
+
+                  <Box py={1}>
+                    <Button
+                      startIcon={<AddIcon />}
+                      onClick={handleAddImage}
+                      sx={{ color: 'grey' }}
+                    >
+                      Add Reference Image
+                    </Button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      style={{ display: 'none' }}
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                    />
+                  </Box>
                 </Box>
               </Grid>
               <Grid item xs={12} md={8}>
-                <Box pl={3}>
-                  <form ref={sectionsFormRef} onSubmit={handleSave}>
-                    <Box
-                      sx={{
-                        marginTop: -4,
-                      }}
+                <Box pl={3} zIndex={9000000}>
+                  {isUnsavedChanges && (
+                    <Typography
+                      sx={{ userSelect: 'none' }}
+                      pb={1}
+                      mt={-4}
+                      color={'grey'}
                     >
-                      {isEditing ? (
-                        <>
-                          {isUserDm && (
-                            <HideContentCheckbox
-                              defaultValue={content.hidden}
-                            />
-                          )}
-                        </>
-                      ) : (
-                        <Typography
-                          color={'grey'}
-                          variant={'subtitle2'}
-                          sx={{
-                            opacity: content.hidden ? 1 : 0,
-                          }}
-                        >
-                          Hidden from players
-                        </Typography>
-                      )}
-                    </Box>
-                    {content.sections.map((section, index) => {
-                      const author =
-                        campaign?.players.find(
-                          (player) => player.id === section.authorId
-                        ) ?? null;
-                      return (
-                        <Box
-                          key={section.id}
-                          sx={{
-                            paddingBottom: '28px',
-                            display:
-                              !section.hidden || isUserDm ? 'auto' : 'none',
-                          }}
-                        >
-                          {/* Section title page anchor */}
-                          <span
-                            id={section.title}
-                            style={{
-                              position: 'relative',
-                              top: -90,
-                            }}
-                          ></span>
-                          <Box
-                            onClick={() => {
-                              if (!section.isHeader) {
-                                setFocusedSectionId(section.id);
-                              }
-                            }}
-                            sx={
-                              isEditing ||
-                              (section.title.length <= 0 &&
-                                section.body.length <= 0)
-                                ? {}
-                                : { display: 'none' }
-                            }
-                          >
-                            <EditableSection
-                              section={section}
-                              author={author}
-                            />
-                          </Box>
-                          <Box sx={!isEditing ? {} : { display: 'none' }}>
-                            <Section
-                              section={section}
-                              author={author}
-                              handleHideSection={handleHideSection}
-                            />
-                          </Box>
-                          {section.isHeader && (
-                            <Divider
-                              sx={
-                                section.body.trim() || isEditing
-                                  ? { py: 1 }
-                                  : {}
-                              }
-                            />
-                          )}
-                        </Box>
+                      (unsaved changes)
+                    </Typography>
+                  )}
+                  <Slate
+                    editor={editor}
+                    initialValue={unit.content}
+                    onChange={() => {
+                      const isAstChange = editor.operations.some(
+                        (op: any) => 'set_selection' !== op.type
                       );
-                    })}
-                  </form>
-                  {content.type === 'quest' && (
+                      if (isAstChange) {
+                        setUnsavedChanges(true);
+                      }
+                    }}
+                  >
+                    <HoveringToolbar />
+                    <Editable
+                      id={'editable'}
+                      renderElement={renderElement}
+                      renderLeaf={renderLeaf}
+                      style={{
+                        outline: 'none',
+                      }}
+                    />
+                  </Slate>
+                  {unit.type === 'quest' && (
                     <>
                       {/*<QuestTimeline questId={content.id} />*/}
                       <div style={{ paddingBottom: '28px' }}>
-                        <LootTable questId={content.id} />
+                        <LootTable questId={unit.id} />
                       </div>
                     </>
                   )}
-                  {content.imageUrls.length > 0 && (
+                  {unit.imageUrls.length > 0 && (
                     <div style={{ paddingBottom: '28px' }}>
                       <ImageList
-                        imageUrls={content.imageUrls}
+                        imageUrls={unit.imageUrls}
                         handleDeleteImage={handleDeleteImage}
                       />
                     </div>
@@ -636,49 +334,19 @@ export const PageContent = () => {
               bottom: 16,
             }}
           >
-            {isEditing ? (
-              <>
-                <Tooltip title={'Save Changes'} placement={'left'}>
-                  <IconButton
-                    size="large"
-                    onClick={() => {
-                      sectionsFormRef.current &&
-                        sectionsFormRef.current.dispatchEvent(
-                          new Event('submit', {
-                            cancelable: true,
-                            bubbles: true,
-                          })
-                        );
-                    }}
-                  >
-                    <CheckIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip
-                  title={`Delete ${focusedSectionTitle}`}
-                  placement={'left'}
+            <Tooltip title={'Save Changes'} placement={'left'}>
+              <span>
+                <IconButton
+                  size="large"
+                  disabled={!isUnsavedChanges}
+                  onClick={handleSaveContent}
                 >
-                  <span>
-                    <IconButton
-                      size="large"
-                      disabled={!Boolean(focusedSectionId)}
-                      onClick={handleDeleteSection}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-              </>
-            ) : (
-              <Tooltip title={'Edit Page'} placement={'left'}>
-                <IconButton size="large" onClick={() => setEditing(true)}>
-                  <EditIcon />
+                  <CheckIcon />
                 </IconButton>
-              </Tooltip>
-            )}
+              </span>
+            </Tooltip>
           </Stack>
         </Box>
-        {/*<Button onClick={() => console.log(content)}>log state</Button>*/}
       </Container>
     </Box>
   );

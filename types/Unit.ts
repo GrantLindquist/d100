@@ -1,3 +1,5 @@
+import { Node } from 'slate';
+
 export type UnitType = 'article' | 'quest' | 'collection';
 export const UnitEnum = ['article', 'quest', 'collection'];
 export const UnitDisplayValues = {
@@ -20,22 +22,13 @@ export interface Collection extends Unit {
 }
 
 export interface Article extends Unit {
-  sections: Section[];
+  content: Node[];
   imageUrls: ImageUrl[];
 }
 
 export interface Quest extends Article {
   loot: Loot[];
   complete: boolean;
-}
-
-export interface Section {
-  id: string;
-  isHeader: boolean;
-  title: string;
-  body: string;
-  authorId: string;
-  hidden?: boolean;
 }
 
 export interface Breadcrumb {

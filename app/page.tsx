@@ -32,7 +32,6 @@ export default function AuthPage() {
       const result = await signInWithPopup(auth, provider);
 
       // Define user values from Google
-      console.log(result.user);
       const user = result.user;
       let session: UserBase = {
         displayName: user.displayName,
@@ -69,7 +68,7 @@ export default function AuthPage() {
       sx={{
         height: '100vh',
         width: '100vw',
-        backgroundImage: 'url(/d100-signin.png)',
+        backgroundImage: 'url(/d100-signin.svg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}

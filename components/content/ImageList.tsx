@@ -13,7 +13,7 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Masonry from '@mui/lab/Masonry';
-import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
 import { ImageUrl } from '@/types/Unit';
 import ImageFrame from '@/components/content/ImageFrame';
 
@@ -54,7 +54,7 @@ const ImageList = (props: {
       <Typography
         id={'Reference Images'}
         fontWeight={BOLD_FONT_WEIGHT}
-        variant={'h4'}
+        variant={SUBTITLE_VARIANT}
         pb={1}
       >
         Reference Images

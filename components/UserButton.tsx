@@ -16,11 +16,12 @@ import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useAlert } from '@/hooks/useAlert';
 import LogoutIcon from '@mui/icons-material/Logout';
+import ClearIcon from '@mui/icons-material/Clear';
 import { useCampaign } from '@/hooks/useCampaign';
 import { arrayRemove, doc, runTransaction } from '@firebase/firestore';
 import { UserBase } from '@/types/User';
 
-// TODO: Signout bug
+// TODO: Signout bug - pushing router to '/' persists collection content ???
 const UserButton = () => {
   const router = useRouter();
   const { user, signOutUser, setListening } = useUser();
@@ -87,39 +88,43 @@ const UserButton = () => {
 
   return (
     <>
-      <Button onClick={handleClick}>
-        <Avatar
-          src={user?.photoURL ?? '-'}
-          alt={'Current User'}
-          sx={{
-            width: 30,
-            height: 30,
-            marginRight: 1,
-          }}
-        />
-        {displayUserName && (
-          <Typography color={'white'} variant={'subtitle2'}>
-            {user?.displayName}
-          </Typography>
-        )}
-      </Button>
-      <Menu
-        anchorEl={anchor}
-        open={open}
-        onClose={handleClose}
-        disableScrollLock
-      >
-        <MenuItem onClick={handleSignOut}>
-          <LogoutIcon sx={{ width: 20, height: 20 }} />
-          &nbsp; Sign out
-        </MenuItem>
-        {campaign && !isUserDm && (
-          <MenuItem onClick={() => handleLeaveCampaign(campaign.id)}>
-            <LogoutIcon sx={{ width: 20, height: 20 }} />
-            &nbsp; Leave Campaign
-          </MenuItem>
-        )}
-      </Menu>
+      {user && (
+        <>
+          <Button onClick={handleClick}>
+            <Avatar
+              src={user?.photoURL ?? '-'}
+              alt={'Current User'}
+              sx={{
+                width: 30,
+                height: 30,
+                marginRight: 1,
+              }}
+            />
+            {displayUserName && (
+              <Typography color={'white'} variant={'subtitle2'}>
+                {user?.displayName}
+              </Typography>
+            )}
+          </Button>
+          <Menu
+            anchorEl={anchor}
+            open={open}
+            onClose={handleClose}
+            disableScrollLock
+          >
+            <MenuItem onClick={handleSignOut}>
+              <LogoutIcon sx={{ width: 20, height: 20 }} />
+              &nbsp; Sign out
+            </MenuItem>
+            {campaign && !isUserDm && (
+              <MenuItem onClick={() => handleLeaveCampaign(campaign.id)}>
+                <ClearIcon sx={{ width: 20, height: 20 }} />
+                &nbsp; Leave Campaign
+              </MenuItem>
+            )}
+          </Menu>
+        </>
+      )}
     </>
   );
 };
