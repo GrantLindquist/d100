@@ -24,7 +24,7 @@ import { CurrencyType, Loot } from '@/types/Unit';
 import { doc, onSnapshot, updateDoc } from '@firebase/firestore';
 import { useAlert } from '@/hooks/useAlert';
 import db from '@/utils/firebase';
-import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
 
 const EditableTable = (props: { questId: string }) => {
   const { displayAlert } = useAlert();
