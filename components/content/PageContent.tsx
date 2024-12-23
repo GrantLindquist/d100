@@ -53,6 +53,7 @@ import {
 } from '@/components/content/slate/RichText';
 import { HoveringToolbar } from '@/components/content/slate/HoveringToolbar';
 import ArticleAside from '@/components/content/ArticleAside';
+import { withHistory } from 'slate-history';
 
 const HideContentCheckbox = (props: { defaultValue: boolean }) => {
   const [checked, setChecked] = useState(props.defaultValue);
@@ -76,7 +77,6 @@ const HideContentCheckbox = (props: { defaultValue: boolean }) => {
   );
 };
 
-// TODO: Signal when there are unsaved changes
 // TODO: Make drag/hover event work when initiated outside of slate editor
 export const PageContent = () => {
   const [unit, setUnit] = useState<Article | Quest | null>(null);
@@ -84,18 +84,30 @@ export const PageContent = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { campaign, setBreadcrumbs } = useCampaign();
+  const { campaign, setBreadcrumbs, isUserDm } = useCampaign();
   const { displayAlert } = useAlert();
   const pathname = usePathname();
 
-  const editor = useMemo(() => withLayout(withReact(createEditor())), []);
+  const editor = useMemo(
+    () => withLayout(withReact(withHistory(createEditor()))),
+    []
+  );
   const renderElement = useCallback((props: any) => <Element {...props} />, []);
-  const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
+  const renderLeaf = useCallback(
+    (props: { attributes: any; children: any; leaf: any }) => {
+      if (props.leaf.hidden && !isUserDm) {
+        return <></>;
+      }
+      return <Leaf {...props} />;
+    },
+    []
+  );
 
+  // TODO: This is empty on initialization, becomes populated after refresh
   const sectionTitles = editor.children
-    .filter((e) => e.type === 'title' || e.type === 'subtitle') // Filter elements
-    .map((e) => {
-      return e.children.map((child) => child.text).join('');
+    .filter((e: any) => e.type === 'title' || e.type === 'subtitle')
+    .map((e: any) => {
+      return e.children.map((child: any) => child.text).join('');
     });
 
   useEffect(() => {
@@ -245,9 +257,6 @@ export const PageContent = () => {
                     >
                       Add Reference Image
                     </Button>
-                    <Button onClick={() => console.log(editor.children)}>
-                      Print editor
-                    </Button>
                     <input
                       type="file"
                       accept="image/*"
@@ -260,8 +269,17 @@ export const PageContent = () => {
                 </Box>
               </Grid>
               <Grid item xs={12} md={8}>
-                <Box pl={3}>
-                  {/* TODO: Enable history */}
+                <Box pl={3} zIndex={9000000}>
+                  {isUnsavedChanges && (
+                    <Typography
+                      sx={{ userSelect: 'none' }}
+                      pb={1}
+                      mt={-4}
+                      color={'grey'}
+                    >
+                      (unsaved changes)
+                    </Typography>
+                  )}
                   <Slate
                     editor={editor}
                     initialValue={unit.content}
@@ -290,6 +308,9 @@ export const PageContent = () => {
                           case 'formatUnderline':
                             event.preventDefault();
                             return toggleMark(editor, 'underlined');
+                          case 'formatHidden':
+                            event.preventDefault();
+                            return toggleMark(editor, 'hidden');
                         }
                       }}
                       style={{

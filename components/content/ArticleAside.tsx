@@ -18,7 +18,6 @@ const SubheaderAsideSx = {
   paddingY: 0.5,
 };
 
-// TODO: Re-implement section titles
 const ArticleAside = (props: { titles: string[]; article: Article }) => {
   const scrollToTitle = (title: string) => {
     const targetElement = document.getElementById(title);
@@ -31,7 +30,7 @@ const ArticleAside = (props: { titles: string[]; article: Article }) => {
   };
 
   return (
-    <Card>
+    <Card sx={{ userSelect: 'none' }}>
       {props.article.imageUrls.length > 0 && (
         <ImageFrame
           image={props.article.imageUrls[0]}

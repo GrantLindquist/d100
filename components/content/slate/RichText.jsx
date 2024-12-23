@@ -40,6 +40,11 @@ export const Leaf = ({ attributes, children, leaf }) => {
   if (leaf.underlined) {
     children = <u>{children}</u>;
   }
+  if (leaf.hidden) {
+    children = (
+      <mark style={{ color: '#fff', backgroundColor: '#333' }}>{children}</mark>
+    );
+  }
 
   return <span {...attributes}>{children}</span>;
 };
@@ -66,6 +71,7 @@ export const isElementActive = (editor, type) => {
   return !!match;
 };
 
+// TODO: editor.children[1] cannot be changed to subtitle - maybe rewrite function & reuse subtitle logic for logic
 export const withLayout = (editor) => {
   const { normalizeNode } = editor;
 
@@ -90,13 +96,13 @@ export const withLayout = (editor) => {
         });
       }
 
-      if (editor.children.length < 2) {
-        const paragraph = {
-          type: 'paragraph',
-          children: [{ text: '' }],
-        };
-        Transforms.insertNodes(editor, paragraph, { at: path.concat(1) });
-      }
+      // if (editor.children.length < 2) {
+      //   const paragraph = {
+      //     type: 'paragraph',
+      //     children: [{ text: '' }],
+      //   };
+      //   Transforms.insertNodes(editor, paragraph, { at: path.concat(1) });
+      // }
 
       for (const [child, childPath] of Node.children(editor, path)) {
         let type;

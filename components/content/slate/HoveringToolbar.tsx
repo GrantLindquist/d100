@@ -14,6 +14,12 @@ import {
   isMarkActive,
   toggleMark,
 } from '@/components/content/slate/RichText';
+import FormatBoldIcon from '@mui/icons-material/FormatBold';
+import FormatItalicIcon from '@mui/icons-material/FormatItalic';
+import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
+import TitleIcon from '@mui/icons-material/Title';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { Tooltip } from '@mui/material';
 
 // TODO: Remove IDE errors from this file
 interface BaseProps {
@@ -43,12 +49,15 @@ export const HoveringToolbar = () => {
     }
 
     const domSelection = window.getSelection();
-    const domRange = domSelection.getRangeAt(0);
-    const rect = domRange.getBoundingClientRect();
+    const domRange = domSelection?.getRangeAt(0);
+    const rect = domRange?.getBoundingClientRect();
     el.style.opacity = '1';
-    el.style.top = `${rect.top + window.pageYOffset - el.offsetHeight}px`;
+    el.style.top = `${(rect?.top ?? 0) + window.pageYOffset - el.offsetHeight}px`;
     el.style.left = `${
-      rect.left + window.pageXOffset - el.offsetWidth / 2 + rect.width / 2
+      (rect?.left ?? 0) +
+      window.pageXOffset -
+      el.offsetWidth / 2 +
+      (rect?.width ?? 0) / 2
     }px`;
   });
 
@@ -57,56 +66,48 @@ export const HoveringToolbar = () => {
       <Menu
         ref={ref}
         className={css`
-          padding: 8px 7px 6px;
+          padding: 8px 8px 0;
           position: absolute;
-          z-index: 1;
+          z-index: 3;
           top: -10000px;
           left: -10000px;
-          margin-top: -6px;
           opacity: 0;
           background-color: #222;
           border-radius: 4px;
-          transition: opacity 0.75s;
+          transition: opacity 0.4s;
         `}
         onMouseDown={(e) => {
-          // prevent toolbar from taking focus away from editor
           e.preventDefault();
         }}
       >
-        {/*<ButtonGroup>*/}
-        {/*  <IconButton onClick={() => toggleMark(editor, 'subtitle')}>*/}
-        {/*    <FormatTitleIcon />*/}
-        {/*  </IconButton>*/}
-        {/*  <IconButton onClick={() => toggleMark(editor, 'bold')}>*/}
-        {/*    <FormatBoldIcon />*/}
-        {/*  </IconButton>*/}
-        {/*  <IconButton onClick={() => toggleMark(editor, 'italic')}>*/}
-        {/*    <FormatItalicIcon />*/}
-        {/*  </IconButton>*/}
-        {/*</ButtonGroup>*/}
-        <FormatButton format="subtitle" icon="t" />
-        <FormatButton format="bold" icon="b" />
-        <FormatButton format="italic" icon="i" />
-        <FormatButton format="underlined" icon="u" />
+        <FormatButton format="subtitle" icon={<TitleIcon />} />
+        <FormatButton format="bold" icon={<FormatBoldIcon />} />
+        <FormatButton format="italic" icon={<FormatItalicIcon />} />
+        <FormatButton format="underlined" icon={<FormatUnderlinedIcon />} />
+        <Tooltip title={'Hide from players'} placement="top">
+          <div>
+            <FormatButton format="hidden" icon={<VisibilityOffIcon />} />
+          </div>
+        </Tooltip>
       </Menu>
     </Portal>
   );
 };
-const FormatButton = ({ format, icon }) => {
+const FormatButton = (props: { format: string; icon: ReactNode }) => {
   const editor = useSlate();
 
-  // TODO: editor.children[1] cannot be changed to subtitle
   const handleClick = () => {
-    if (format === 'subtitle') {
+    if (props.format === 'subtitle') {
       const isActive = isElementActive(editor, 'subtitle');
-      console.log(isActive);
       if (isActive) {
+        // @ts-ignore
         Transforms.setNodes(editor, { type: 'paragraph' });
       } else {
+        // @ts-ignore
         Transforms.setNodes(editor, { type: 'subtitle' });
       }
     } else {
-      toggleMark(editor, format);
+      toggleMark(editor, props.format);
     }
   };
 
@@ -114,13 +115,13 @@ const FormatButton = ({ format, icon }) => {
     <Button
       reversed
       active={
-        format === 'subtitle'
+        props.format === 'subtitle'
           ? isElementActive(editor, 'subtitle')
-          : isMarkActive(editor, format)
+          : isMarkActive(editor, props.format)
       }
       onClick={handleClick}
     >
-      {icon}
+      {props.icon}
     </Button>
   );
 };
