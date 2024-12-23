@@ -45,12 +45,7 @@ import { usePathname } from 'next/navigation';
 import { Editable, Slate, withReact } from 'slate-react';
 import CheckIcon from '@mui/icons-material/Check';
 import { createEditor } from 'slate';
-import {
-  Element,
-  Leaf,
-  toggleMark,
-  withLayout,
-} from '@/components/content/slate/RichText';
+import { Element, Leaf, withLayout } from '@/components/content/slate/RichText';
 import { HoveringToolbar } from '@/components/content/slate/HoveringToolbar';
 import ArticleAside from '@/components/content/ArticleAside';
 import { withHistory } from 'slate-history';
@@ -81,6 +76,7 @@ const HideContentCheckbox = (props: { defaultValue: boolean }) => {
 export const PageContent = () => {
   const [unit, setUnit] = useState<Article | Quest | null>(null);
   const [isUnsavedChanges, setUnsavedChanges] = useState(false);
+  const [sectionTitles, setSectionTitles] = useState([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -103,12 +99,18 @@ export const PageContent = () => {
     []
   );
 
-  // TODO: This is empty on initialization, becomes populated after refresh
-  const sectionTitles = editor.children
-    .filter((e: any) => e.type === 'title' || e.type === 'subtitle')
-    .map((e: any) => {
-      return e.children.map((child: any) => child.text).join('');
-    });
+  useEffect(() => {
+    const titles = editor.children
+      .filter(
+        (e: any) =>
+          (e.type === 'title' || e.type === 'subtitle') &&
+          (isUserDm || !e.children[0].hidden)
+      )
+      .map((e: any) => {
+        return e.children.map((child: any) => child.text).join('');
+      });
+    setSectionTitles(titles);
+  }, [unit]);
 
   useEffect(() => {
     const url = pathname.split('/').slice(1);
@@ -297,22 +299,6 @@ export const PageContent = () => {
                       id={'editable'}
                       renderElement={renderElement}
                       renderLeaf={renderLeaf}
-                      onDOMBeforeInput={(event: InputEvent) => {
-                        switch (event.inputType) {
-                          case 'formatBold':
-                            event.preventDefault();
-                            return toggleMark(editor, 'bold');
-                          case 'formatItalic':
-                            event.preventDefault();
-                            return toggleMark(editor, 'italic');
-                          case 'formatUnderline':
-                            event.preventDefault();
-                            return toggleMark(editor, 'underlined');
-                          case 'formatHidden':
-                            event.preventDefault();
-                            return toggleMark(editor, 'hidden');
-                        }
-                      }}
                       style={{
                         outline: 'none',
                       }}

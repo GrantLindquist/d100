@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material';
 import { Editor, Element as SlateElement, Node, Transforms } from 'slate';
-import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
 
 // TODO: Fix y-spacing, maybe line-height?
 export const Element = ({ children, element }) => {
@@ -15,7 +15,7 @@ export const Element = ({ children, element }) => {
           }}
         ></span>
         <Typography
-          variant={element.type === 'title' ? 'h1' : 'h2'}
+          variant={element.type === 'title' ? 'h1' : SUBTITLE_VARIANT}
           fontWeight={BOLD_FONT_WEIGHT}
           sx={element.type === 'title' ? { marginTop: -2 } : {}}
         >
@@ -71,7 +71,6 @@ export const isElementActive = (editor, type) => {
   return !!match;
 };
 
-// TODO: editor.children[1] cannot be changed to subtitle - maybe rewrite function & reuse subtitle logic for logic
 export const withLayout = (editor) => {
   const { normalizeNode } = editor;
 
@@ -95,35 +94,28 @@ export const withLayout = (editor) => {
           select: true,
         });
       }
-
-      // if (editor.children.length < 2) {
-      //   const paragraph = {
-      //     type: 'paragraph',
-      //     children: [{ text: '' }],
-      //   };
-      //   Transforms.insertNodes(editor, paragraph, { at: path.concat(1) });
-      // }
-
       for (const [child, childPath] of Node.children(editor, path)) {
         let type;
         const slateIndex = childPath[0];
-        const enforceType = (type) => {
-          if (SlateElement.isElement(child) && child.type !== type) {
-            const newProperties = { type };
-            Transforms.setNodes(editor, newProperties, {
-              at: childPath,
-            });
+        const enforceType = (defaultType, allowedTypes) => {
+          if (SlateElement.isElement(child)) {
+            if (!allowedTypes.includes(child.type)) {
+              const newProperties = { type: defaultType };
+              Transforms.setNodes(editor, newProperties, {
+                at: childPath,
+              });
+            }
           }
         };
 
         switch (slateIndex) {
           case 0:
             type = 'title';
-            enforceType(type);
+            enforceType(type, [type]);
             break;
           case 1:
             type = 'paragraph';
-            enforceType(type);
+            enforceType(type, ['paragraph', 'subtitle']); // Allow paragraph or subtitle
             break;
           default:
             break;

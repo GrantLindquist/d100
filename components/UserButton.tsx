@@ -87,39 +87,43 @@ const UserButton = () => {
 
   return (
     <>
-      <Button onClick={handleClick}>
-        <Avatar
-          src={user?.photoURL ?? '-'}
-          alt={'Current User'}
-          sx={{
-            width: 30,
-            height: 30,
-            marginRight: 1,
-          }}
-        />
-        {displayUserName && (
-          <Typography color={'white'} variant={'subtitle2'}>
-            {user?.displayName}
-          </Typography>
-        )}
-      </Button>
-      <Menu
-        anchorEl={anchor}
-        open={open}
-        onClose={handleClose}
-        disableScrollLock
-      >
-        <MenuItem onClick={handleSignOut}>
-          <LogoutIcon sx={{ width: 20, height: 20 }} />
-          &nbsp; Sign out
-        </MenuItem>
-        {campaign && !isUserDm && (
-          <MenuItem onClick={() => handleLeaveCampaign(campaign.id)}>
-            <LogoutIcon sx={{ width: 20, height: 20 }} />
-            &nbsp; Leave Campaign
-          </MenuItem>
-        )}
-      </Menu>
+      {user && (
+        <>
+          <Button onClick={handleClick}>
+            <Avatar
+              src={user?.photoURL ?? '-'}
+              alt={'Current User'}
+              sx={{
+                width: 30,
+                height: 30,
+                marginRight: 1,
+              }}
+            />
+            {displayUserName && (
+              <Typography color={'white'} variant={'subtitle2'}>
+                {user?.displayName}
+              </Typography>
+            )}
+          </Button>
+          <Menu
+            anchorEl={anchor}
+            open={open}
+            onClose={handleClose}
+            disableScrollLock
+          >
+            <MenuItem onClick={handleSignOut}>
+              <LogoutIcon sx={{ width: 20, height: 20 }} />
+              &nbsp; Sign out
+            </MenuItem>
+            {campaign && !isUserDm && (
+              <MenuItem onClick={() => handleLeaveCampaign(campaign.id)}>
+                <LogoutIcon sx={{ width: 20, height: 20 }} />
+                &nbsp; Leave Campaign
+              </MenuItem>
+            )}
+          </Menu>
+        </>
+      )}
     </>
   );
 };

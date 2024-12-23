@@ -21,3 +21,5 @@ export const LINK_STYLE = {
     cursor: 'pointer',
   },
 };
+
+export const SUBTITLE_VARIANT = 'h4';

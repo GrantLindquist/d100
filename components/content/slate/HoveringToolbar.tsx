@@ -48,17 +48,20 @@ export const HoveringToolbar = () => {
       return;
     }
 
+    // TODO: This crashes when toggling hidden text
     const domSelection = window.getSelection();
-    const domRange = domSelection?.getRangeAt(0);
-    const rect = domRange?.getBoundingClientRect();
-    el.style.opacity = '1';
-    el.style.top = `${(rect?.top ?? 0) + window.pageYOffset - el.offsetHeight}px`;
-    el.style.left = `${
-      (rect?.left ?? 0) +
-      window.pageXOffset -
-      el.offsetWidth / 2 +
-      (rect?.width ?? 0) / 2
-    }px`;
+    if (domSelection && domSelection.rangeCount > 0) {
+      const domRange = domSelection.getRangeAt(0);
+      const rect = domRange?.getBoundingClientRect();
+      el.style.opacity = '1';
+      el.style.top = `${(rect?.top ?? 0) + window.pageYOffset - el.offsetHeight}px`;
+      el.style.left = `${
+        (rect?.left ?? 0) +
+        window.pageXOffset -
+        el.offsetWidth / 2 +
+        (rect?.width ?? 0) / 2
+      }px`;
+    }
   });
 
   return (
