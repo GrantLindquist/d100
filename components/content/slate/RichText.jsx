@@ -40,6 +40,7 @@ export const Leaf = ({ attributes, children, leaf }) => {
   if (leaf.underlined) {
     children = <u>{children}</u>;
   }
+
   if (leaf.hidden) {
     children = (
       <mark style={{ color: '#fff', backgroundColor: '#333' }}>{children}</mark>
@@ -71,6 +72,7 @@ export const isElementActive = (editor, type) => {
   return !!match;
 };
 
+// TODO: Prevent title from being marked
 export const withLayout = (editor) => {
   const { normalizeNode } = editor;
 

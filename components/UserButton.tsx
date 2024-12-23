@@ -16,6 +16,7 @@ import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useAlert } from '@/hooks/useAlert';
 import LogoutIcon from '@mui/icons-material/Logout';
+import ClearIcon from '@mui/icons-material/Clear';
 import { useCampaign } from '@/hooks/useCampaign';
 import { arrayRemove, doc, runTransaction } from '@firebase/firestore';
 import { UserBase } from '@/types/User';
@@ -117,7 +118,7 @@ const UserButton = () => {
             </MenuItem>
             {campaign && !isUserDm && (
               <MenuItem onClick={() => handleLeaveCampaign(campaign.id)}>
-                <LogoutIcon sx={{ width: 20, height: 20 }} />
+                <ClearIcon sx={{ width: 20, height: 20 }} />
                 &nbsp; Leave Campaign
               </MenuItem>
             )}

@@ -48,7 +48,6 @@ export const HoveringToolbar = () => {
       return;
     }
 
-    // TODO: This crashes when toggling hidden text
     const domSelection = window.getSelection();
     if (domSelection && domSelection.rangeCount > 0) {
       const domRange = domSelection.getRangeAt(0);
@@ -96,10 +95,12 @@ export const HoveringToolbar = () => {
     </Portal>
   );
 };
+
 const FormatButton = (props: { format: string; icon: ReactNode }) => {
   const editor = useSlate();
 
   const handleClick = () => {
+    // Handles specific case of toggling element type
     if (props.format === 'subtitle') {
       const isActive = isElementActive(editor, 'subtitle');
       if (isActive) {
@@ -109,7 +110,9 @@ const FormatButton = (props: { format: string; icon: ReactNode }) => {
         // @ts-ignore
         Transforms.setNodes(editor, { type: 'subtitle' });
       }
-    } else {
+    }
+    // Toggles leaf marks (bold, italic, etc.)
+    else {
       toggleMark(editor, props.format);
     }
   };

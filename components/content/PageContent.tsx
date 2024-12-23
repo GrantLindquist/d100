@@ -88,6 +88,7 @@ export const PageContent = () => {
     () => withLayout(withReact(withHistory(createEditor()))),
     []
   );
+
   const renderElement = useCallback((props: any) => <Element {...props} />, []);
   const renderLeaf = useCallback(
     (props: { attributes: any; children: any; leaf: any }) => {
@@ -96,7 +97,7 @@ export const PageContent = () => {
       }
       return <Leaf {...props} />;
     },
-    []
+    [isUserDm]
   );
 
   useEffect(() => {
