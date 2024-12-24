@@ -50,6 +50,7 @@ import { HoveringToolbar } from '@/components/content/slate/HoveringToolbar';
 import ArticleAside from '@/components/content/ArticleAside';
 import { withHistory } from 'slate-history';
 
+// TODO: Re-introduce this
 const HideContentCheckbox = (props: { defaultValue: boolean }) => {
   const [checked, setChecked] = useState(props.defaultValue);
 

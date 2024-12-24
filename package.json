@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p 80",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "eslint \"src/**/*.{js,jsx}\" --fix"
   },
   "prettier": {
     "trailingComma": "es5",

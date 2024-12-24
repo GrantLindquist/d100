@@ -1,13 +1,6 @@
 'use client';
 import UserButton from '@/components/UserButton';
-import {
-  Divider,
-  Stack,
-  Toolbar,
-  Tooltip,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Divider, Stack, Toolbar, Tooltip, Typography } from '@mui/material';
 import SettingsButton from '@/components/SettingsButton';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
@@ -22,7 +15,6 @@ const Navbar = () => {
   const { campaign, isUserDm } = useCampaign();
   const pathname = usePathname();
   const router = useRouter();
-  const theme = useTheme();
   if (pathname !== '/') {
     return (
       <Toolbar

@@ -27,8 +27,6 @@ interface BaseProps {
   [key: string]: unknown;
 }
 
-type OrNull<T> = T | null;
-
 export const HoveringToolbar = () => {
   const ref = useRef<HTMLDivElement | null>(null);
   const editor = useSlate();
@@ -165,6 +163,7 @@ export const Button = React.forwardRef(
     />
   )
 );
+Button.displayName = 'Button';
 
 export const Menu = React.forwardRef(
   (
@@ -190,6 +189,7 @@ export const Menu = React.forwardRef(
     />
   )
 );
+Menu.displayName = 'Menu';
 
 export const Portal = ({ children }: { children?: ReactNode }) => {
   return typeof document === 'object'
