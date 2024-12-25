@@ -42,7 +42,7 @@ const generateDefaultContent = (title: string) => {
     },
     {
       type: 'paragraph',
-      children: [{ text: 'Put some stuff here' }],
+      children: [{ text: '' }],
     },
   ];
 };

@@ -1,8 +1,10 @@
-import { Divider, Typography } from '@mui/material';
+import { Divider, Typography, useTheme } from '@mui/material';
 import { Editor, Element as SlateElement, Node, Transforms } from 'slate';
 import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
 
 export const Element = ({ children, element }) => {
+  const theme = useTheme();
+
   if (element.type === 'title' || element.type === 'subtitle') {
     return (
       <>
@@ -23,6 +25,23 @@ export const Element = ({ children, element }) => {
         {element.type === 'title' && <Divider sx={{ my: 1 }} />}
       </>
     );
+  }
+  // TODO: Get links to redirect properly
+  else if (element.type === 'link') {
+    return (
+      <a
+        href={element.children[0].text}
+        style={{
+          color: theme.palette.primary.main,
+          cursor: 'pointer',
+          margin: '1em 0',
+        }}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        {children}
+      </a>
+    );
   } else {
     return <p>{children}</p>;
   }
@@ -30,7 +49,6 @@ export const Element = ({ children, element }) => {
 
 // TODO: Add custom behavior to remove leaves from empty space
 export const Leaf = ({ attributes, children, leaf }) => {
-  // console.log(leaf);
   if (leaf.bold) {
     children = <strong>{children}</strong>;
   }
@@ -93,7 +111,7 @@ export const withLayout = (editor) => {
       if (editor.children.length <= 1 && Editor.string(editor, [0, 0]) === '') {
         const title = {
           type: 'title',
-          children: [{ text: 'Untitled' }],
+          children: [{ text: '' }],
         };
         Transforms.insertNodes(editor, title, {
           at: path.concat(0),
@@ -120,8 +138,9 @@ export const withLayout = (editor) => {
             enforceType(type, [type]);
             break;
           case 1:
+            // NOTE: Any element other than title MUST be placed into the allowedTypes parameter
             type = 'paragraph';
-            enforceType(type, ['paragraph', 'subtitle']); // Allow paragraph or subtitle
+            enforceType(type, ['paragraph', 'subtitle', 'link']);
             break;
           default:
             break;

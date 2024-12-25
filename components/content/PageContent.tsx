@@ -43,7 +43,7 @@ import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { usePathname } from 'next/navigation';
 import { Editable, Slate, withReact } from 'slate-react';
 import CheckIcon from '@mui/icons-material/Check';
-import { createEditor } from 'slate';
+import { createEditor, Transforms } from 'slate';
 import { Element, Leaf, withLayout } from '@/components/content/slate/RichText';
 import { HoveringToolbar } from '@/components/content/slate/HoveringToolbar';
 import ArticleAside from '@/components/content/ArticleAside';
@@ -219,6 +219,21 @@ export const PageContent = () => {
     }
   };
 
+  const handlePaste = (event: any) => {
+    const text = event.clipboardData?.getData('text') ?? null;
+    const urlRegex = new RegExp(
+      '^(https?:\\/\\/)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}(\\b[-a-zA-Z0-9@:%_\\+.~#?&//=]*)?$'
+    );
+    const link = {
+      type: 'link',
+      children: [{ text: text }],
+    };
+    if (text && urlRegex.test(text)) {
+      event.preventDefault();
+      Transforms.insertNodes(editor, link);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -297,11 +312,9 @@ export const PageContent = () => {
                       id={'editable'}
                       renderElement={renderElement}
                       renderLeaf={renderLeaf}
+                      onPaste={(event) => handlePaste(event)}
                       style={{
                         outline: 'none',
-                      }}
-                      onDOMBeforeInput={(e) => {
-                        console.log(e);
                       }}
                     />
                   </Slate>
