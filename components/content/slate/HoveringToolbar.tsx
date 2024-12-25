@@ -20,6 +20,7 @@ import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
 import TitleIcon from '@mui/icons-material/Title';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Tooltip } from '@mui/material';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 
 interface BaseProps {
   className: string;
@@ -83,6 +84,7 @@ export const HoveringToolbar = () => {
         <FormatButton format="bold" icon={<FormatBoldIcon />} />
         <FormatButton format="italic" icon={<FormatItalicIcon />} />
         <FormatButton format="underlined" icon={<FormatUnderlinedIcon />} />
+        <FormatButton format="bulletList" icon={<FormatListBulletedIcon />} />
         <Tooltip title={'Hide from players'} placement="top">
           <div>
             <FormatButton format="hidden" icon={<VisibilityOffIcon />} />

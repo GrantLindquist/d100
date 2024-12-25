@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material';
+import { Divider, Typography } from '@mui/material';
 import { Editor, Element as SlateElement, Node, Transforms } from 'slate';
 import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
 
@@ -15,12 +15,13 @@ export const Element = ({ children, element }) => {
           }}
         ></span>
         <Typography
-          variant={element.type === 'title' ? 'h1' : SUBTITLE_VARIANT}
+          variant={element.type === 'title' ? 'h2' : SUBTITLE_VARIANT}
           fontWeight={BOLD_FONT_WEIGHT}
-          sx={element.type === 'title' ? { marginTop: -2 } : {}}
+          sx={element.type === 'title' ? { marginTop: -1 } : {}}
         >
           {children}
         </Typography>
+        {element.type === 'title' && <Divider sx={{ my: 1 }} />}
       </>
     );
   } else {
@@ -28,19 +29,23 @@ export const Element = ({ children, element }) => {
   }
 };
 
+// TODO: Add custom behavior to remove leaves from empty space
 export const Leaf = ({ attributes, children, leaf }) => {
+  console.log(children);
   if (leaf.bold) {
     children = <strong>{children}</strong>;
   }
-
   if (leaf.italic) {
     children = <em>{children}</em>;
   }
-
   if (leaf.underlined) {
     children = <u>{children}</u>;
   }
-
+  // TODO: Add custom behavior to turn list into paragraph if enter is clicked on empty bullet
+  if (leaf.bulletList) {
+    children = <li>{children}</li>;
+  }
+  // TODO: Add custom behavior to not carry hidden text on keystroke UNLESS keystroke is positioned between two hidden characters.
   if (leaf.hidden) {
     children = (
       <mark style={{ color: '#fff', backgroundColor: '#333' }}>{children}</mark>

@@ -163,6 +163,7 @@ const CampaignTabMemo = memo(CampaignTab, (prevProps, nextProps) => {
   );
 });
 
+// Organize by time last joined
 const CampaignList = () => {
   const { user } = useUser();
   const [hoveredCampaignId, setHoveredCampaignId] = useState<string | null>(

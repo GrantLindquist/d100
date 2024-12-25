@@ -270,14 +270,23 @@ const CollectionSearch = (props: {
               size={'small'}
               onChange={handleInputChange}
               fullWidth
+              placeholder={'Search'}
               sx={{
-                paddingBottom: 5,
+                marginBottom: 5,
+                backgroundColor: '#222222',
+                borderRadius: 50,
+                color: '#DDDDDD',
+                '& fieldset': { border: 'none' },
               }}
-              InputProps={{
-                startAdornment: <SearchIcon />,
-                endAdornment: (
-                  <CreateUnitModal breadcrumbs={props.collection.breadcrumbs} />
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: <SearchIcon style={{ marginRight: 6 }} />,
+                  endAdornment: (
+                    <CreateUnitModal
+                      breadcrumbs={props.collection.breadcrumbs}
+                    />
+                  ),
+                },
               }}
             />
             <Box

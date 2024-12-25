@@ -304,6 +304,9 @@ export const PageContent = () => {
                       style={{
                         outline: 'none',
                       }}
+                      // onDOMBeforeInput={(e) => {
+                      //   console.log(e);
+                      // }}
                     />
                   </Slate>
                   {unit.type === 'quest' && (
