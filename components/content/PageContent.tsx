@@ -3,7 +3,6 @@
 import {
   Box,
   Button,
-  Checkbox,
   Container,
   Grid,
   IconButton,
@@ -49,29 +48,7 @@ import { Element, Leaf, withLayout } from '@/components/content/slate/RichText';
 import { HoveringToolbar } from '@/components/content/slate/HoveringToolbar';
 import ArticleAside from '@/components/content/ArticleAside';
 import { withHistory } from 'slate-history';
-
-// TODO: Re-introduce this
-const HideContentCheckbox = (props: { defaultValue: boolean }) => {
-  const [checked, setChecked] = useState(props.defaultValue);
-
-  return (
-    <Stack direction={'row'} alignItems={'center'}>
-      <Checkbox
-        sx={{
-          paddingY: 0,
-          paddingLeft: 0,
-          paddingRight: 1,
-        }}
-        name={'isHidden'}
-        checked={checked}
-        onChange={(event) => setChecked(event.target.checked)}
-      />
-      <Typography color={'grey'} variant={'subtitle2'}>
-        Hidden from players
-      </Typography>
-    </Stack>
-  );
-};
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 // TODO: Make drag/hover event work when initiated outside of slate editor
 export const PageContent = () => {
@@ -223,6 +200,25 @@ export const PageContent = () => {
     setUnsavedChanges(false);
   };
 
+  const toggleHideUnit = async (toggle: boolean) => {
+    try {
+      if (unit) {
+        await updateDoc(doc(db, 'units', unit.id), {
+          hidden: toggle,
+        });
+        displayAlert({
+          message: `Content is ${toggle ? 'now' : 'no longer'} hidden from players.`,
+        });
+      }
+    } catch (e: any) {
+      displayAlert({
+        message: `An error occurred while hiding this content.`,
+        isError: true,
+        errorType: e.message,
+      });
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -273,17 +269,17 @@ export const PageContent = () => {
                 </Box>
               </Grid>
               <Grid item xs={12} md={8}>
-                <Box pl={3} zIndex={9000000}>
-                  {isUnsavedChanges && (
-                    <Typography
-                      sx={{ userSelect: 'none' }}
-                      pb={1}
-                      mt={-4}
-                      color={'grey'}
-                    >
-                      (unsaved changes)
-                    </Typography>
-                  )}
+                <Box pl={3} zIndex={5}>
+                  <Typography
+                    sx={{ userSelect: 'none' }}
+                    pb={1}
+                    mt={-4}
+                    color={'grey'}
+                  >
+                    {unit.hidden && 'Hidden from players'}&nbsp;
+                    {isUnsavedChanges && <em>(unsaved changes)</em>}
+                  </Typography>
+
                   <Slate
                     editor={editor}
                     initialValue={unit.content}
@@ -304,9 +300,9 @@ export const PageContent = () => {
                       style={{
                         outline: 'none',
                       }}
-                      // onDOMBeforeInput={(e) => {
-                      //   console.log(e);
-                      // }}
+                      onDOMBeforeInput={(e) => {
+                        console.log(e);
+                      }}
                     />
                   </Slate>
                   {unit.type === 'quest' && (
@@ -338,6 +334,18 @@ export const PageContent = () => {
               bottom: 16,
             }}
           >
+            <Tooltip title={`Hide Content From Players`} placement={'left'}>
+              <span>
+                <IconButton
+                  size="large"
+                  onClick={() => toggleHideUnit(!unit?.hidden)}
+                >
+                  <VisibilityOffIcon
+                    style={!unit?.hidden ? { color: 'grey' } : {}}
+                  />
+                </IconButton>
+              </span>
+            </Tooltip>
             <Tooltip title={'Save Changes'} placement={'left'}>
               <span>
                 <IconButton

@@ -18,6 +18,7 @@ const SubheaderAsideSx = {
   paddingY: 0.5,
 };
 
+// TODO: Titles sometimes disappear when article is toggled hidden
 const ArticleAside = (props: { titles: string[]; article: Article }) => {
   // TODO: Make section title temporarily highlight when this activates
   const scrollToTitle = (title: string) => {

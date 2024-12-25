@@ -2,7 +2,6 @@ import { Divider, Typography } from '@mui/material';
 import { Editor, Element as SlateElement, Node, Transforms } from 'slate';
 import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
 
-// TODO: Fix y-spacing, maybe line-height?
 export const Element = ({ children, element }) => {
   if (element.type === 'title' || element.type === 'subtitle') {
     return (
@@ -31,7 +30,7 @@ export const Element = ({ children, element }) => {
 
 // TODO: Add custom behavior to remove leaves from empty space
 export const Leaf = ({ attributes, children, leaf }) => {
-  console.log(children);
+  // console.log(leaf);
   if (leaf.bold) {
     children = <strong>{children}</strong>;
   }
