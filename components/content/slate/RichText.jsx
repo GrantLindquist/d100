@@ -27,6 +27,7 @@ export const Element = ({ children, element }) => {
     );
   }
   // TODO: Get links to redirect properly
+  // TODO: Space key changes from link to normal text
   else if (element.type === 'link') {
     return (
       <a

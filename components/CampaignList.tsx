@@ -53,25 +53,24 @@ const CampaignTab = (props: {
     return () => unsubscribe();
   }, [props.campaignId]);
 
-  const handleClick = (event: any) => {
+  const handleClickMenu = (event: any) => {
     event.stopPropagation();
     setAnchor(event.currentTarget);
+  };
+
+  const handleClickCard = async () => {
+    if (campaign && !anchor) {
+      router.push(
+        `campaigns/${props.campaignId}/collections/${campaign.baseCollectionId}`
+      );
+    }
   };
 
   if (!loading && !campaign) {
     return null;
   }
-
   return (
-    <div
-      onClick={() =>
-        campaign &&
-        !anchor &&
-        router.push(
-          `campaigns/${props.campaignId}/collections/${campaign.baseCollectionId}`
-        )
-      }
-    >
+    <div onClick={handleClickCard}>
       <Card
         variant="outlined"
         sx={{
@@ -99,7 +98,7 @@ const CampaignTab = (props: {
                   </Box>
                   {(props.displayActions || anchor) && (
                     <IconButton
-                      onClick={handleClick}
+                      onClick={handleClickMenu}
                       disableRipple
                       disableFocusRipple
                       sx={{
@@ -163,7 +162,6 @@ const CampaignTabMemo = memo(CampaignTab, (prevProps, nextProps) => {
   );
 });
 
-// Organize by time last joined
 const CampaignList = () => {
   const { user } = useUser();
   const [hoveredCampaignId, setHoveredCampaignId] = useState<string | null>(
