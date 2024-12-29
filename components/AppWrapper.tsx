@@ -6,11 +6,15 @@ import { usePathname } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
 import { getCampaignIdFromUrl } from '@/utils/url';
 import { Outfit } from 'next/font/google';
+import { doc, updateDoc } from '@firebase/firestore';
+import { useUser } from '@/hooks/useUser';
+import db from '@/utils/firebase';
 
 export const outfit = Outfit({ subsets: ['latin'] });
 
 const AppWrapper = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
+  const { user } = useUser();
   const { campaign, setCampaignId } = useCampaign();
   const url = pathname.split('/').slice(1);
 
@@ -22,6 +26,20 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
     } else if (urlCampaignId && urlCampaignId !== campaign?.id) {
       setCampaignId(urlCampaignId);
     }
+
+    // Organizes campaignIds by last opened
+    const organizeCampaignIds = async () => {
+      if (campaign?.id && user) {
+        const campaignIds = [
+          campaign.id,
+          ...user.campaignIds.filter((c) => c !== campaign.id),
+        ];
+        await updateDoc(doc(db, 'users', user.id), {
+          campaignIds: campaignIds,
+        });
+      }
+    };
+    organizeCampaignIds();
   }, [pathname]);
 
   const darkTheme = createTheme({

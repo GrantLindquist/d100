@@ -52,9 +52,10 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
         <Box
           sx={{
             width: 500,
-            backgroundColor: '#111111',
+            backgroundColor: '#222222',
             borderRadius: '5px',
-            borderWidth: 1,
+            borderWidth: 0,
+            borderLeftWidth: 10,
             borderStyle: 'solid',
             paddingY: 0.5,
             ...(alert.isError
@@ -62,7 +63,7 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
                   borderColor: 'red',
                 }
               : {
-                  borderColor: 'rgba(0, 255, 0, .4)',
+                  borderColor: '#00FF00',
                 }),
           }}
         >

@@ -8,7 +8,8 @@ import { AlertProvider } from '@/hooks/useAlert';
 
 export const metadata: Metadata = {
   title: 'd100',
-  description: 'D&D Threads',
+  description:
+    'Web app for D&D players to organize campaign information effectively into a “wiki-style” repository.',
   icons: {
     icon: '/d100-favicon.png',
   },

@@ -1,9 +1,10 @@
-import { Typography } from '@mui/material';
+import { Divider, Typography, useTheme } from '@mui/material';
 import { Editor, Element as SlateElement, Node, Transforms } from 'slate';
 import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
 
-// TODO: Fix y-spacing, maybe line-height?
 export const Element = ({ children, element }) => {
+  const theme = useTheme();
+
   if (element.type === 'title' || element.type === 'subtitle') {
     return (
       <>
@@ -15,32 +16,54 @@ export const Element = ({ children, element }) => {
           }}
         ></span>
         <Typography
-          variant={element.type === 'title' ? 'h1' : SUBTITLE_VARIANT}
+          variant={element.type === 'title' ? 'h2' : SUBTITLE_VARIANT}
           fontWeight={BOLD_FONT_WEIGHT}
-          sx={element.type === 'title' ? { marginTop: -2 } : {}}
+          sx={element.type === 'title' ? { marginTop: -1 } : {}}
         >
           {children}
         </Typography>
+        {element.type === 'title' && <Divider sx={{ my: 1 }} />}
       </>
+    );
+  }
+  // TODO: Get links to redirect properly
+  // TODO: Space key changes from link to normal text
+  else if (element.type === 'link') {
+    return (
+      <a
+        href={element.children[0].text}
+        style={{
+          color: theme.palette.primary.main,
+          cursor: 'pointer',
+          margin: '1em 0',
+        }}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        {children}
+      </a>
     );
   } else {
     return <p>{children}</p>;
   }
 };
 
+// TODO: Add custom behavior to remove leaves from empty space
 export const Leaf = ({ attributes, children, leaf }) => {
   if (leaf.bold) {
     children = <strong>{children}</strong>;
   }
-
   if (leaf.italic) {
     children = <em>{children}</em>;
   }
-
   if (leaf.underlined) {
     children = <u>{children}</u>;
   }
-
+  // TODO: Add custom behavior to turn list into paragraph if enter is clicked on empty bullet
+  if (leaf.bulletList) {
+    children = <li>{children}</li>;
+  }
+  // TODO: Add custom behavior to not carry hidden text on keystroke UNLESS keystroke is positioned between two hidden characters.
   if (leaf.hidden) {
     children = (
       <mark style={{ color: '#fff', backgroundColor: '#333' }}>{children}</mark>
@@ -89,7 +112,7 @@ export const withLayout = (editor) => {
       if (editor.children.length <= 1 && Editor.string(editor, [0, 0]) === '') {
         const title = {
           type: 'title',
-          children: [{ text: 'Untitled' }],
+          children: [{ text: '' }],
         };
         Transforms.insertNodes(editor, title, {
           at: path.concat(0),
@@ -116,8 +139,9 @@ export const withLayout = (editor) => {
             enforceType(type, [type]);
             break;
           case 1:
+            // NOTE: Any element other than title MUST be placed into the allowedTypes parameter
             type = 'paragraph';
-            enforceType(type, ['paragraph', 'subtitle']); // Allow paragraph or subtitle
+            enforceType(type, ['paragraph', 'subtitle', 'link']);
             break;
           default:
             break;
