@@ -64,6 +64,7 @@ export const Leaf = ({ attributes, children, leaf }) => {
     children = <li>{children}</li>;
   }
   // TODO: Add custom behavior to not carry hidden text on keystroke UNLESS keystroke is positioned between two hidden characters.
+  // TODO: Bulleted text is not highlighted when hidden
   if (leaf.hidden) {
     children = (
       <mark style={{ color: '#fff', backgroundColor: '#333' }}>{children}</mark>

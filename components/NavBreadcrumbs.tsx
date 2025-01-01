@@ -6,6 +6,7 @@ import db from '@/utils/firebase';
 import { doc, getDoc } from '@firebase/firestore';
 import { LINK_STYLE } from '@/utils/globals';
 import { useRouter } from 'next/navigation';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 const NavBreadcrumbs = () => {
   const { breadcrumbs } = useCampaign();
@@ -30,13 +31,7 @@ const NavBreadcrumbs = () => {
   return (
     <Breadcrumbs
       separator={
-        <Typography
-          sx={{
-            color: 'grey',
-          }}
-        >
-          {'>'}
-        </Typography>
+        <KeyboardArrowRightIcon style={{ color: 'grey', width: 20 }} />
       }
     >
       {breadcrumbs.map((crumb, index) => {

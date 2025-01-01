@@ -5,6 +5,7 @@ import { useUser } from '@/hooks/useUser';
 import { useRouter } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
 
+// TODO: Dynamically change website head \
 export default function ArticlePage() {
   const { user } = useUser();
   const { campaign } = useCampaign();

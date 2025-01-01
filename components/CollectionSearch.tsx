@@ -241,13 +241,13 @@ const CollectionSearch = (props: {
 
   return (
     <Grid container columns={24} spacing={3}>
-      <Grid item md={11}>
+      <Grid item xs={24} md={11}>
         <Box
           sx={{
             [theme.breakpoints.up('md')]: {
               position: 'fixed',
               height: '80vh',
-              width: '50vh',
+              width: '30vw',
             },
           }}
         >

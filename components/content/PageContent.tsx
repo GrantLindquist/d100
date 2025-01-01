@@ -229,8 +229,15 @@ export const PageContent = () => {
       children: [{ text: text }],
     };
     if (text && urlRegex.test(text)) {
+      // event.preventDefault() is necessary to prevent clipboard from pasting twice
       event.preventDefault();
       Transforms.insertNodes(editor, link);
+    }
+  };
+
+  const handleKeyDown = (event: any) => {
+    console.log(editor.selection);
+    if (event.key === 'space') {
     }
   };
 
@@ -312,7 +319,8 @@ export const PageContent = () => {
                       id={'editable'}
                       renderElement={renderElement}
                       renderLeaf={renderLeaf}
-                      onPaste={(event) => handlePaste(event)}
+                      onPaste={handlePaste}
+                      onKeyDown={handleKeyDown}
                       style={{
                         outline: 'none',
                       }}
