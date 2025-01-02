@@ -1,5 +1,3 @@
-import { Node } from 'slate';
-
 export type UnitType = 'article' | 'quest' | 'collection';
 export const UnitEnum = ['article', 'quest', 'collection'];
 export const UnitDisplayValues = {
@@ -22,7 +20,7 @@ export interface Collection extends Unit {
 }
 
 export interface Article extends Unit {
-  content: Node[];
+  content: Object;
   imageUrls: ImageUrl[];
 }
 

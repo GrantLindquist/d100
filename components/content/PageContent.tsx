@@ -11,14 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Article, Breadcrumb, ImageUrl, Quest } from '@/types/Unit';
-import {
-  ChangeEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import {
   arrayRemove,
   arrayUnion,
@@ -41,54 +34,55 @@ import AddIcon from '@mui/icons-material/Add';
 import { useAlert } from '@/hooks/useAlert';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { usePathname } from 'next/navigation';
-import { Editable, Slate, withReact } from 'slate-react';
 import CheckIcon from '@mui/icons-material/Check';
-import { createEditor, Transforms } from 'slate';
-import { Element, Leaf, withLayout } from '@/components/content/slate/RichText';
-import { HoveringToolbar } from '@/components/content/slate/HoveringToolbar';
 import ArticleAside from '@/components/content/ArticleAside';
-import { withHistory } from 'slate-history';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
+import Bulletlist from '@tiptap/extension-bullet-list';
+import Document from '@tiptap/extension-document';
+import HardBreak from '@tiptap/extension-hard-break';
+import Heading from '@tiptap/extension-heading';
+import ListItem from '@tiptap/extension-list-item';
+import Paragraph from '@tiptap/extension-paragraph';
+import Text from '@tiptap/extension-text';
+import History from '@tiptap/extension-history';
+import Bold from '@tiptap/extension-bold';
+import Italic from '@tiptap/extension-italic';
+import { Typography as TypographyExtension } from '@tiptap/extension-typography';
+import { HiddenMark } from '@/components/content/text-editor/CustomMarks';
+import Link from '@tiptap/extension-link';
 
-// TODO: Make drag/hover event work when initiated outside of slate editor
+// TODO: Make drag/hover event work when initiated outside of editor
 export const PageContent = () => {
   const [unit, setUnit] = useState<Article | Quest | null>(null);
   const [isUnsavedChanges, setUnsavedChanges] = useState(false);
-  const [sectionTitles, setSectionTitles] = useState([]);
+  const [sectionTitles, setSectionTitles] = useState<string[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { campaign, setBreadcrumbs, isUserDm } = useCampaign();
+  const { campaign, setBreadcrumbs } = useCampaign();
   const { displayAlert } = useAlert();
   const pathname = usePathname();
 
-  const editor = useMemo(
-    () => withLayout(withReact(withHistory(createEditor()))),
-    []
-  );
-
-  const renderElement = useCallback((props: any) => <Element {...props} />, []);
-  const renderLeaf = useCallback(
-    (props: { attributes: any; children: any; leaf: any }) => {
-      if (props.leaf.hidden && !isUserDm) {
-        return <></>;
-      }
-      return <Leaf {...props} />;
-    },
-    [isUserDm]
-  );
+  const subtitleLevel = 2;
 
   useEffect(() => {
-    const titles = editor.children
-      .filter(
-        (e: any) =>
-          (e.type === 'title' || e.type === 'subtitle') &&
-          (isUserDm || !e.children[0].hidden)
-      )
-      .map((e: any) => {
-        return e.children.map((child: any) => child.text).join('');
-      });
-    setSectionTitles(titles);
+    if (editor && unit?.content) {
+      editor.commands.setContent(unit.content);
+    }
+
+    const generateTitles = () => {
+      const titles = [];
+      const titleNodes =
+        editor?.getJSON().content?.filter((c) => c.type === 'heading') ?? [];
+      for (const node of titleNodes) {
+        if (node?.content?.[0].text) {
+          titles.push(node.content[0].text);
+        }
+      }
+      return titles;
+    };
+    setSectionTitles(generateTitles());
   }, [unit]);
 
   useEffect(() => {
@@ -109,6 +103,71 @@ export const PageContent = () => {
       };
     }
   }, []);
+
+  const editor = useEditor({
+    extensions: [
+      Bulletlist,
+      Document,
+      HardBreak,
+      Heading.configure({
+        levels: [1, subtitleLevel],
+      }),
+      ListItem,
+      Paragraph,
+      Text,
+      History,
+      Bold,
+      TypographyExtension,
+      Italic,
+      HiddenMark,
+      Link.configure({
+        defaultProtocol: 'https',
+        protocols: ['http', 'https'],
+        isAllowedUri: (url, ctx) => {
+          try {
+            const parsedUrl = url.includes(':')
+              ? new URL(url)
+              : new URL(`${ctx.defaultProtocol}://${url}`);
+            return ctx.defaultValidate(parsedUrl.href);
+          } catch (error) {
+            console.error(error);
+            return false;
+          }
+        },
+      }),
+    ],
+    immediatelyRender: false,
+    content: '',
+    onUpdate: ({ editor }) => {
+      setUnsavedChanges(true);
+      if (editor.getJSON().content?.[0]?.type !== 'heading') {
+        editor.chain().focus().setNode('heading', { level: 1 }).run();
+      }
+    },
+  });
+
+  const handleSaveContent = async () => {
+    if (unit && editor) {
+      try {
+        const unitTitle =
+          editor.getJSON().content?.[0]?.content?.[0]?.text ?? unit?.title;
+        await updateDoc(doc(db, 'units', unit.id), {
+          content: editor.getJSON(),
+          title: unitTitle,
+        });
+        displayAlert({
+          message: `Your changes to ${unitTitle} have been saved.`,
+        });
+      } catch (e: any) {
+        displayAlert({
+          message: 'An error occurred while saving changes.',
+          isError: true,
+          errorType: e.message,
+        });
+      }
+    }
+    setUnsavedChanges(false);
+  };
 
   const handleAddImage = () => {
     if (fileInputRef.current) {
@@ -177,32 +236,12 @@ export const PageContent = () => {
     }
   };
 
-  const handleSaveContent = async () => {
-    if (unit) {
-      try {
-        const unitTitle = editor.children[0].children[0].text ?? unit.title;
-        await updateDoc(doc(db, 'units', unit.id), {
-          content: editor.children,
-          title: unitTitle,
-        });
-        displayAlert({
-          message: `Your changes to ${unitTitle} have been saved.`,
-        });
-      } catch (e: any) {
-        displayAlert({
-          message: 'An error occurred while saving changes.',
-          isError: true,
-          errorType: e.message,
-        });
-      }
-    }
-
-    setUnsavedChanges(false);
-  };
-
   const toggleHideUnit = async (toggle: boolean) => {
     try {
       if (unit) {
+        if (isUnsavedChanges) {
+          await handleSaveContent();
+        }
         await updateDoc(doc(db, 'units', unit.id), {
           hidden: toggle,
         });
@@ -216,28 +255,6 @@ export const PageContent = () => {
         isError: true,
         errorType: e.message,
       });
-    }
-  };
-
-  const handlePaste = (event: any) => {
-    const text = event.clipboardData?.getData('text') ?? null;
-    const urlRegex = new RegExp(
-      '^(https?:\\/\\/)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}(\\b[-a-zA-Z0-9@:%_\\+.~#?&//=]*)?$'
-    );
-    const link = {
-      type: 'link',
-      children: [{ text: text }],
-    };
-    if (text && urlRegex.test(text)) {
-      // event.preventDefault() is necessary to prevent clipboard from pasting twice
-      event.preventDefault();
-      Transforms.insertNodes(editor, link);
-    }
-  };
-
-  const handleKeyDown = (event: any) => {
-    console.log(editor.selection);
-    if (event.key === 'space') {
     }
   };
 
@@ -302,30 +319,62 @@ export const PageContent = () => {
                     {isUnsavedChanges && <em>(unsaved changes)</em>}
                   </Typography>
 
-                  <Slate
-                    editor={editor}
-                    initialValue={unit.content}
-                    onChange={() => {
-                      const isAstChange = editor.operations.some(
-                        (op: any) => 'set_selection' !== op.type
-                      );
-                      if (isAstChange) {
-                        setUnsavedChanges(true);
-                      }
-                    }}
-                  >
-                    <HoveringToolbar />
-                    <Editable
-                      id={'editable'}
-                      renderElement={renderElement}
-                      renderLeaf={renderLeaf}
-                      onPaste={handlePaste}
-                      onKeyDown={handleKeyDown}
-                      style={{
-                        outline: 'none',
-                      }}
-                    />
-                  </Slate>
+                  {editor && (
+                    <BubbleMenu
+                      editor={editor}
+                      tippyOptions={{ duration: 100 }}
+                    >
+                      <div className="bubble-menu">
+                        <button
+                          onClick={() =>
+                            editor.chain().focus().toggleBold().run()
+                          }
+                          className={editor.isActive('bold') ? 'is-active' : ''}
+                        >
+                          Bold
+                        </button>
+                        <button
+                          onClick={() =>
+                            editor.chain().focus().toggleItalic().run()
+                          }
+                          className={
+                            editor.isActive('italic') ? 'is-active' : ''
+                          }
+                        >
+                          Italic
+                        </button>
+                        <button
+                          onClick={() =>
+                            editor
+                              .chain()
+                              .focus()
+                              .toggleHeading({
+                                level: subtitleLevel,
+                              })
+                              .run()
+                          }
+                          className={
+                            editor.isActive('heading') ? 'is-active' : ''
+                          }
+                        >
+                          Heading
+                        </button>
+                        <button
+                          onClick={() =>
+                            // @ts-ignore
+                            editor.chain().focus().toggleHidden().run()
+                          }
+                          className={
+                            editor.isActive('hidden') ? 'is-active' : ''
+                          }
+                        >
+                          Hide
+                        </button>
+                      </div>
+                    </BubbleMenu>
+                  )}
+                  <EditorContent editor={editor} />
+
                   {unit.type === 'quest' && (
                     <>
                       {/*<QuestTimeline questId={content.id} />*/}
