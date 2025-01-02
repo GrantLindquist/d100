@@ -1,21 +1,27 @@
-'use client';
 import { PageContent } from '@/components/content/PageContent';
-import { useUser } from '@/hooks/useUser';
-import { useCampaign } from '@/hooks/useCampaign';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { Metadata } from 'next';
+import { getDoc } from '@firebase/firestore';
+import { doc } from 'firebase/firestore';
+import db from '@/utils/firebase';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { questId: string };
+}): Promise<Metadata> {
+  const { questId } = params;
+  if (questId) {
+    const unitDocSnap = await getDoc(doc(db, 'units', questId));
+    return {
+      title: unitDocSnap.exists() ? unitDocSnap.data().title : 'd100',
+    };
+  } else {
+    return {
+      title: 'd100',
+    };
+  }
+}
 
 export default function QuestPage() {
-  const { user } = useUser();
-  const { campaign } = useCampaign();
-  const router = useRouter();
-  useEffect(() => {
-    if (campaign && user) {
-      if (!user.campaignIds.includes(campaign.id)) {
-        router.push('/campaigns/unauthorized');
-      }
-    }
-  }, [user?.id, campaign?.id]);
-
   return <PageContent />;
 }

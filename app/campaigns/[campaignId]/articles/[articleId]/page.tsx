@@ -1,22 +1,27 @@
-'use client';
 import { PageContent } from '@/components/content/PageContent';
-import { useEffect } from 'react';
-import { useUser } from '@/hooks/useUser';
-import { useRouter } from 'next/navigation';
-import { useCampaign } from '@/hooks/useCampaign';
+import { Metadata } from 'next';
+import { getDoc } from '@firebase/firestore';
+import { doc } from 'firebase/firestore';
+import db from '@/utils/firebase';
 
-// TODO: Dynamically change website head \
+export async function generateMetadata({
+  params,
+}: {
+  params: { articleId: string };
+}): Promise<Metadata> {
+  const { articleId } = params;
+  if (articleId) {
+    const unitDocSnap = await getDoc(doc(db, 'units', articleId));
+    return {
+      title: unitDocSnap.exists() ? unitDocSnap.data().title : 'd100',
+    };
+  } else {
+    return {
+      title: 'd100',
+    };
+  }
+}
+
 export default function ArticlePage() {
-  const { user } = useUser();
-  const { campaign } = useCampaign();
-  const router = useRouter();
-  useEffect(() => {
-    if (campaign && user) {
-      if (!user.campaignIds.includes(campaign.id)) {
-        router.push('/campaigns/unauthorized');
-      }
-    }
-  }, [user?.id, campaign?.id]);
-
   return <PageContent />;
 }

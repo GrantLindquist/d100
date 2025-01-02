@@ -2,7 +2,7 @@ export const SESSION_TIMEOUT: number = 604800000;
 
 export const BOLD_FONT_WEIGHT = 600;
 
-export const PLAYER_INVITATIONS_FEATURE_FLAG = false;
+export const PLAYER_INVITATIONS_FEATURE_FLAG = true;
 
 export const MODAL_STYLE = {
   position: 'absolute',
