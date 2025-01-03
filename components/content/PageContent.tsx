@@ -51,6 +51,7 @@ import Italic from '@tiptap/extension-italic';
 import { Typography as TypographyExtension } from '@tiptap/extension-typography';
 import { HiddenMark } from '@/components/content/text-editor/CustomMarks';
 import Link from '@tiptap/extension-link';
+import '@/components/styles/EditorContent.css';
 
 // TODO: Make drag/hover event work when initiated outside of editor
 export const PageContent = () => {
@@ -138,6 +139,7 @@ export const PageContent = () => {
     ],
     immediatelyRender: false,
     content: '',
+    // TODO: Maximum call stack exceeded - try to enforce this as single-line
     onUpdate: ({ editor }) => {
       setUnsavedChanges(true);
       if (editor.getJSON().content?.[0]?.type !== 'heading') {
@@ -197,6 +199,8 @@ export const PageContent = () => {
       }
     }
   };
+
+  console.log(editor?.getJSON());
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (unit && campaign) {
