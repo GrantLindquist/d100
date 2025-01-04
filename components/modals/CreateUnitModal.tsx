@@ -35,16 +35,23 @@ import KeyIcon from '@mui/icons-material/Key';
 import FolderIcon from '@mui/icons-material/Folder';
 
 const generateDefaultContent = (title: string) => {
-  return [
-    {
-      type: 'title',
-      children: [{ text: title, fontStyle: 'title', bold: true }],
-    },
-    {
-      type: 'paragraph',
-      children: [{ text: '' }],
-    },
-  ];
+  return {
+    content: [
+      {
+        type: 'heading',
+        attrs: {
+          level: 1,
+        },
+        content: [
+          {
+            type: 'text',
+            text: title,
+          },
+        ],
+      },
+    ],
+    type: 'doc',
+  };
 };
 
 const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {

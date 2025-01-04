@@ -18,16 +18,18 @@ const SubheaderAsideSx = {
   paddingY: 0.5,
 };
 
-// TODO: Titles sometimes disappear when article is toggled hidden
 const ArticleAside = (props: { titles: string[]; article: Article }) => {
-  // TODO: Make section title temporarily highlight when this activates
-  const scrollToTitle = (title: string) => {
-    const targetElement = document.getElementById(title);
-    if (targetElement) {
-      targetElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
+  // TODO: Get this working
+  const scrollToHeader = (headerText: string) => {
+    const headerElement = Array.from(document.querySelectorAll('h2')).find(
+      (header) => header.innerHTML === headerText
+    );
+
+    // TODO: Make section title temporarily highlight when this activates
+    if (headerElement) {
+      headerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      console.error('Header not found:', headerText);
     }
   };
 
@@ -52,7 +54,7 @@ const ArticleAside = (props: { titles: string[]; article: Article }) => {
             <Typography
               key={index}
               sx={index === 0 ? HeaderAsideSx : SubheaderAsideSx}
-              onClick={() => scrollToTitle(title)}
+              onClick={() => scrollToHeader(title)}
             >
               {title}
             </Typography>
@@ -61,13 +63,13 @@ const ArticleAside = (props: { titles: string[]; article: Article }) => {
         {props.article.type === 'quest' && (
           <>
             <Typography
-              onClick={() => scrollToTitle('Quest Timeline')}
+              onClick={() => scrollToHeader('Quest Timeline')}
               sx={HeaderAsideSx}
             >
               Quest Timeline
             </Typography>
             <Typography
-              onClick={() => scrollToTitle('Loot Table')}
+              onClick={() => scrollToHeader('Loot Table')}
               sx={HeaderAsideSx}
             >
               Loot Table
@@ -76,7 +78,7 @@ const ArticleAside = (props: { titles: string[]; article: Article }) => {
         )}
         {props.article.imageUrls.length > 0 && (
           <Typography
-            onClick={() => scrollToTitle('Reference Images')}
+            onClick={() => scrollToHeader('Reference Images')}
             sx={HeaderAsideSx}
           >
             Reference Images

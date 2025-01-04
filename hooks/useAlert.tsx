@@ -46,6 +46,7 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
     router.push(link);
   };
 
+  // TODO: Add support for displaying multiple snackbars at once
   return (
     <AlertContext.Provider value={{ displayAlert }}>
       <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>

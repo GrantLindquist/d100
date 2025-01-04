@@ -2,7 +2,7 @@
 
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import { ReactNode, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
 import { getCampaignIdFromUrl } from '@/utils/url';
 import { Outfit } from 'next/font/google';
@@ -14,6 +14,7 @@ export const outfit = Outfit({ subsets: ['latin'] });
 
 const AppWrapper = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useUser();
   const { campaign, setCampaignId } = useCampaign();
   const url = pathname.split('/').slice(1);
@@ -41,6 +42,16 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
     };
     organizeCampaignIds();
   }, [pathname]);
+
+  // TODO: When an unauthorized user attempts to access a campaign via url, the campaign's id is saved under their user.campaignIds
+  // Handle unauthorized requests
+  useEffect(() => {
+    if (campaign && user) {
+      if (!user.campaignIds.includes(campaign.id)) {
+        router.push('/campaigns/unauthorized');
+      }
+    }
+  }, [user?.id, campaign?.id]);
 
   const darkTheme = createTheme({
     palette: {
