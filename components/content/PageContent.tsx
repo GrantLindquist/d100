@@ -51,7 +51,8 @@ import Italic from '@tiptap/extension-italic';
 import { Typography as TypographyExtension } from '@tiptap/extension-typography';
 import { HiddenMark } from '@/components/content/text-editor/CustomMarks';
 import Link from '@tiptap/extension-link';
-import '@/components/styles/EditorContent.css';
+import '@/components/content/text-editor/EditorContent.css';
+import EnforceTitle from '@/components/content/text-editor/EnforceTitle';
 
 // TODO: Make drag/hover event work when initiated outside of editor
 export const PageContent = () => {
@@ -64,8 +65,6 @@ export const PageContent = () => {
   const { campaign, setBreadcrumbs } = useCampaign();
   const { displayAlert } = useAlert();
   const pathname = usePathname();
-
-  const subtitleLevel = 2;
 
   useEffect(() => {
     if (editor && unit?.content) {
@@ -105,13 +104,14 @@ export const PageContent = () => {
     }
   }, []);
 
+  // TODO: Optimize rendering https://tiptap.dev/docs/examples/advanced/react-performance
   const editor = useEditor({
     extensions: [
       Bulletlist,
       Document,
       HardBreak,
       Heading.configure({
-        levels: [1, subtitleLevel],
+        levels: [2],
       }),
       ListItem,
       Paragraph,
@@ -121,6 +121,7 @@ export const PageContent = () => {
       TypographyExtension,
       Italic,
       HiddenMark,
+      EnforceTitle,
       Link.configure({
         defaultProtocol: 'https',
         protocols: ['http', 'https'],
@@ -142,11 +143,10 @@ export const PageContent = () => {
     // TODO: Maximum call stack exceeded - try to enforce this as single-line
     onUpdate: ({ editor }) => {
       setUnsavedChanges(true);
-      if (editor.getJSON().content?.[0]?.type !== 'heading') {
-        editor.chain().focus().setNode('heading', { level: 1 }).run();
-      }
     },
   });
+
+  console.log(editor?.getJSON());
 
   const handleSaveContent = async () => {
     if (unit && editor) {
@@ -353,7 +353,7 @@ export const PageContent = () => {
                               .chain()
                               .focus()
                               .toggleHeading({
-                                level: subtitleLevel,
+                                level: 2,
                               })
                               .run()
                           }

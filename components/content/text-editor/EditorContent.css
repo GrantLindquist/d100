@@ -7,7 +7,7 @@
   box-shadow: 0 0 0 2px #222222;
 }
 
-.ProseMirror h1 {
+.ProseMirror h2:first-child {
   font-size: 3rem;
   margin: 0;
   line-height: 1;
