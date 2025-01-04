@@ -4,6 +4,7 @@ import { getDoc } from '@firebase/firestore';
 import { doc } from 'firebase/firestore';
 import db from '@/utils/firebase';
 
+// TODO: reduce minHeight of text editor because it makes loot table look funny.
 export async function generateMetadata({
   params,
 }: {

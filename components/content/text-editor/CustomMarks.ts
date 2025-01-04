@@ -7,7 +7,7 @@ export const HiddenMark = Mark.create({
       'span',
       {
         ...HTMLAttributes,
-        style: `background-color: #333333; visibility: ${true ? 'auto' : 'hidden'}`,
+        style: `background-color: #333333`,
       },
       0,
     ];
