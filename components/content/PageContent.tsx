@@ -9,6 +9,7 @@ import {
   Stack,
   Tooltip,
   Typography,
+  useTheme,
 } from '@mui/material';
 import { Article, Breadcrumb, ImageUrl, Quest } from '@/types/Unit';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
@@ -53,6 +54,9 @@ import { HiddenMark } from '@/components/content/text-editor/CustomMarks';
 import Link from '@tiptap/extension-link';
 import '@/components/content/text-editor/EditorContent.css';
 import EnforceTitle from '@/components/content/text-editor/EnforceTitle';
+import FormatBoldIcon from '@mui/icons-material/FormatBold';
+import FormatItalicIcon from '@mui/icons-material/FormatItalic';
+import TitleIcon from '@mui/icons-material/Title';
 
 // TODO: Make drag/hover event work when initiated outside of editor
 export const PageContent = () => {
@@ -65,6 +69,7 @@ export const PageContent = () => {
   const { campaign, setBreadcrumbs } = useCampaign();
   const { displayAlert } = useAlert();
   const pathname = usePathname();
+  const theme = useTheme();
 
   useEffect(() => {
     if (editor && unit?.content) {
@@ -145,8 +150,6 @@ export const PageContent = () => {
       setUnsavedChanges(true);
     },
   });
-
-  console.log(editor?.getJSON());
 
   const handleSaveContent = async () => {
     if (unit && editor) {
@@ -328,26 +331,39 @@ export const PageContent = () => {
                       editor={editor}
                       tippyOptions={{ duration: 100 }}
                     >
-                      <div className="bubble-menu">
-                        <button
+                      <Box
+                        sx={{
+                          backgroundColor: '#222222',
+                          borderRadius: 2,
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <FormatBoldIcon
                           onClick={() =>
                             editor.chain().focus().toggleBold().run()
                           }
-                          className={editor.isActive('bold') ? 'is-active' : ''}
-                        >
-                          Bold
-                        </button>
-                        <button
+                          sx={{
+                            margin: 0.75,
+                            cursor: 'pointer',
+                            color: editor.isActive('bold')
+                              ? theme.palette.primary.main
+                              : 'grey',
+                          }}
+                        />
+                        <FormatItalicIcon
                           onClick={() =>
                             editor.chain().focus().toggleItalic().run()
                           }
-                          className={
-                            editor.isActive('italic') ? 'is-active' : ''
-                          }
-                        >
-                          Italic
-                        </button>
-                        <button
+                          sx={{
+                            margin: 0.75,
+                            cursor: 'pointer',
+                            color: editor.isActive('italic')
+                              ? theme.palette.primary.main
+                              : 'grey',
+                          }}
+                        />
+                        <TitleIcon
                           onClick={() =>
                             editor
                               .chain()
@@ -357,24 +373,32 @@ export const PageContent = () => {
                               })
                               .run()
                           }
-                          className={
-                            editor.isActive('heading') ? 'is-active' : ''
-                          }
-                        >
-                          Heading
-                        </button>
-                        <button
-                          onClick={() =>
-                            // @ts-ignore
-                            editor.chain().focus().toggleHidden().run()
-                          }
-                          className={
-                            editor.isActive('hidden') ? 'is-active' : ''
-                          }
-                        >
-                          Hide
-                        </button>
-                      </div>
+                          sx={{
+                            margin: 0.75,
+                            cursor: 'pointer',
+                            color: editor.isActive('heading')
+                              ? theme.palette.primary.main
+                              : 'grey',
+                          }}
+                        />
+                        <Tooltip title={'Hide from players'} placement={'top'}>
+                          <VisibilityOffIcon
+                            onClick={() =>
+                              // @ts-ignore
+                              editor.chain().focus().toggleHidden().run()
+                            }
+                            sx={{
+                              width: 22,
+                              height: 22,
+                              margin: 0.75,
+                              cursor: 'pointer',
+                              color: editor.isActive('hidden')
+                                ? theme.palette.primary.main
+                                : 'grey',
+                            }}
+                          />
+                        </Tooltip>
+                      </Box>
                     </BubbleMenu>
                   )}
                   <EditorContent editor={editor} />

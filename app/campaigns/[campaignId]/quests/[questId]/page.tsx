@@ -9,7 +9,7 @@ export async function generateMetadata({
 }: {
   params: { questId: string };
 }): Promise<Metadata> {
-  const { questId } = params;
+  const { questId } = await params;
   if (questId) {
     const unitDocSnap = await getDoc(doc(db, 'units', questId));
     return {
