@@ -7,9 +7,9 @@ import db from '@/utils/firebase';
 export async function generateMetadata({
   params,
 }: {
-  params: { articleId: string };
+  params: Promise<{ articleId: string }>;
 }): Promise<Metadata> {
-  const { articleId } = params;
+  const articleId = (await params).articleId;
   if (articleId) {
     const unitDocSnap = await getDoc(doc(db, 'units', articleId));
     return {
