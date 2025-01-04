@@ -1,5 +1,5 @@
 .ProseMirror {
-  min-height: 70vh;
+  min-height: 200px;
 }
 
 .ProseMirror:focus {

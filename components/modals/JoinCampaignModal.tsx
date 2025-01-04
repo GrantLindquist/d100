@@ -101,7 +101,9 @@ const JoinCampaignModal = () => {
               error={Boolean(displayErrorMsg)}
               helperText={displayErrorMsg}
             />
-            <Button type={'submit'}>Join Campaign</Button>
+            <Button disabled={!campaignId.trim()} type={'submit'}>
+              Join Campaign
+            </Button>
           </Stack>
         </form>
       </>

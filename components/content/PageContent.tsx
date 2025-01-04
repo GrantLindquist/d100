@@ -71,6 +71,7 @@ export const PageContent = () => {
   const pathname = usePathname();
   const theme = useTheme();
 
+  // TODO: Focus editor on create
   useEffect(() => {
     if (editor && unit?.content) {
       editor.commands.setContent(unit.content);
@@ -201,8 +202,6 @@ export const PageContent = () => {
       }
     }
   };
-
-  console.log(editor?.getJSON());
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (unit && campaign) {
@@ -400,7 +399,7 @@ export const PageContent = () => {
                       </Box>
                     </BubbleMenu>
                   )}
-                  <EditorContent editor={editor} />
+                  <EditorContent id={'editor-content'} editor={editor} />
 
                   {unit.type === 'quest' && (
                     <>
