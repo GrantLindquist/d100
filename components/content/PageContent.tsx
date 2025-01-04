@@ -145,8 +145,7 @@ export const PageContent = () => {
     ],
     immediatelyRender: false,
     content: '',
-    // TODO: Maximum call stack exceeded - try to enforce this as single-line
-    onUpdate: ({ editor }) => {
+    onUpdate: () => {
       setUnsavedChanges(true);
     },
   });

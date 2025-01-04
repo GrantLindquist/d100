@@ -7,7 +7,7 @@ export const HiddenMark = Mark.create({
       'span',
       {
         ...HTMLAttributes,
-        style: `background-color: grey; visibility: ${true ? 'auto' : 'hidden'}`,
+        style: `background-color: #333333; visibility: ${true ? 'auto' : 'hidden'}`,
       },
       0,
     ];
@@ -15,7 +15,7 @@ export const HiddenMark = Mark.create({
   parseHTML() {
     return [
       {
-        tag: 'span[style*="background-color: grey"]',
+        tag: 'span[style*="background-color: #333333"]',
       },
     ];
   },
