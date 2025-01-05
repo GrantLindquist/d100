@@ -55,16 +55,26 @@ import History from '@tiptap/extension-history';
 import Bold from '@tiptap/extension-bold';
 import Italic from '@tiptap/extension-italic';
 import { Typography as TypographyExtension } from '@tiptap/extension-typography';
-import { HiddenMark } from '@/components/content/text-editor/CustomMarks';
 import Link from '@tiptap/extension-link';
 import '@/components/content/text-editor/EditorContent.css';
 import EnforceTitle from '@/components/content/text-editor/EnforceTitle';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import TitleIcon from '@mui/icons-material/Title';
+import Highlight from '@tiptap/extension-highlight';
 
-// TODO: Make drag/hover event work when initiated outside of editor
+// Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
+  const { isUserDm } = useCampaign();
+
+  if (isUserDm === null) {
+    return;
+  }
+  return <ContentEditor displayHiddenMarks={isUserDm} />;
+};
+
+// TODO: Drag & drop images into editor should save them as reference image
+export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
   const [unit, setUnit] = useState<Article | Quest | null>(null);
   const [isUnsavedChanges, setUnsavedChanges] = useState(false);
   const [sectionTitles, setSectionTitles] = useState<string[]>([]);
@@ -121,7 +131,13 @@ export const PageContent = () => {
       Bold,
       Document,
       EnforceTitle,
-      HiddenMark,
+      Highlight.configure({
+        HTMLAttributes: !props.displayHiddenMarks
+          ? {
+              class: 'hidden',
+            }
+          : {},
+      }),
       HardBreak,
       Heading.configure({
         levels: [2],
@@ -412,8 +428,7 @@ export const PageContent = () => {
                           >
                             <VisibilityOffIcon
                               onClick={() =>
-                                // @ts-ignore
-                                editor.chain().focus().toggleHidden().run()
+                                editor.chain().focus().toggleHighlight().run()
                               }
                               sx={{
                                 width: 22,

@@ -4,6 +4,7 @@ import { getDoc } from '@firebase/firestore';
 import { doc } from 'firebase/firestore';
 import db from '@/utils/firebase';
 
+// TODO: Display 1st reference image if exists when sending link (on discord, for example)
 export async function generateMetadata({
   params,
 }: {
