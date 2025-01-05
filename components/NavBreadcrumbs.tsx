@@ -7,6 +7,7 @@ import { doc, getDoc } from '@firebase/firestore';
 import { LINK_STYLE } from '@/utils/globals';
 import { useRouter } from 'next/navigation';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import SaveCheckLink from './SaveCheckLink';
 
 const NavBreadcrumbs = () => {
   const { breadcrumbs } = useCampaign();
@@ -37,14 +38,11 @@ const NavBreadcrumbs = () => {
       {breadcrumbs.map((crumb, index) => {
         if (index < breadcrumbs.length - 1) {
           return (
-            <Typography
-              key={index}
-              sx={LINK_STYLE}
-              color={theme.palette.primary.main}
-              onClick={() => router.push(crumb.url)}
-            >
-              {crumbTitles[index] ?? '-'}
-            </Typography>
+            <SaveCheckLink key={index} href={crumb.url}>
+              <Typography sx={LINK_STYLE} color={theme.palette.primary.main}>
+                {crumbTitles[index] ?? '-'}
+              </Typography>
+            </SaveCheckLink>
           );
         } else {
           return (

@@ -13,6 +13,11 @@
   line-height: 1;
 }
 
+a {
+  color: #ff6a48;
+  cursor: pointer;
+}
+
 mark {
   color: white;
   background-color: #333333;

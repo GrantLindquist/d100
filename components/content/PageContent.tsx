@@ -63,6 +63,7 @@ import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import TitleIcon from '@mui/icons-material/Title';
 import Highlight from '@tiptap/extension-highlight';
 import FileDropzone from '@/components/content/text-editor/FileDropzone';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
@@ -80,15 +81,13 @@ export const PageContent = () => {
   );
 };
 
-// TODO: Drag & drop images into editor should save them as reference image
-// TODO: Create Link wrapper that conditionally alerts user before pushing url (for unsaved changes)
 export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
   const [unit, setUnit] = useState<Article | Quest | null>(null);
-  const [isUnsavedChanges, setUnsavedChanges] = useState(false);
   const [sectionTitles, setSectionTitles] = useState<string[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const { isUnsavedChanges, setUnsavedChanges } = useUnsavedChanges();
   const { isUserDm, campaign, setBreadcrumbs } = useCampaign();
   const { displayAlert } = useAlert();
   const pathname = usePathname();
@@ -115,6 +114,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
   }, [unit]);
 
   useEffect(() => {
+    isUnsavedChanges && setUnsavedChanges(false);
     const url = pathname.split('/').slice(1);
     const unitId = getCurrentUnitIdFromUrl(url);
     if (unitId) {
@@ -186,7 +186,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
       isBold: ctx.editor?.isActive('bold'),
       isItalic: ctx.editor?.isActive('italic'),
       isHeading: ctx.editor?.isActive('heading'),
-      isHidden: ctx.editor?.isActive('hidden'),
+      isHidden: ctx.editor?.isActive('highlight'),
     }),
     equalityFn: (prev, next) => {
       if (!next) {

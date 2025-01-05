@@ -9,6 +9,7 @@ import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 import Image from 'next/image';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { outfit } from '@/components/AppWrapper';
+import SaveCheckLink from '@/components/SaveCheckLink';
 
 // TODO: Make responsive
 const Navbar = () => {
@@ -35,10 +36,7 @@ const Navbar = () => {
           sx={{ flexGrow: 1, alignItems: 'center' }}
         >
           <Tooltip title={'View All Campaigns'}>
-            <div
-              onClick={() => router.push('/campaigns')}
-              style={{ cursor: 'pointer' }}
-            >
+            <SaveCheckLink href={'/campaigns'}>
               <Stack direction={'row'} alignItems={'center'} spacing={1}>
                 <Image
                   src="/d100.png"
@@ -56,7 +54,7 @@ const Navbar = () => {
                   d100
                 </Typography>
               </Stack>
-            </div>
+            </SaveCheckLink>
           </Tooltip>
 
           {campaign && (
