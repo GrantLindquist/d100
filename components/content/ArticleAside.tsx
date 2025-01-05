@@ -2,6 +2,7 @@ import { Article } from '@/types/Unit';
 import { Box, Card, Typography } from '@mui/material';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import ImageFrame from '@/components/content/ImageFrame';
+import '@/components/content/text-editor/EditorContent.css';
 
 const HeaderAsideSx = {
   '&:hover': {
@@ -19,7 +20,6 @@ const SubheaderAsideSx = {
 };
 
 const ArticleAside = (props: { titles: string[]; article: Article }) => {
-  // TODO: Get this working
   const scrollToHeader = (headerText: string) => {
     const headerElement = Array.from(document.querySelectorAll('h2')).find(
       (header) => header.innerHTML === headerText
@@ -27,7 +27,14 @@ const ArticleAside = (props: { titles: string[]; article: Article }) => {
 
     // TODO: Make section title temporarily highlight when this activates
     if (headerElement) {
-      headerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const rect = headerElement.getBoundingClientRect();
+      const offset = window.scrollY || document.documentElement.scrollTop;
+      const targetPosition = rect.top + offset - 100;
+
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth',
+      });
     } else {
       console.error('Header not found:', headerText);
     }

@@ -38,7 +38,12 @@ import { usePathname } from 'next/navigation';
 import CheckIcon from '@mui/icons-material/Check';
 import ArticleAside from '@/components/content/ArticleAside';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
+import {
+  BubbleMenu,
+  EditorContent,
+  useEditor,
+  useEditorState,
+} from '@tiptap/react';
 import Bulletlist from '@tiptap/extension-bullet-list';
 import Document from '@tiptap/extension-document';
 import HardBreak from '@tiptap/extension-hard-break';
@@ -66,7 +71,7 @@ export const PageContent = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { campaign, setBreadcrumbs } = useCampaign();
+  const { isUserDm, campaign, setBreadcrumbs } = useCampaign();
   const { displayAlert } = useAlert();
   const pathname = usePathname();
   const theme = useTheme();
@@ -110,24 +115,20 @@ export const PageContent = () => {
     }
   }, []);
 
-  // TODO: Optimize rendering https://tiptap.dev/docs/examples/advanced/react-performance
   const editor = useEditor({
     extensions: [
       Bulletlist,
+      Bold,
       Document,
+      EnforceTitle,
+      HiddenMark,
       HardBreak,
       Heading.configure({
         levels: [2],
       }),
-      ListItem,
-      Paragraph,
-      Text,
       History,
-      Bold,
-      TypographyExtension,
       Italic,
-      HiddenMark,
-      EnforceTitle,
+      ListItem,
       Link.configure({
         defaultProtocol: 'https',
         protocols: ['http', 'https'],
@@ -143,11 +144,36 @@ export const PageContent = () => {
           }
         },
       }),
+      Paragraph,
+      Text,
+      TypographyExtension,
     ],
     immediatelyRender: false,
+    shouldRerenderOnTransaction: false,
     content: '',
     onUpdate: () => {
       setUnsavedChanges(true);
+    },
+  });
+
+  const currentEditorState = useEditorState({
+    editor,
+    selector: (ctx) => ({
+      isBold: ctx.editor?.isActive('bold'),
+      isItalic: ctx.editor?.isActive('italic'),
+      isHeading: ctx.editor?.isActive('heading'),
+      isHidden: ctx.editor?.isActive('hidden'),
+    }),
+    equalityFn: (prev, next) => {
+      if (!next) {
+        return false;
+      }
+      return (
+        prev.isBold === next.isBold &&
+        prev.isItalic === next.isItalic &&
+        prev.isHeading === next.isHeading &&
+        prev.isHidden == next.isHidden
+      );
     },
   });
 
@@ -324,7 +350,7 @@ export const PageContent = () => {
                     {isUnsavedChanges && <em>(unsaved changes)</em>}
                   </Typography>
 
-                  {editor && (
+                  {editor && currentEditorState && (
                     <BubbleMenu
                       editor={editor}
                       tippyOptions={{ duration: 100 }}
@@ -344,7 +370,7 @@ export const PageContent = () => {
                           sx={{
                             margin: 0.75,
                             cursor: 'pointer',
-                            color: editor.isActive('bold')
+                            color: currentEditorState.isBold
                               ? theme.palette.primary.main
                               : 'grey',
                           }}
@@ -356,7 +382,7 @@ export const PageContent = () => {
                           sx={{
                             margin: 0.75,
                             cursor: 'pointer',
-                            color: editor.isActive('italic')
+                            color: currentEditorState.isItalic
                               ? theme.palette.primary.main
                               : 'grey',
                           }}
@@ -374,28 +400,33 @@ export const PageContent = () => {
                           sx={{
                             margin: 0.75,
                             cursor: 'pointer',
-                            color: editor.isActive('heading')
+                            color: currentEditorState.isHeading
                               ? theme.palette.primary.main
                               : 'grey',
                           }}
                         />
-                        <Tooltip title={'Hide from players'} placement={'top'}>
-                          <VisibilityOffIcon
-                            onClick={() =>
-                              // @ts-ignore
-                              editor.chain().focus().toggleHidden().run()
-                            }
-                            sx={{
-                              width: 22,
-                              height: 22,
-                              margin: 0.75,
-                              cursor: 'pointer',
-                              color: editor.isActive('hidden')
-                                ? theme.palette.primary.main
-                                : 'grey',
-                            }}
-                          />
-                        </Tooltip>
+                        {isUserDm && (
+                          <Tooltip
+                            title={'Hide from players'}
+                            placement={'top'}
+                          >
+                            <VisibilityOffIcon
+                              onClick={() =>
+                                // @ts-ignore
+                                editor.chain().focus().toggleHidden().run()
+                              }
+                              sx={{
+                                width: 22,
+                                height: 22,
+                                margin: 0.75,
+                                cursor: 'pointer',
+                                color: currentEditorState.isHidden
+                                  ? theme.palette.primary.main
+                                  : 'grey',
+                              }}
+                            />
+                          </Tooltip>
+                        )}
                       </Box>
                     </BubbleMenu>
                   )}
