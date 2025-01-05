@@ -62,18 +62,26 @@ import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import TitleIcon from '@mui/icons-material/Title';
 import Highlight from '@tiptap/extension-highlight';
+import FileDropzone from '@/components/content/text-editor/FileDropzone';
 
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
   const { isUserDm } = useCampaign();
 
-  if (isUserDm === null) {
-    return;
-  }
-  return <ContentEditor displayHiddenMarks={isUserDm} />;
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        backgroundColor: '#111111',
+      }}
+    >
+      {isUserDm !== null && <ContentEditor displayHiddenMarks={isUserDm} />}
+    </Box>
+  );
 };
 
 // TODO: Drag & drop images into editor should save them as reference image
+// TODO: Create Link wrapper that conditionally alerts user before pushing url (for unsaved changes)
 export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
   const [unit, setUnit] = useState<Article | Quest | null>(null);
   const [isUnsavedChanges, setUnsavedChanges] = useState(false);
@@ -306,202 +314,199 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundColor: '#111111',
-      }}
-    >
-      <Container>
-        <Box
-          sx={{
-            pt: 12,
-          }}
-        >
-          {unit && (
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={3}>
-                <Box
-                  sx={{
-                    position: { xs: 'auto', md: 'fixed' },
-                    width: { md: '23vw', lg: '19vw' },
-                  }}
-                >
+    <>
+      {unit && (
+        <FileDropzone unitId={unit.id}>
+          <Container>
+            <Box
+              sx={{
+                pt: 12,
+              }}
+            >
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={3}>
                   <Box
                     sx={{
-                      display: { xs: 'none', md: 'block' },
+                      position: { xs: 'auto', md: 'fixed' },
+                      width: { md: '23vw', lg: '19vw' },
                     }}
                   >
-                    <ArticleAside titles={sectionTitles} article={unit} />
-                  </Box>
-
-                  <Box py={1}>
-                    <Button
-                      startIcon={<AddIcon />}
-                      onClick={handleAddImage}
-                      sx={{ color: 'grey' }}
+                    <Box
+                      sx={{
+                        display: { xs: 'none', md: 'block' },
+                      }}
                     >
-                      Add Reference Image
-                    </Button>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      style={{ display: 'none' }}
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                    />
-                  </Box>
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={8}>
-                <Box pl={3} zIndex={5}>
-                  <Typography
-                    sx={{ userSelect: 'none' }}
-                    pb={1}
-                    mt={-4}
-                    color={'grey'}
-                  >
-                    {unit.hidden && 'Hidden from players'}&nbsp;
-                    {isUnsavedChanges && <em>(unsaved changes)</em>}
-                  </Typography>
+                      <ArticleAside titles={sectionTitles} article={unit} />
+                    </Box>
 
-                  {editor && currentEditorState && (
-                    <BubbleMenu
-                      editor={editor}
-                      tippyOptions={{ duration: 100 }}
-                    >
-                      <Box
-                        sx={{
-                          backgroundColor: '#222222',
-                          borderRadius: 2,
-                          display: 'flex',
-                          alignItems: 'center',
-                        }}
+                    <Box py={1}>
+                      <Button
+                        startIcon={<AddIcon />}
+                        onClick={handleAddImage}
+                        sx={{ color: 'grey' }}
                       >
-                        <FormatBoldIcon
-                          onClick={() =>
-                            editor.chain().focus().toggleBold().run()
-                          }
-                          sx={{
-                            margin: 0.75,
-                            cursor: 'pointer',
-                            color: currentEditorState.isBold
-                              ? theme.palette.primary.main
-                              : 'grey',
-                          }}
-                        />
-                        <FormatItalicIcon
-                          onClick={() =>
-                            editor.chain().focus().toggleItalic().run()
-                          }
-                          sx={{
-                            margin: 0.75,
-                            cursor: 'pointer',
-                            color: currentEditorState.isItalic
-                              ? theme.palette.primary.main
-                              : 'grey',
-                          }}
-                        />
-                        <TitleIcon
-                          onClick={() =>
-                            editor
-                              .chain()
-                              .focus()
-                              .toggleHeading({
-                                level: 2,
-                              })
-                              .run()
-                          }
-                          sx={{
-                            margin: 0.75,
-                            cursor: 'pointer',
-                            color: currentEditorState.isHeading
-                              ? theme.palette.primary.main
-                              : 'grey',
-                          }}
-                        />
-                        {isUserDm && (
-                          <Tooltip
-                            title={'Hide from players'}
-                            placement={'top'}
-                          >
-                            <VisibilityOffIcon
-                              onClick={() =>
-                                editor.chain().focus().toggleHighlight().run()
-                              }
-                              sx={{
-                                width: 22,
-                                height: 22,
-                                margin: 0.75,
-                                cursor: 'pointer',
-                                color: currentEditorState.isHidden
-                                  ? theme.palette.primary.main
-                                  : 'grey',
-                              }}
-                            />
-                          </Tooltip>
-                        )}
-                      </Box>
-                    </BubbleMenu>
-                  )}
-                  <EditorContent id={'editor-content'} editor={editor} />
-
-                  {unit.type === 'quest' && (
-                    <>
-                      {/*<QuestTimeline questId={content.id} />*/}
-                      <div style={{ paddingBottom: '28px' }}>
-                        <LootTable questId={unit.id} />
-                      </div>
-                    </>
-                  )}
-                  {unit.imageUrls.length > 0 && (
-                    <div style={{ paddingBottom: '28px' }}>
-                      <ImageList
-                        imageUrls={unit.imageUrls}
-                        handleDeleteImage={handleDeleteImage}
+                        Add Reference Image
+                      </Button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        style={{ display: 'none' }}
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
                       />
-                    </div>
-                  )}
-                </Box>
+                    </Box>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={8}>
+                  <Box pl={3} zIndex={5}>
+                    <Typography
+                      sx={{ userSelect: 'none' }}
+                      pb={1}
+                      mt={-4}
+                      color={'grey'}
+                    >
+                      {unit.hidden && 'Hidden from players'}&nbsp;
+                      {isUnsavedChanges && <em>(unsaved changes)</em>}
+                    </Typography>
+
+                    {editor && currentEditorState && (
+                      <BubbleMenu
+                        editor={editor}
+                        tippyOptions={{ duration: 100 }}
+                      >
+                        <Box
+                          sx={{
+                            backgroundColor: '#222222',
+                            borderRadius: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <FormatBoldIcon
+                            onClick={() =>
+                              editor.chain().focus().toggleBold().run()
+                            }
+                            sx={{
+                              margin: 0.75,
+                              cursor: 'pointer',
+                              color: currentEditorState.isBold
+                                ? theme.palette.primary.main
+                                : 'grey',
+                            }}
+                          />
+                          <FormatItalicIcon
+                            onClick={() =>
+                              editor.chain().focus().toggleItalic().run()
+                            }
+                            sx={{
+                              margin: 0.75,
+                              cursor: 'pointer',
+                              color: currentEditorState.isItalic
+                                ? theme.palette.primary.main
+                                : 'grey',
+                            }}
+                          />
+                          <TitleIcon
+                            onClick={() =>
+                              editor
+                                .chain()
+                                .focus()
+                                .toggleHeading({
+                                  level: 2,
+                                })
+                                .run()
+                            }
+                            sx={{
+                              margin: 0.75,
+                              cursor: 'pointer',
+                              color: currentEditorState.isHeading
+                                ? theme.palette.primary.main
+                                : 'grey',
+                            }}
+                          />
+                          {isUserDm && (
+                            <Tooltip
+                              title={'Hide from players'}
+                              placement={'top'}
+                            >
+                              <VisibilityOffIcon
+                                onClick={() =>
+                                  editor.chain().focus().toggleHighlight().run()
+                                }
+                                sx={{
+                                  width: 22,
+                                  height: 22,
+                                  margin: 0.75,
+                                  cursor: 'pointer',
+                                  color: currentEditorState.isHidden
+                                    ? theme.palette.primary.main
+                                    : 'grey',
+                                }}
+                              />
+                            </Tooltip>
+                          )}
+                        </Box>
+                      </BubbleMenu>
+                    )}
+                    <EditorContent id={'editor-content'} editor={editor} />
+
+                    {unit.type === 'quest' && (
+                      <>
+                        {/*<QuestTimeline questId={content.id} />*/}
+                        <div style={{ paddingBottom: '28px' }}>
+                          <LootTable questId={unit.id} />
+                        </div>
+                      </>
+                    )}
+                    {unit.imageUrls.length > 0 && (
+                      <div style={{ paddingBottom: '28px' }}>
+                        <ImageList
+                          imageUrls={unit.imageUrls}
+                          handleDeleteImage={handleDeleteImage}
+                        />
+                      </div>
+                    )}
+                  </Box>
+                </Grid>
               </Grid>
-            </Grid>
-          )}
-          <Stack
-            direction="column"
-            p={3}
-            sx={{
-              position: 'fixed',
-              right: 16,
-              bottom: 16,
-            }}
-          >
-            <Tooltip title={`Hide Content From Players`} placement={'left'}>
-              <span>
-                <IconButton
-                  size="large"
-                  onClick={() => toggleHideUnit(!unit?.hidden)}
-                >
-                  <VisibilityOffIcon
-                    style={!unit?.hidden ? { color: 'grey' } : {}}
-                  />
-                </IconButton>
-              </span>
-            </Tooltip>
-            <Tooltip title={'Save Changes'} placement={'left'}>
-              <span>
-                <IconButton
-                  size="large"
-                  disabled={!isUnsavedChanges}
-                  onClick={handleSaveContent}
-                >
-                  <CheckIcon />
-                </IconButton>
-              </span>
-            </Tooltip>
-          </Stack>
-        </Box>
-      </Container>
-    </Box>
+              <Stack
+                direction="column"
+                p={3}
+                sx={{
+                  position: 'fixed',
+                  right: 16,
+                  bottom: 16,
+                }}
+              >
+                <Tooltip title={`Hide Content From Players`} placement={'left'}>
+                  <span>
+                    <IconButton
+                      size="large"
+                      onClick={() => toggleHideUnit(!unit?.hidden)}
+                    >
+                      <VisibilityOffIcon
+                        style={!unit?.hidden ? { color: 'grey' } : {}}
+                      />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+                <Tooltip title={'Save Changes'} placement={'left'}>
+                  <span>
+                    <IconButton
+                      size="large"
+                      disabled={!isUnsavedChanges}
+                      onClick={handleSaveContent}
+                    >
+                      <CheckIcon />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </Stack>
+            </Box>
+          </Container>
+        </FileDropzone>
+      )}
+    </>
   );
 };
