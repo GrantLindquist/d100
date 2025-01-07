@@ -49,6 +49,9 @@ const generateDefaultContent = (title: string) => {
           },
         ],
       },
+      {
+        type: 'paragraph',
+      },
     ],
     type: 'doc',
   };

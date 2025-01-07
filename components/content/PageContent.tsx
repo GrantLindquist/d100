@@ -64,6 +64,7 @@ import TitleIcon from '@mui/icons-material/Title';
 import Highlight from '@tiptap/extension-highlight';
 import FileDropzone from '@/components/content/text-editor/FileDropzone';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { Placeholder } from '@tiptap/extension-placeholder';
 
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
@@ -169,6 +170,14 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
         },
       }),
       Paragraph,
+      Placeholder.configure({
+        placeholder: ({ node }) => {
+          if (node.type.name === 'heading') {
+            return 'Page Title';
+          }
+          return 'Can you add some further context?';
+        },
+      }),
       Text,
       TypographyExtension,
     ],
@@ -179,6 +188,8 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
       setUnsavedChanges(true);
     },
   });
+
+  console.log(editor && editor.getJSON());
 
   const currentEditorState = useEditorState({
     editor,

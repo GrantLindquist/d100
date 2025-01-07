@@ -26,3 +26,11 @@ mark {
 .hidden {
   visibility: hidden;
 }
+
+.tiptap h2.is-editor-empty::before {
+  color: grey;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

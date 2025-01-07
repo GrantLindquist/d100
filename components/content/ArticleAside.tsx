@@ -69,12 +69,12 @@ const ArticleAside = (props: { titles: string[]; article: Article }) => {
         })}
         {props.article.type === 'quest' && (
           <>
-            <Typography
-              onClick={() => scrollToHeader('Quest Timeline')}
-              sx={HeaderAsideSx}
-            >
-              Quest Timeline
-            </Typography>
+            {/*<Typography*/}
+            {/*  onClick={() => scrollToHeader('Quest Timeline')}*/}
+            {/*  sx={HeaderAsideSx}*/}
+            {/*>*/}
+            {/*  Quest Timeline*/}
+            {/*</Typography>*/}
             <Typography
               onClick={() => scrollToHeader('Loot Table')}
               sx={HeaderAsideSx}
