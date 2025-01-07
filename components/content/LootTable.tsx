@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import {
   Box,
-  Button,
   IconButton,
   InputAdornment,
   MenuItem,
@@ -25,7 +24,10 @@ import { doc, onSnapshot, updateDoc } from '@firebase/firestore';
 import { useAlert } from '@/hooks/useAlert';
 import db from '@/utils/firebase';
 import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
+import RoundButton from '@/components/RoundButton';
+import AddIcon from '@mui/icons-material/Add';
 
+// TODO: Make loot table an optional add
 const EditableTable = (props: { questId: string }) => {
   const { displayAlert } = useAlert();
 
@@ -151,7 +153,7 @@ const EditableTable = (props: { questId: string }) => {
       >
         Loot ({calculateCurrencyTotal()}gp)
       </Typography>
-      <TableContainer>
+      <TableContainer sx={{ marginBottom: 1 }}>
         <Table>
           {rows.length > 0 && (
             <TableHead>
@@ -260,7 +262,9 @@ const EditableTable = (props: { questId: string }) => {
           </TableBody>
         </Table>
       </TableContainer>
-      <Button onClick={handleAddRow}>Add Row</Button>
+      <RoundButton icon={<AddIcon />} onClick={handleAddRow}>
+        Add Row
+      </RoundButton>
     </>
   );
 };

@@ -51,7 +51,6 @@ import { deleteObject, listAll, ref } from '@firebase/storage';
 import ImageFrame from '@/components/content/ImageFrame';
 import { outfit } from '@/components/AppWrapper';
 
-// TODO: Create a skeleton for this
 const UnitTab = (props: {
   unit: Unit;
   icon: ReactNode;

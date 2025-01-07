@@ -18,8 +18,7 @@ const PlayerAvatarList = (props: { players: UserBase[] }) => {
                 width: 30,
                 height: 30,
                 zIndex: props.players.length - index,
-                border: (theme) =>
-                  `2px ${theme.palette.background.default} solid`,
+                border: () => `2px #121212 solid`,
               }}
             />
           </Tooltip>

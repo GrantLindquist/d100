@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import { CampaignProvider } from '@/hooks/useCampaign';
 import { UserProvider } from '@/hooks/useUser';
 import { AlertProvider } from '@/hooks/useAlert';
+import { UnsavedChangesProvider } from '@/hooks/useUnsavedChanges';
 
 export const metadata: Metadata = {
   title: 'd100',
@@ -30,10 +31,12 @@ export default function RootLayout({
         <AlertProvider>
           <UserProvider>
             <CampaignProvider>
-              <AppWrapper>
-                <Navbar />
-                {children}
-              </AppWrapper>
+              <UnsavedChangesProvider>
+                <AppWrapper>
+                  <Navbar />
+                  {children}
+                </AppWrapper>
+              </UnsavedChangesProvider>
             </CampaignProvider>
           </UserProvider>
         </AlertProvider>

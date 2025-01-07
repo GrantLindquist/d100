@@ -12,3 +12,25 @@
   margin: 0;
   line-height: 1;
 }
+
+a {
+  color: #ff6a48;
+  cursor: pointer;
+}
+
+mark {
+  color: white;
+  background-color: #333333;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.tiptap h2.is-editor-empty::before {
+  color: grey;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
