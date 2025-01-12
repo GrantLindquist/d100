@@ -80,7 +80,6 @@ const EditableTable = (props: { questId: string }) => {
 
   const updateTable = async (data: Loot[]) => {
     try {
-      console.log(data);
       await updateDoc(doc(db, 'units', props.questId), {
         loot: data,
       });

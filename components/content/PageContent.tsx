@@ -54,12 +54,14 @@ import Text from '@tiptap/extension-text';
 import History from '@tiptap/extension-history';
 import Bold from '@tiptap/extension-bold';
 import Italic from '@tiptap/extension-italic';
+import Blockquote from '@tiptap/extension-blockquote';
 import { Typography as TypographyExtension } from '@tiptap/extension-typography';
 import Link from '@tiptap/extension-link';
 import '@/components/content/text-editor/EditorContent.css';
 import EnforceTitle from '@/components/content/text-editor/EnforceTitle';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
+import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import TitleIcon from '@mui/icons-material/Title';
 import Highlight from '@tiptap/extension-highlight';
 import FileDropzone from '@/components/content/text-editor/FileDropzone';
@@ -82,6 +84,7 @@ export const PageContent = () => {
   );
 };
 
+// TODO: Get blockquotes working
 export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
   const [unit, setUnit] = useState<Article | Quest | null>(null);
   const [sectionTitles, setSectionTitles] = useState<string[]>([]);
@@ -135,6 +138,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
 
   const editor = useEditor({
     extensions: [
+      Blockquote,
       Bulletlist,
       Bold,
       Document,
@@ -188,11 +192,10 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
     },
   });
 
-  console.log(editor && editor.getJSON());
-
   const currentEditorState = useEditorState({
     editor,
     selector: (ctx) => ({
+      isBlockquote: ctx.editor?.isActive('blockquote'),
       isBold: ctx.editor?.isActive('bold'),
       isItalic: ctx.editor?.isActive('italic'),
       isHeading: ctx.editor?.isActive('heading'),
@@ -203,6 +206,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
         return false;
       }
       return (
+        prev.isBlockquote === next.isBlockquote &&
         prev.isBold === next.isBold &&
         prev.isItalic === next.isItalic &&
         prev.isHeading === next.isHeading &&
@@ -435,6 +439,18 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                               margin: 0.75,
                               cursor: 'pointer',
                               color: currentEditorState.isHeading
+                                ? theme.palette.primary.main
+                                : 'grey',
+                            }}
+                          />
+                          <FormatQuoteIcon
+                            onClick={() =>
+                              editor.chain().focus().toggleBlockquote().run()
+                            }
+                            sx={{
+                              margin: 0.75,
+                              cursor: 'pointer',
+                              color: currentEditorState.isBlockquote
                                 ? theme.palette.primary.main
                                 : 'grey',
                             }}

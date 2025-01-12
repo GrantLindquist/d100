@@ -32,6 +32,12 @@ const ArticleAside = (props: { titles: string[]; article: Article }) => {
       const targetPosition =
         rect.top + offset - (headerText === props.article.title ? 100 : 85);
 
+      // console.log(headerElement);
+      // headerElement.classList.add('highlight');
+      // setTimeout(() => {
+      //   headerElement.classList.remove('highlight');
+      // }, 500);
+
       window.scrollTo({
         top: targetPosition,
         behavior: 'smooth',
