@@ -15,7 +15,7 @@ import { useAlert } from '@/hooks/useAlert';
 import { useEffect } from 'react';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { outfit } from '@/components/AppWrapper';
-import RoundButton from '@/components/RoundButton';
+import RoundButton from '@/components/buttons/RoundButton';
 
 export default function AuthPage() {
   const { user, setListening } = useUser();

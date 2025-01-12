@@ -84,7 +84,6 @@ export const PageContent = () => {
   );
 };
 
-// TODO: Get blockquotes working
 export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
   const [unit, setUnit] = useState<Article | Quest | null>(null);
   const [sectionTitles, setSectionTitles] = useState<string[]>([]);

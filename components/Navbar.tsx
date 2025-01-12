@@ -1,10 +1,10 @@
 'use client';
-import UserButton from '@/components/UserButton';
+import UserButton from '@/components/buttons/UserButton';
 import { Divider, Stack, Toolbar, Tooltip, Typography } from '@mui/material';
-import SettingsButton from '@/components/SettingsButton';
+import SettingsButton from '@/components/buttons/SettingsButton';
 import { usePathname } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
-import NotificationButton from '@/components/NotificationButton';
+import NotificationButton from '@/components/buttons/NotificationButton';
 import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 import Image from 'next/image';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';

@@ -17,7 +17,7 @@ import db from '@/utils/firebase';
 import { Collection } from '@/types/Unit';
 import { useUser } from '@/hooks/useUser';
 import { useAlert } from '@/hooks/useAlert';
-import RoundButton from '@/components/RoundButton';
+import RoundButton from '@/components/buttons/RoundButton';
 
 const CreateCampaignModal = () => {
   const [open, setOpen] = useState(false);

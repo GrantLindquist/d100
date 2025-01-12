@@ -24,7 +24,7 @@ import { doc, onSnapshot, updateDoc } from '@firebase/firestore';
 import { useAlert } from '@/hooks/useAlert';
 import db from '@/utils/firebase';
 import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
-import RoundButton from '@/components/RoundButton';
+import RoundButton from '@/components/buttons/RoundButton';
 import AddIcon from '@mui/icons-material/Add';
 
 // TODO: Make loot table an optional add
