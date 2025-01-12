@@ -115,7 +115,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
   }, [unit]);
 
   useEffect(() => {
-    isUnsavedChanges && setUnsavedChanges(false);
     const url = pathname.split('/').slice(1);
     const unitId = getCurrentUnitIdFromUrl(url);
     if (unitId) {
@@ -339,7 +338,11 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                   <Box
                     sx={{
                       position: { xs: 'auto', md: 'fixed' },
-                      width: { md: '23vw', lg: '19vw' },
+                      width: {
+                        md: '23vw',
+                        lg: '19vw',
+                        xl: '14vw',
+                      },
                     }}
                   >
                     <Box

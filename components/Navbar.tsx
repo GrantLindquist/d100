@@ -2,7 +2,7 @@
 import UserButton from '@/components/UserButton';
 import { Divider, Stack, Toolbar, Tooltip, Typography } from '@mui/material';
 import SettingsButton from '@/components/SettingsButton';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useCampaign } from '@/hooks/useCampaign';
 import NotificationButton from '@/components/NotificationButton';
 import NavBreadcrumbs from '@/components/NavBreadcrumbs';
@@ -11,11 +11,12 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { outfit } from '@/components/AppWrapper';
 import SaveCheckLink from '@/components/SaveCheckLink';
 
+// TODO: Make campaign-wide searchbar in here
 // TODO: Make responsive
 const Navbar = () => {
   const { campaign, isUserDm } = useCampaign();
   const pathname = usePathname();
-  const router = useRouter();
+
   if (pathname !== '/') {
     return (
       <Toolbar

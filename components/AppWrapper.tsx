@@ -9,24 +9,20 @@ import { Outfit } from 'next/font/google';
 import { doc, updateDoc } from '@firebase/firestore';
 import { useUser } from '@/hooks/useUser';
 import db from '@/utils/firebase';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 export const outfit = Outfit({ subsets: ['latin'] });
 
 const AppWrapper = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const router = useRouter();
+  const { isUnsavedChanges, setUnsavedChanges } = useUnsavedChanges();
   const { user } = useUser();
   const { campaign, setCampaignId } = useCampaign();
   const url = pathname.split('/').slice(1);
 
   useEffect(() => {
-    // Set current campaign
-    const urlCampaignId = getCampaignIdFromUrl(url);
-    if (!urlCampaignId) {
-      setCampaignId(null);
-    } else if (urlCampaignId && urlCampaignId !== campaign?.id) {
-      setCampaignId(urlCampaignId);
-    }
+    isUnsavedChanges && setUnsavedChanges(false);
 
     // Organizes campaignIds by last opened
     const organizeCampaignIds = async () => {
@@ -40,18 +36,24 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
         });
       }
     };
-    organizeCampaignIds();
-  }, [pathname]);
 
-  // TODO: When an unauthorized user attempts to access a campaign via url, the campaign's id is saved under their user.campaignIds
-  // Handle unauthorized requests
-  useEffect(() => {
-    if (campaign && user) {
-      if (!user.campaignIds.includes(campaign.id)) {
+    // Set current campaign
+    const urlCampaignId = getCampaignIdFromUrl(url);
+    if (urlCampaignId && user) {
+      if (user.campaignIds.includes(urlCampaignId)) {
+        if (urlCampaignId !== campaign?.id) {
+          setCampaignId(urlCampaignId);
+          organizeCampaignIds();
+        }
+      }
+      // Redirects unauthorized requests
+      else {
         router.push('/campaigns/unauthorized');
       }
+    } else {
+      setCampaignId(null);
     }
-  }, [user?.id, campaign?.id]);
+  }, [pathname, user]);
 
   const darkTheme = createTheme({
     palette: {

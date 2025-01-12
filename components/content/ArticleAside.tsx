@@ -29,7 +29,8 @@ const ArticleAside = (props: { titles: string[]; article: Article }) => {
     if (headerElement) {
       const rect = headerElement.getBoundingClientRect();
       const offset = window.scrollY || document.documentElement.scrollTop;
-      const targetPosition = rect.top + offset - 100;
+      const targetPosition =
+        rect.top + offset - (headerText === props.article.title ? 100 : 85);
 
       window.scrollTo({
         top: targetPosition,

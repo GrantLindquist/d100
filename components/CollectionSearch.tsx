@@ -51,6 +51,7 @@ import { deleteObject, listAll, ref } from '@firebase/storage';
 import ImageFrame from '@/components/content/ImageFrame';
 import { outfit } from '@/components/AppWrapper';
 
+// TODO: Get the move unit functionality working
 const UnitTab = (props: {
   unit: Unit;
   icon: ReactNode;
