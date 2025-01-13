@@ -40,7 +40,6 @@ import Masonry from '@mui/lab/Masonry';
 import { useCampaign } from '@/hooks/useCampaign';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
-import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import KeyIcon from '@mui/icons-material/Key';
@@ -50,23 +49,21 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { deleteObject, listAll, ref } from '@firebase/storage';
 import ImageFrame from '@/components/content/ImageFrame';
 import { outfit } from '@/components/AppWrapper';
+import MoveUnitsModal from '@/components/modals/MoveUnitsModal';
 
-// TODO: Get the move unit functionality working
+// TODO: Include sub-collections inside unit selection
 const UnitTab = (props: {
   unit: Unit;
+  checked?: boolean;
   icon: ReactNode;
   isEditing: boolean;
   updateState: (removeId: boolean, unitId: string) => void;
   imageUrl?: ImageUrl;
 }) => {
   const router = useRouter();
-  // Changing this state re-renders entire component
-  const [isSelected, setSelected] = useState(false);
 
   const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
-    const checked = event.target.checked;
-    setSelected(checked);
-    props.updateState(!checked, props.unit.id);
+    props.updateState(!event.target.checked, props.unit.id);
   };
   return (
     <div
@@ -123,7 +120,7 @@ const UnitTab = (props: {
           </Stack>
           {props.isEditing && props.unit.type !== 'collection' && (
             <Checkbox
-              checked={isSelected}
+              checked={props.checked}
               onChange={handleCheck}
               sx={{
                 p: 0,
@@ -185,6 +182,11 @@ const CollectionSearch = (props: {
 
     props.unitIds.length > 0 ? fetchUnits() : setUnits([]);
   }, [props.unitIds]);
+
+  // Resets selected unit ids when done editing
+  useEffect(() => {
+    setSelectedUnitIds([]);
+  }, [isEditing]);
 
   const updateSelectedUnitIds = (removeId: boolean, unitId: string) => {
     if (!removeId) {
@@ -340,6 +342,7 @@ const CollectionSearch = (props: {
                     <UnitTab
                       key={index}
                       unit={unit}
+                      checked={selectedUnitIds.includes(unit.id)}
                       icon={
                         unit.type === 'quest' ? (
                           <KeyIcon />
@@ -378,19 +381,23 @@ const CollectionSearch = (props: {
               ) : (
                 <>
                   <Tooltip title={'Save Changes'} placement={'left'}>
-                    <IconButton size="large" onClick={() => setEditing(false)}>
+                    <IconButton
+                      size="large"
+                      onClick={() => {
+                        setEditing(false);
+                      }}
+                    >
                       <CheckIcon />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title={'Move Items'} placement={'left'}>
                     <span>
-                      <IconButton
-                        size="large"
-                        disabled
-                        onClick={() => setEditing(false)}
-                      >
-                        <DriveFileMoveIcon />
-                      </IconButton>
+                      <MoveUnitsModal
+                        selectedUnitIds={selectedUnitIds}
+                        disabled={selectedUnitIds.length === 0}
+                        setEditing={setEditing}
+                        currentCollection={props.collection}
+                      />
                     </span>
                   </Tooltip>
                   <Tooltip title={'Delete Items'} placement={'left'}>
