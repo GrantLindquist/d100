@@ -82,7 +82,7 @@ const MoveUnitsModal = (props: {
     []
   );
 
-  // TODO: Organize collections in parental order
+  // TODO: Organize collections in parental order / re-create breadcrumbs on move
   useEffect(() => {
     const getCollections = async (campaignId: string) => {
       const collections: Collection[] = [];
