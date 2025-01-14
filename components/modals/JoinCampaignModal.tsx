@@ -16,7 +16,7 @@ import { useUser } from '@/hooks/useUser';
 import LoginIcon from '@mui/icons-material/Login';
 import { useAlert } from '@/hooks/useAlert';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import RoundButton from '@/components/RoundButton';
+import RoundButton from '@/components/buttons/RoundButton';
 
 const JoinCampaignModal = () => {
   const [open, setOpen] = useState(false);

@@ -1,36 +1,52 @@
 .ProseMirror {
-  min-height: 200px;
+    min-height: 200px;
 }
 
 .ProseMirror:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px #222222;
+    outline: none;
+    box-shadow: 0 0 0 2px #222222;
 }
 
 .ProseMirror h2:first-child {
-  font-size: 3rem;
-  margin: 0;
-  line-height: 1;
+    font-size: 3rem;
+    margin: 0;
+    line-height: 1;
+}
+
+.ProseMirror blockquote {
+    margin: 0;
+    border-radius: 2px;
+
+    /*padding: 5px 40px 5px 40px;*/
+    /*background-color: #222222;*/
+
+    padding: 0 40px 0 40px;
+    border-left: 6px solid #222222;
+}
+
+.ProseMirror mark {
+    color: white;
+    background-color: #333333;
 }
 
 a {
-  color: #ff6a48;
-  cursor: pointer;
+    color: #ff6a48;
+    cursor: pointer;
 }
 
-mark {
-  color: white;
-  background-color: #333333;
-}
 
 .hidden {
-  visibility: hidden;
+    visibility: hidden;
 }
 
 .tiptap h2.is-editor-empty::before {
-  color: grey;
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
+    color: grey;
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
 }
+
+/*.highlight {*/
+/*    background-color: yellow !important; !* Highlight color *!*/
+/*}*/

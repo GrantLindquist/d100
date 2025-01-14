@@ -1,5 +1,5 @@
 import { Box, Container, Stack } from '@mui/material';
-import CampaignList from '@/components/CampaignList';
+import CampaignList from '@/components/data-list/CampaignList';
 import CreateCampaignModal from '@/components/modals/CreateCampaignModal';
 import JoinCampaignModal from '@/components/modals/JoinCampaignModal';
 

@@ -17,7 +17,7 @@ import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useRouter } from 'next/navigation';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
-import PlayerAvatarList from '@/components/PlayerAvatarList';
+import PlayerAvatarList from '@/components/data-list/PlayerAvatarList';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CampaignActionsModal from '@/components/modals/CampaignActionsModal';
 import DeleteIcon from '@mui/icons-material/Delete';
