@@ -182,7 +182,7 @@ const CampaignList = () => {
       </Typography>
       {user && (
         <>
-          {user.campaignIds.length > 0 ? (
+          {user.campaignIds?.length > 0 ? (
             <Grid container spacing={2}>
               {user.campaignIds.map((id, index) => (
                 <Grid
