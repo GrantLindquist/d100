@@ -1,11 +1,5 @@
 'use client';
-import {
-  createContext,
-  ReactNode,
-  SyntheticEvent,
-  useContext,
-  useState,
-} from 'react';
+import { createContext, ReactNode, useContext, useState } from 'react';
 import { Box, Button, Snackbar, Stack, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
@@ -34,13 +28,6 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
     setOpen(true);
   };
 
-  const handleClose = (event: SyntheticEvent | Event, reason: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpen(false);
-  };
-
   const handleNavigate = (link: string) => {
     setOpen(false);
     router.push(link);
@@ -49,7 +36,11 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
   // TODO: Add support for displaying multiple snackbars at once
   return (
     <AlertContext.Provider value={{ displayAlert }}>
-      <Snackbar open={open} autoHideDuration={8000} onClose={handleClose}>
+      <Snackbar
+        open={open}
+        autoHideDuration={6000}
+        onClose={() => setOpen(false)}
+      >
         <Box
           sx={{
             width: 500,
