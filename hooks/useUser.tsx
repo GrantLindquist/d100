@@ -12,6 +12,7 @@ import { User } from '@/types/User';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { getUserFromSession } from '@/utils/userSession';
+import { useAlert } from '@/hooks/useAlert';
 
 const UserContext = createContext<{
   user: User | null;
@@ -24,6 +25,8 @@ const UserContext = createContext<{
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
+  const { displayAlert } = useAlert();
+
   const [user, setUser] = useState<User | null>(null);
   const [listening, setListening] = useState<boolean>(false);
 
@@ -36,6 +39,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           (userDocSnap) => {
             if (userDocSnap.exists()) {
               setUser(userDocSnap.data() as User);
+            } else {
+              displayAlert({
+                message:
+                  'Failed to pull user data from database. This may be a result if mismatched database environments.',
+                isError: true,
+              });
             }
           }
         );

@@ -14,7 +14,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const databaseId =
+  process.env.NODE_ENV === 'development' ? 'env-dev' : '(default)';
+const db = getFirestore(app, databaseId);
 
 export const auth = getAuth();
 export const storage = getStorage(app);

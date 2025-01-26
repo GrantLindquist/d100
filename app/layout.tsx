@@ -16,7 +16,6 @@ export const metadata: Metadata = {
   },
 };
 
-// TODO: Setup dev & prod firestore environments
 export default function RootLayout({
   children,
 }: Readonly<{
