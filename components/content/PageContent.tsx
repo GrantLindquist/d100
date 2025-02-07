@@ -66,7 +66,6 @@ import TitleIcon from '@mui/icons-material/Title';
 import Highlight from '@tiptap/extension-highlight';
 import FileDropzone from '@/components/content/text-editor/FileDropzone';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { Placeholder } from '@tiptap/extension-placeholder';
 
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
@@ -172,14 +171,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
         },
       }),
       Paragraph,
-      Placeholder.configure({
-        placeholder: ({ node }) => {
-          if (node.type.name === 'heading') {
-            return 'Page Title';
-          }
-          return 'Can you add some further context?';
-        },
-      }),
       Text,
       TypographyExtension,
     ],
@@ -191,6 +182,14 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
     },
   });
 
+  // TODO: Get this working
+  const shouldDisplayPlaceholder = () => {
+    return (
+      !editor?.getJSON()?.content?.[1]?.content ||
+      editor?.getJSON()?.content?.[1]?.content?.[0]?.text?.trim().length === 0
+    );
+  };
+
   const currentEditorState = useEditorState({
     editor,
     selector: (ctx) => ({
@@ -201,7 +200,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
       isHidden: ctx.editor?.isActive('highlight'),
     }),
     equalityFn: (prev, next) => {
-      if (!next) {
+      if (!next || shouldDisplayPlaceholder()) {
         return false;
       }
       return (
@@ -222,6 +221,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
         await updateDoc(doc(db, 'units', unit.id), {
           content: editor.getJSON(),
           title: unitTitle,
+          lastEdited: Date.now(),
         });
         displayAlert({
           message: `Your changes to ${unitTitle} have been saved.`,
@@ -326,6 +326,8 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
     }
   };
 
+  console.log(editor?.getJSON().content);
+
   return (
     <>
       {unit && (
@@ -386,7 +388,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                       {unit.hidden && 'Hidden from players'}&nbsp;
                       {isUnsavedChanges && <em>(unsaved changes)</em>}
                     </Typography>
-
                     {editor && currentEditorState && (
                       <BubbleMenu
                         editor={editor}
@@ -479,7 +480,13 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                       </BubbleMenu>
                     )}
                     <EditorContent id={'editor-content'} editor={editor} />
-
+                    {shouldDisplayPlaceholder() && (
+                      <Typography
+                        sx={{ color: 'grey', position: 'relative', top: -135 }}
+                      >
+                        Here is my cool placeholder
+                      </Typography>
+                    )}
                     {unit.type === 'quest' && (
                       <>
                         {/*<QuestTimeline questId={content.id} />*/}

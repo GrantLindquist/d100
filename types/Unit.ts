@@ -13,6 +13,7 @@ export interface Unit {
   type: UnitType;
   breadcrumbs: Breadcrumb[];
   hidden: boolean;
+  lastEdited?: number;
 }
 
 export interface Collection extends Unit {

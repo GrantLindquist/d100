@@ -97,7 +97,6 @@ const DeleteCampaignForm = (props: {
           where('campaignId', '==', props.campaign.id)
         );
 
-        // TODO: !Important! Make sure that campaignId is removed for ALL users on campaign delete - not just DM
         await runTransaction(db, async (transaction) => {
           // Gets all players enrolled in campaign (firebase requires all transaction reads to go before writes)
           let players = [];
