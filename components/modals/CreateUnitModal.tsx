@@ -123,7 +123,7 @@ const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {
             newUnitObj = {
               ...newUnitObj,
               imageUrls: [],
-              loot: [],
+              loot: null,
               content: generateDefaultContent(unitTitle),
               complete: false,
             } as Quest;

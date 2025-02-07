@@ -26,7 +26,7 @@ export interface Article extends Unit {
 }
 
 export interface Quest extends Article {
-  loot: Loot[];
+  loot: Loot[] | null;
   complete: boolean;
 }
 

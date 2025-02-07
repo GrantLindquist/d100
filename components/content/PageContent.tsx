@@ -2,7 +2,6 @@
 
 import {
   Box,
-  Button,
   Container,
   Grid,
   IconButton,
@@ -31,7 +30,6 @@ import { generateUUID } from '@/utils/uuid';
 import { useCampaign } from '@/hooks/useCampaign';
 import ImageList from '@/components/content/ImageList';
 import LootTable from '@/components/content/LootTable';
-import AddIcon from '@mui/icons-material/Add';
 import { useAlert } from '@/hooks/useAlert';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { usePathname } from 'next/navigation';
@@ -66,6 +64,7 @@ import TitleIcon from '@mui/icons-material/Title';
 import Highlight from '@tiptap/extension-highlight';
 import FileDropzone from '@/components/content/text-editor/FileDropzone';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import AddToContentButton from '@/components/buttons/AddToContentButton';
 
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
@@ -326,12 +325,20 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
     }
   };
 
-  console.log(editor?.getJSON().content);
+  // console.log(editor?.getJSON().content);
 
   return (
     <>
       {unit && (
         <FileDropzone unitId={unit.id}>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            style={{ display: 'none' }}
+            ref={fileInputRef}
+            onChange={handleFileChange}
+          />
           <Container>
             <Box
               sx={{
@@ -356,24 +363,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                       }}
                     >
                       <ArticleAside titles={sectionTitles} article={unit} />
-                    </Box>
-
-                    <Box py={1}>
-                      <Button
-                        startIcon={<AddIcon />}
-                        onClick={handleAddImage}
-                        sx={{ color: 'grey' }}
-                      >
-                        Add Reference Image
-                      </Button>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        style={{ display: 'none' }}
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                      />
                     </Box>
                   </Box>
                 </Grid>
@@ -487,7 +476,8 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                         Here is my cool placeholder
                       </Typography>
                     )}
-                    {unit.type === 'quest' && (
+                    {/* @ts-ignore */}
+                    {unit.type === 'quest' && unit.loot && (
                       <>
                         {/*<QuestTimeline questId={content.id} />*/}
                         <div style={{ paddingBottom: '28px' }}>
@@ -527,6 +517,10 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                     </IconButton>
                   </span>
                 </Tooltip>
+                <AddToContentButton
+                  unit={unit}
+                  handleAddImage={handleAddImage}
+                />
                 <Tooltip title={'Save Changes'} placement={'left'}>
                   <span>
                     <IconButton
