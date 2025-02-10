@@ -7,4 +7,7 @@ export interface Campaign {
   dmId: string;
   players: UserBase[];
   pendingPlayers: UserBase[];
+  settings: {
+    displaySpotifyPlayer?: boolean;
+  };
 }

@@ -9,7 +9,7 @@ import {
 import db, { auth } from '@/utils/firebase';
 import { User, UserBase } from '@/types/User';
 import { doc, setDoc } from '@firebase/firestore';
-import { setUserSession } from '@/utils/userSession';
+import { setCookie } from '@/utils/cookie';
 import { useRouter } from 'next/navigation';
 import { useAlert } from '@/hooks/useAlert';
 import { useEffect } from 'react';
@@ -26,6 +26,7 @@ export default function AuthPage() {
     user && router.push('/campaigns');
   }, [user]);
 
+  // TODO: Add checkbox to let user consent to using cookies
   const handleSignIn = async () => {
     try {
       const provider = new GoogleAuthProvider();
@@ -52,7 +53,7 @@ export default function AuthPage() {
       }
 
       // Set session
-      await setUserSession(session);
+      await setCookie('session', session);
       setListening(true);
     } catch (e: any) {
       displayAlert({

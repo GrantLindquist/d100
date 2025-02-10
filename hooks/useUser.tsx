@@ -11,7 +11,7 @@ import {
 import { User } from '@/types/User';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
-import { getUserFromSession } from '@/utils/userSession';
+import { getCookie } from '@/utils/cookie';
 import { useAlert } from '@/hooks/useAlert';
 
 const UserContext = createContext<{
@@ -32,10 +32,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const result = await getUserFromSession();
-      if (result?.user) {
+      const result = await getCookie('session');
+      if (result?.obj) {
         const unsubscribe = onSnapshot(
-          doc(db, 'users', result.user.id),
+          doc(db, 'users', result.obj.id),
           (userDocSnap) => {
             if (userDocSnap.exists()) {
               setUser(userDocSnap.data() as User);
