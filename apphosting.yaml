@@ -6,7 +6,7 @@ env:
       - RUNTIME
 
   - variable: SPOTIFY_CLIENT_ID
-    value: bf0cd101fbb34766ae9f59ec48cb43be
+    value: d2b1062b484a46ea8c04de05d569de89
     availability:
       - BUILD
       - RUNTIME
