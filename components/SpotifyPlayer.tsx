@@ -4,14 +4,12 @@ import { useEffect, useState } from 'react';
 import { SpotifyAccessToken } from '@/types/User';
 import { Box, useTheme } from '@mui/material';
 
-console.log(`testing env - url: ${process.env.NEXT_PUBLIC_APP_URL!}}`);
-
 const SpotifyPlayer = (props: { trackUris: string[] }) => {
   const theme = useTheme();
   console.log(theme.palette.primary.main);
 
   const [accessToken, setAccessToken] = useState<SpotifyAccessToken | null>(
-    null
+    null,
   );
   const [playerState, setPlayerState] = useState<CallbackState | null>(null);
 
@@ -30,7 +28,7 @@ const SpotifyPlayer = (props: { trackUris: string[] }) => {
 
   const refreshToken = async () => {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/music/refresh-token`
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/music/refresh-token`,
     );
     const data = await response.json();
     console.log(data);
@@ -61,9 +59,7 @@ const SpotifyPlayer = (props: { trackUris: string[] }) => {
           token={accessToken.token}
           uris={props.trackUris}
           callback={(state) => {
-            // console.log(state);
             if (Date.now() > accessToken.expiresAt) {
-              // TODO: Get this working - might be firebases fault?
               refreshToken();
             }
             setPlayerState(state);
