@@ -2,7 +2,6 @@
 
 import {
   Box,
-  Button,
   Container,
   Grid,
   IconButton,
@@ -31,7 +30,6 @@ import { generateUUID } from '@/utils/uuid';
 import { useCampaign } from '@/hooks/useCampaign';
 import ImageList from '@/components/content/ImageList';
 import LootTable from '@/components/content/LootTable';
-import AddIcon from '@mui/icons-material/Add';
 import { useAlert } from '@/hooks/useAlert';
 import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { usePathname } from 'next/navigation';
@@ -66,7 +64,7 @@ import TitleIcon from '@mui/icons-material/Title';
 import Highlight from '@tiptap/extension-highlight';
 import FileDropzone from '@/components/content/text-editor/FileDropzone';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { Placeholder } from '@tiptap/extension-placeholder';
+import AddToContentButton from '@/components/buttons/AddToContentButton';
 
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
@@ -172,14 +170,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
         },
       }),
       Paragraph,
-      Placeholder.configure({
-        placeholder: ({ node }) => {
-          if (node.type.name === 'heading') {
-            return 'Page Title';
-          }
-          return 'Can you add some further context?';
-        },
-      }),
       Text,
       TypographyExtension,
     ],
@@ -191,6 +181,14 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
     },
   });
 
+  // TODO: Get this working
+  const shouldDisplayPlaceholder = () => {
+    return (
+      !editor?.getJSON()?.content?.[1]?.content ||
+      editor?.getJSON()?.content?.[1]?.content?.[0]?.text?.trim().length === 0
+    );
+  };
+
   const currentEditorState = useEditorState({
     editor,
     selector: (ctx) => ({
@@ -201,7 +199,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
       isHidden: ctx.editor?.isActive('highlight'),
     }),
     equalityFn: (prev, next) => {
-      if (!next) {
+      if (!next || shouldDisplayPlaceholder()) {
         return false;
       }
       return (
@@ -222,6 +220,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
         await updateDoc(doc(db, 'units', unit.id), {
           content: editor.getJSON(),
           title: unitTitle,
+          lastEdited: Date.now(),
         });
         displayAlert({
           message: `Your changes to ${unitTitle} have been saved.`,
@@ -326,10 +325,20 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
     }
   };
 
+  // console.log(editor?.getJSON().content);
+
   return (
     <>
       {unit && (
         <FileDropzone unitId={unit.id}>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            style={{ display: 'none' }}
+            ref={fileInputRef}
+            onChange={handleFileChange}
+          />
           <Container>
             <Box
               sx={{
@@ -355,24 +364,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                     >
                       <ArticleAside titles={sectionTitles} article={unit} />
                     </Box>
-
-                    <Box py={1}>
-                      <Button
-                        startIcon={<AddIcon />}
-                        onClick={handleAddImage}
-                        sx={{ color: 'grey' }}
-                      >
-                        Add Reference Image
-                      </Button>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        style={{ display: 'none' }}
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                      />
-                    </Box>
                   </Box>
                 </Grid>
                 <Grid item xs={12} md={8}>
@@ -386,7 +377,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                       {unit.hidden && 'Hidden from players'}&nbsp;
                       {isUnsavedChanges && <em>(unsaved changes)</em>}
                     </Typography>
-
                     {editor && currentEditorState && (
                       <BubbleMenu
                         editor={editor}
@@ -479,8 +469,15 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                       </BubbleMenu>
                     )}
                     <EditorContent id={'editor-content'} editor={editor} />
-
-                    {unit.type === 'quest' && (
+                    {shouldDisplayPlaceholder() && (
+                      <Typography
+                        sx={{ color: 'grey', position: 'relative', top: -135 }}
+                      >
+                        Here is my cool placeholder
+                      </Typography>
+                    )}
+                    {/* @ts-ignore */}
+                    {unit.type === 'quest' && unit.loot && (
                       <>
                         {/*<QuestTimeline questId={content.id} />*/}
                         <div style={{ paddingBottom: '28px' }}>
@@ -520,6 +517,10 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                     </IconButton>
                   </span>
                 </Tooltip>
+                <AddToContentButton
+                  unit={unit}
+                  handleAddImage={handleAddImage}
+                />
                 <Tooltip title={'Save Changes'} placement={'left'}>
                   <span>
                     <IconButton

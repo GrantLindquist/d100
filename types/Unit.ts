@@ -13,6 +13,7 @@ export interface Unit {
   type: UnitType;
   breadcrumbs: Breadcrumb[];
   hidden: boolean;
+  lastEdited?: number;
 }
 
 export interface Collection extends Unit {
@@ -25,7 +26,7 @@ export interface Article extends Unit {
 }
 
 export interface Quest extends Article {
-  loot: Loot[];
+  loot: Loot[] | null;
   complete: boolean;
 }
 

@@ -98,15 +98,30 @@ const DeleteCampaignForm = (props: {
         );
 
         await runTransaction(db, async (transaction) => {
+          // Gets all players enrolled in campaign (firebase requires all transaction reads to go before writes)
+          let players = [];
+          const campaignDoc = await transaction.get(
+            doc(db, 'campaigns', props.campaign.id)
+          );
+          if (campaignDoc.exists()) {
+            players = campaignDoc.data().players;
+          }
+
+          // Deletes every document of campaignId = campaign.id
           const deleteQuerySnap = await getDocs(deleteQuery);
           deleteQuerySnap.forEach((doc) => {
             transaction.delete(doc.ref);
           });
           transaction.delete(doc(db, 'campaigns', props.campaign.id));
-          transaction.update(doc(db, 'users', user.id), {
-            campaignIds: arrayRemove(props.campaign.id),
-          });
 
+          // Removes campaign from player's campaignIds array
+          for (let player of players) {
+            transaction.update(doc(db, 'users', player.id), {
+              campaignIds: arrayRemove(props.campaign.id),
+            });
+          }
+
+          // Removes every firebase storage item associated with campaign
           listAll(ref(storage, props.campaign.id)).then((res) => {
             res.items.forEach(async (itemRef) => {
               await deleteObject(itemRef);

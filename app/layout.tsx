@@ -6,6 +6,7 @@ import { CampaignProvider } from '@/hooks/useCampaign';
 import { UserProvider } from '@/hooks/useUser';
 import { AlertProvider } from '@/hooks/useAlert';
 import { UnsavedChangesProvider } from '@/hooks/useUnsavedChanges';
+import { SpotifyPlayerProvider } from '@/hooks/useSpotifyPlayer';
 
 export const metadata: Metadata = {
   title: 'd100',
@@ -31,12 +32,14 @@ export default function RootLayout({
         <AlertProvider>
           <UserProvider>
             <CampaignProvider>
-              <UnsavedChangesProvider>
-                <AppWrapper>
-                  <Navbar />
-                  {children}
-                </AppWrapper>
-              </UnsavedChangesProvider>
+              <SpotifyPlayerProvider>
+                <UnsavedChangesProvider>
+                  <AppWrapper>
+                    <Navbar />
+                    {children}
+                  </AppWrapper>
+                </UnsavedChangesProvider>
+              </SpotifyPlayerProvider>
             </CampaignProvider>
           </UserProvider>
         </AlertProvider>

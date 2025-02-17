@@ -8,4 +8,10 @@ export interface UserBase {
 export interface User extends UserBase {
   campaignIds: string[];
   createdAt: number;
+  spotifyRefreshToken?: string;
+}
+
+export interface SpotifyAccessToken {
+  token: string;
+  expiresAt: number;
 }

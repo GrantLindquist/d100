@@ -47,6 +47,7 @@ const CreateCampaignModal = () => {
               },
             ],
             pendingPlayers: [],
+            settings: {},
           };
           const baseCollection: Collection = {
             id: baseCollectionId,

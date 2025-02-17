@@ -5,12 +5,13 @@ import {
   Button,
   Menu,
   MenuItem,
+  Stack,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import { useState } from 'react';
-import { clearSession } from '@/utils/userSession';
+import { clearCookie } from '@/utils/cookie';
 import db, { auth } from '@/utils/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -18,8 +19,14 @@ import { useAlert } from '@/hooks/useAlert';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useCampaign } from '@/hooks/useCampaign';
-import { arrayRemove, doc, runTransaction } from '@firebase/firestore';
+import {
+  arrayRemove,
+  doc,
+  runTransaction,
+  updateDoc,
+} from '@firebase/firestore';
 import { UserBase } from '@/types/User';
+import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 
 // TODO: Signout bug - pushing router to '/' persists collection content ???
 const UserButton = () => {
@@ -27,6 +34,8 @@ const UserButton = () => {
   const { user, signOutUser, setListening } = useUser();
   const { campaign, isUserDm } = useCampaign();
   const { displayAlert } = useAlert();
+  const { spotifyAuthenticated } = useSpotifyPlayer();
+
   const theme = useTheme();
   const displayUserName = useMediaQuery(theme.breakpoints.up('md'));
 
@@ -41,12 +50,28 @@ const UserButton = () => {
     setAnchor(null);
   };
 
+  const handleConnectSpotify = async () => {
+    try {
+      window.location.href = '/api/music/auth-music-player';
+    } catch (e: any) {
+      displayAlert({
+        message: `An error occurred while connecting your Spotify account.`,
+        isError: true,
+        errorType: e.message,
+      });
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       handleClose();
       signOutUser();
+      await updateDoc(doc(db, 'users', user!.id), {
+        spotifyRefreshToken: null,
+      });
       await signOut(auth);
-      await clearSession();
+      await clearCookie('session');
+      await clearCookie('spotify_access_token');
       router.push('/');
       setListening(false);
     } catch (e: any) {
@@ -112,6 +137,18 @@ const UserButton = () => {
             onClose={handleClose}
             disableScrollLock
           >
+            <MenuItem
+              disabled={spotifyAuthenticated}
+              onClick={handleConnectSpotify}
+            >
+              <Stack direction={'row'}>
+                <img
+                  src={'/spotify.svg'}
+                  style={{ width: 22, marginRight: 6 }}
+                />
+                {spotifyAuthenticated ? 'Connected' : 'Connect Spotify'}
+              </Stack>
+            </MenuItem>
             <MenuItem onClick={handleSignOut}>
               <LogoutIcon sx={{ width: 20, height: 20 }} />
               &nbsp; Sign out
