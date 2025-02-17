@@ -1,15 +1,30 @@
 env:
   - variable: NEXT_PUBLIC_APP_URL
     value: https://d100--d100-7cb14.us-central1.hosted.app
+    availability:
+      - BUILD
+      - RUNTIME
 
   - variable: SPOTIFY_CLIENT_ID
     value: bf0cd101fbb34766ae9f59ec48cb43be
+    availability:
+      - BUILD
+      - RUNTIME
 
   - variable: SPOTIFY_CLIENT_SECRET
     secret: projects/4289428408/secrets/SPOTIFY_CLIENT_SECRET/versions/latest
+    availability:
+      - BUILD
+      - RUNTIME
 
   - variable: FIREBASE_PRIVATE_KEY
     secret: projects/4289428408/secrets/FIREBASE_PRIVATE_KEY/versions/latest
+    availability:
+      - BUILD
+      - RUNTIME
 
   - variable: FIREBASE_CLIENT_EMAIL
     secret: projects/4289428408/secrets/FIREBASE_CLIENT_EMAIL/versions/latest
+    availability:
+      - BUILD
+      - RUNTIME

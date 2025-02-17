@@ -1,7 +1,6 @@
 import { generateRandomString } from '@/utils/uuid';
 import { NextResponse } from 'next/server';
 
-// TODO: Make sure this works in prod (adjust urls for both envs)
 export async function GET() {
   const params = new URLSearchParams({
     response_type: 'code',
