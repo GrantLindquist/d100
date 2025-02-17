@@ -5,8 +5,9 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   const params = new URLSearchParams({
     response_type: 'code',
-    client_id: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!,
-    scope: 'user-read-private',
+    client_id: process.env.SPOTIFY_CLIENT_ID!,
+    scope:
+      'user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control playlist-read-private playlist-read-collaborative user-read-playback-position streaming',
     redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/music/register-token`,
     state: generateRandomString(16),
     show_dialog: 'true',

@@ -1,7 +1,9 @@
+import 'server-only';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getCookie, setCookie } from '@/utils/cookie';
+import { SpotifyAccessToken, UserBase } from '@/types/User';
 import { adminDB } from '@/utils/firebase-admin';
-import { UserBase } from '@/types/User';
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code');
@@ -11,18 +13,18 @@ export async function GET(req: NextRequest) {
     throw new Error('Invalid state -- access denied.');
   }
 
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/music/register-token`;
   const authOptions = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       Authorization: `Basic ${Buffer.from(
-        `${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID}:${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET}`
+        `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
       ).toString('base64')}`,
     },
     body: new URLSearchParams({
       code: code!,
-      redirect_uri: redirectUri,
+      // redirect_uri is only used for verification here - the endpoint will actually redirect to /campaigns
+      redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/music/register-token`,
       grant_type: 'authorization_code',
     }),
   };
@@ -32,7 +34,10 @@ export async function GET(req: NextRequest) {
       authOptions
     );
     const tokenData = await tokenResponse.json();
-    await setCookie('spotify_access_token', tokenData.access_token);
+    await setCookie('spotify_access_token', {
+      token: tokenData.access_token,
+      expiresAt: Date.now() + tokenData.expires_in * 1000,
+    } as SpotifyAccessToken);
 
     const userSession: { obj: UserBase } = await getCookie('session');
     await adminDB

@@ -130,7 +130,7 @@ const PlayerList = (props: { players: UserBase[] }) => {
 
 const SettingsButton = () => {
   const { campaign } = useCampaign();
-  const { spotifyAuthenticated, displayPlayer, setDisplayPlayer } =
+  const { spotifyAuthenticated, displayPlayer, toggleDisplayPlayer } =
     useSpotifyPlayer();
 
   const [anchor, setAnchor] = useState(null);
@@ -220,7 +220,7 @@ const SettingsButton = () => {
           </Paper>
         </Box>
         {spotifyAuthenticated && (
-          <MenuItem onClick={() => setDisplayPlayer(!displayPlayer)}>
+          <MenuItem onClick={() => toggleDisplayPlayer(!displayPlayer)}>
             <Stack direction={'row'}>
               <img src={'/spotify.svg'} style={{ width: 24, marginRight: 6 }} />
               {displayPlayer ? 'Hide Player' : 'Show Player'}

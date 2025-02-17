@@ -19,7 +19,12 @@ import { useAlert } from '@/hooks/useAlert';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useCampaign } from '@/hooks/useCampaign';
-import { arrayRemove, doc, runTransaction } from '@firebase/firestore';
+import {
+  arrayRemove,
+  doc,
+  runTransaction,
+  updateDoc,
+} from '@firebase/firestore';
 import { UserBase } from '@/types/User';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 
@@ -61,8 +66,12 @@ const UserButton = () => {
     try {
       handleClose();
       signOutUser();
+      await updateDoc(doc(db, 'users', user!.id), {
+        spotifyRefreshToken: null,
+      });
       await signOut(auth);
       await clearCookie('session');
+      await clearCookie('spotify_access_token');
       router.push('/');
       setListening(false);
     } catch (e: any) {

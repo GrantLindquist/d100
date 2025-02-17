@@ -1,6 +1,6 @@
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { initializeApp } from 'firebase/app';
+import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getStorage } from '@firebase/storage';
 
 const firebaseConfig = {
@@ -13,7 +13,8 @@ const firebaseConfig = {
   measurementId: 'G-01C1C9G01B',
 };
 
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
 const databaseId =
   process.env.NODE_ENV === 'development' ? 'env-dev' : '(default)';
 const db = getFirestore(app, databaseId);

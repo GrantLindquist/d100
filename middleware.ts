@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 import { getCookie } from '@/utils/cookie';
 
 // Reroutes unauthenticated users
-// TODO: Create middleware that refreshes spotify token if expired after 1 hour
 export async function middleware(request: NextRequest) {
   const result = await getCookie('session');
   if (result?.obj) {
