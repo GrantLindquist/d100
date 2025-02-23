@@ -1,3 +1,5 @@
+import { SpotifyBase } from '@/types/Spotify';
+
 export type UnitType = 'article' | 'quest' | 'collection';
 export const UnitEnum = ['article', 'quest', 'collection'];
 export const UnitDisplayValues = {
@@ -14,6 +16,7 @@ export interface Unit {
   breadcrumbs: Breadcrumb[];
   hidden: boolean;
   lastEdited?: number;
+  spotifyItems?: SpotifyBase[];
 }
 
 export interface Collection extends Unit {

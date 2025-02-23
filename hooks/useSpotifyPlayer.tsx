@@ -1,30 +1,31 @@
 'use client';
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { useCampaign } from '@/hooks/useCampaign';
 import { useUser } from '@/hooks/useUser';
-import { doc, updateDoc } from '@firebase/firestore';
+import { doc, getDoc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import SpotifyPlayer from '@/components/SpotifyPlayer';
 
 const SpotifyPlayerContext = createContext<{
   spotifyAuthenticated: boolean;
   displayPlayer: boolean;
-  toggleDisplayPlayer: Function;
+  setDisplayPlayer: Function;
+  toggleDisplayPlayerSetting: Function;
+  activeUnitId: string | null;
+  setActiveUnitId: Function;
 }>({
   spotifyAuthenticated: false,
   displayPlayer: false,
-  toggleDisplayPlayer: () => {},
+  setDisplayPlayer: () => {
+  },
+  toggleDisplayPlayerSetting: () => {
+  },
+  activeUnitId: null,
+  setActiveUnitId: () => {
+  },
 });
 
-export const SpotifyPlayerProvider = ({
-  children,
-}: {
+export const SpotifyPlayerProvider = ({ children }: {
   children: ReactNode;
 }) => {
   const { user } = useUser();
@@ -32,10 +33,9 @@ export const SpotifyPlayerProvider = ({
 
   const [displayPlayer, setDisplayPlayer] = useState(false);
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
-  const [trackUris, setTrackUris] = useState<string[]>([
-    'spotify:track:0RgjEkSbeuStKfT2Pa4Zai',
-    'spotify:track:6Ljp2oy8zR8EhutqBdLYnt',
-  ]);
+  const [trackUris, setTrackUris] = useState<string[]>([]);
+  const [activeUnitId, setActiveUnitId] = useState<string | null>(null);
+  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     user && setSpotifyAuthenticated(Boolean(user.spotifyRefreshToken));
@@ -43,10 +43,29 @@ export const SpotifyPlayerProvider = ({
 
   useEffect(() => {
     campaign &&
-      setDisplayPlayer(Boolean(campaign.settings.displaySpotifyPlayer));
+    setDisplayPlayer(Boolean(campaign.settings.displaySpotifyPlayer));
   }, [campaign?.id]);
 
-  const toggleDisplayPlayer = async () => {
+  useEffect(() => {
+    if (activeUnitId) {
+      async function fetchSpotifyItems() {
+        const unitDocSnap = await getDoc(doc(db, 'units', activeUnitId));
+        if (unitDocSnap.exists()) {
+          const data = unitDocSnap.data();
+          const spotifyIds = [];
+          for (let item of data.spotifyItems) {
+            spotifyIds.push(`spotify:${item.type}:${item.id}`);
+          }
+          setTrackUris(spotifyIds);
+          setPlaying(true);
+        }
+      }
+
+      fetchSpotifyItems();
+    }
+  }, [activeUnitId]);
+
+  const toggleDisplayPlayerSetting = async () => {
     await updateDoc(doc(db, 'campaigns', campaign!.id), {
       settings: {
         ...campaign!.settings,
@@ -58,10 +77,17 @@ export const SpotifyPlayerProvider = ({
 
   return (
     <SpotifyPlayerContext.Provider
-      value={{ spotifyAuthenticated, displayPlayer, toggleDisplayPlayer }}
+      value={{
+        spotifyAuthenticated,
+        displayPlayer,
+        setDisplayPlayer,
+        toggleDisplayPlayerSetting,
+        activeUnitId,
+        setActiveUnitId,
+      }}
     >
       {spotifyAuthenticated && displayPlayer && (
-        <SpotifyPlayer trackUris={trackUris} />
+        <SpotifyPlayer trackUris={trackUris} playing={playing} />
       )}
       {children}
     </SpotifyPlayerContext.Provider>
@@ -72,7 +98,7 @@ export const useSpotifyPlayer = () => {
   const context = useContext(SpotifyPlayerContext);
   if (!context)
     throw new Error(
-      'useSpotifyPlayer must be used inside SpotifyPlayerProvider'
+      'useSpotifyPlayer must be used inside SpotifyPlayerProvider',
     );
   return context;
 };

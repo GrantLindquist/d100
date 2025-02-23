@@ -1,15 +1,5 @@
 'use client';
-import {
-  Avatar,
-  Box,
-  IconButton,
-  Menu,
-  MenuItem,
-  Paper,
-  Stack,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Avatar, Box, IconButton, Menu, MenuItem, Paper, Stack, Tooltip, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useCampaign } from '@/hooks/useCampaign';
@@ -17,12 +7,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { useUser } from '@/hooks/useUser';
 import { UserBase } from '@/types/User';
-import {
-  arrayRemove,
-  doc,
-  onSnapshot,
-  runTransaction,
-} from '@firebase/firestore';
+import { arrayRemove, doc, onSnapshot, runTransaction } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useAlert } from '@/hooks/useAlert';
@@ -130,7 +115,7 @@ const PlayerList = (props: { players: UserBase[] }) => {
 
 const SettingsButton = () => {
   const { campaign } = useCampaign();
-  const { spotifyAuthenticated, displayPlayer, toggleDisplayPlayer } =
+  const { spotifyAuthenticated, displayPlayer, toggleDisplayPlayerSetting } =
     useSpotifyPlayer();
 
   const [anchor, setAnchor] = useState(null);
@@ -146,7 +131,7 @@ const SettingsButton = () => {
           if (campaignDocSnap.exists()) {
             setPlayers(campaignDocSnap.data().players);
           }
-        }
+        },
       );
 
       return () => unsubscribe();
@@ -220,7 +205,7 @@ const SettingsButton = () => {
           </Paper>
         </Box>
         {spotifyAuthenticated && (
-          <MenuItem onClick={() => toggleDisplayPlayer(!displayPlayer)}>
+          <MenuItem onClick={() => toggleDisplayPlayerSetting(!displayPlayer)}>
             <Stack direction={'row'}>
               <img src={'/spotify.svg'} style={{ width: 24, marginRight: 6 }} />
               {displayPlayer ? 'Hide Player' : 'Show Player'}

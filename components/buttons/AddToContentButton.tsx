@@ -4,6 +4,7 @@ import { Article, Quest } from '@/types/Unit';
 import React, { useState } from 'react';
 import { doc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
+import ThemeTrackModal from '@/components/modals/ThemeTrackModal';
 
 // TODO: Keep scrollbar visible when menu opens
 const AddToContentButton = (props: {
@@ -47,9 +48,7 @@ const AddToContentButton = (props: {
         >
           Reference Image
         </MenuItem>
-        <MenuItem disabled onClick={() => setAnchorEl(null)}>
-          Theme Track
-        </MenuItem>
+        <ThemeTrackModal unitId={props.unit.id} />
       </Menu>
     </>
   );

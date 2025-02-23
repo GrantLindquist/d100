@@ -1,23 +1,28 @@
 import { getCookie } from '@/utils/cookie';
-import { CallbackState, default as Player } from 'react-spotify-web-playback';
+import { default as Player } from 'react-spotify-web-playback';
 import { useEffect, useState } from 'react';
 import { SpotifyAccessToken } from '@/types/User';
-import { Box, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
 
-const SpotifyPlayer = (props: { trackUris: string[] }) => {
-  const theme = useTheme();
-  console.log(theme.palette.primary.main);
+export const refreshAccessToken = async () => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/music/refresh-token`,
+  );
+  return await response.json();
+};
 
+// TODO: Spotify auth fails when first logging in, but works after refreshing
+const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
   const [accessToken, setAccessToken] = useState<SpotifyAccessToken | null>(
     null,
   );
-  const [playerState, setPlayerState] = useState<CallbackState | null>(null);
 
   useEffect(() => {
     async function initAccessToken() {
       const token = await getCookie('spotify_access_token');
       if (Date.now() > token.obj.expiresAt) {
-        refreshToken();
+        const data = await refreshAccessToken();
+        setAccessToken(data);
       } else {
         setAccessToken(token.obj);
       }
@@ -25,15 +30,6 @@ const SpotifyPlayer = (props: { trackUris: string[] }) => {
 
     initAccessToken();
   }, []);
-
-  const refreshToken = async () => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/music/refresh-token`,
-    );
-    const data = await response.json();
-    console.log(data);
-    setAccessToken(data);
-  };
 
   return (
     <Box
@@ -58,19 +54,19 @@ const SpotifyPlayer = (props: { trackUris: string[] }) => {
         <Player
           token={accessToken.token}
           uris={props.trackUris}
-          callback={(state) => {
+          callback={() => {
             if (Date.now() > accessToken.expiresAt) {
-              refreshToken();
+              refreshAccessToken();
             }
-            setPlayerState(state);
           }}
+          play={props.playing}
           inlineVolume={false}
           styles={{
             activeColor: '#fff',
             bgColor: '#111',
             color: '#fff',
             loaderColor: '#fff',
-            sliderColor: theme.palette.primary.main,
+            sliderColor: '#ff6a48',
             trackArtistColor: 'grey',
             trackNameColor: '#fff',
           }}
