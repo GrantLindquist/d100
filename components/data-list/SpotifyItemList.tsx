@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Divider, Stack, TextField } from '@mui/material';
+import { Box, Divider, Stack, TextField, Typography } from '@mui/material';
 import { useAlert } from '@/hooks/useAlert';
 import { getCookie } from '@/utils/cookie';
 import { refreshAccessToken } from '@/components/SpotifyPlayer';
@@ -53,7 +53,7 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
     }
   };
 
-  return (<Box>
+  return (<Box px={1} height={'60vh'}>
     {!props.spotifyItems &&
       <TextField
         variant={'outlined'}
@@ -62,7 +62,7 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
         fullWidth
         placeholder={'Search'}
         sx={{
-          marginBottom: 5,
+          marginBottom: 2,
           backgroundColor: '#222222',
           borderRadius: 1,
           color: '#DDDDDD',
@@ -70,23 +70,30 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
         }}
       />
     }
-    {(props.spotifyItems || data).map((result: SpotifyBase) => <Box key={result.id}>
-      <Stack direction={'row'}>
-        <Stack direction={'column'}>
-          <Box
-            onMouseEnter={() => setHoveredItemId(result.id)}
-            onMouseLeave={() => setHoveredItemId(null)}
-          >
-            <SpotifyItemTabMemo
-              item={result}
-              displayModifyButton={result.id === hoveredItemId}
-              updateState={props.updateState}
-              isDeletingItem={Boolean(props.isDeletingItem)} />
-          </Box>
+    {!props.spotifyItems && !searchTerm ?
+      <Box textAlign={'center'}>
+        <Typography color={'grey'} variant={'subtitle2'} px={4}>
+          Try searching for tracks, albums, or playlists to add to associate with this article.
+        </Typography>
+      </Box> : <>{(props.spotifyItems || data).map((result: SpotifyBase) => <Box
+        key={result.id}>
+        <Stack direction={'row'}>
+          <Stack direction={'column'} width={'100%'}>
+            <Box
+              onMouseEnter={() => setHoveredItemId(result.id)}
+              onMouseLeave={() => setHoveredItemId(null)}
+            >
+              <SpotifyItemTabMemo
+                item={result}
+                displayModifyButton={result.id === hoveredItemId}
+                updateState={props.updateState}
+                isDeletingItem={Boolean(props.isDeletingItem)} />
+            </Box>
+          </Stack>
         </Stack>
-      </Stack>
-      <Divider />
-    </Box>)}
+        <Divider />
+      </Box>)}</>}
+
   </Box>);
 };
 export default SpotifyItemList;

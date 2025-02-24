@@ -7,7 +7,7 @@ import { doc, getDoc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { SpotifyBase } from '@/types/Spotify';
 
-// TODO: Add drag and drop
+// TODO: Organize song order by drag and drop
 const ThemeTrackModal = (props: { unitId: string }) => {
   const { displayAlert } = useAlert();
 
@@ -63,11 +63,11 @@ const ThemeTrackModal = (props: { unitId: string }) => {
           ...MODAL_STYLE,
           width: '80%',
         }}>
-          <Typography variant="h6" fontWeight={BOLD_FONT_WEIGHT}>
-            Add Theme Track
+          <Typography variant="h4" fontWeight={BOLD_FONT_WEIGHT} py={2} px={1}>
+            Theme Tracks
           </Typography>
           <Grid2 container spacing={2}>
-            <Grid2 size={5}>
+            <Grid2 size={6}>
               <Box sx={{
                 maxHeight: '60vh',
                 overflowY: 'auto',
@@ -75,7 +75,10 @@ const ThemeTrackModal = (props: { unitId: string }) => {
                 <SpotifyItemList updateState={modifyTrackList} />
               </Box>
             </Grid2>
-            <Grid2 size={7}>
+            <Grid2 size={6}>
+              <Typography variant={'subtitle2'} color={'grey'} mt={-3}>
+                Saved Tracks
+              </Typography>
               <SpotifyItemList isDeletingItem spotifyItems={spotifyItems} updateState={modifyTrackList} />
             </Grid2>
           </Grid2>

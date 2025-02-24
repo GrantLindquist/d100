@@ -4,7 +4,6 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { memo } from 'react';
 import { SpotifyBase } from '@/types/Spotify';
 
-// TODO: Get flexgrow working here
 const SpotifyItemTab = (props: {
   item: SpotifyBase,
   displayModifyButton: boolean,

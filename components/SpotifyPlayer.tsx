@@ -1,5 +1,5 @@
 import { getCookie } from '@/utils/cookie';
-import { default as Player } from 'react-spotify-web-playback';
+import { default as Player, spotifyApi } from 'react-spotify-web-playback';
 import { useEffect, useState } from 'react';
 import { SpotifyAccessToken } from '@/types/User';
 import { Box } from '@mui/material';
@@ -11,7 +11,6 @@ export const refreshAccessToken = async () => {
   return await response.json();
 };
 
-// TODO: Spotify auth fails when first logging in, but works after refreshing
 const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
   const [accessToken, setAccessToken] = useState<SpotifyAccessToken | null>(
     null,
@@ -20,7 +19,7 @@ const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
   useEffect(() => {
     async function initAccessToken() {
       const token = await getCookie('spotify_access_token');
-      if (Date.now() > token.obj.expiresAt) {
+      if (!token || Date.now() > token.obj.expiresAt) {
         const data = await refreshAccessToken();
         setAccessToken(data);
       } else {
@@ -35,7 +34,7 @@ const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
     <Box
       sx={{
         position: 'fixed',
-        bottom: 0,
+        bottom: -1,
         width: {
           xs: '100%',
           sm: '80%',
@@ -47,6 +46,9 @@ const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
           md: 'translateX(40%)',
           lg: 'translateX(50%)',
         },
+        border: 'solid 2px #222',
+        borderTopRightRadius: 3,
+        borderTopLeftRadius: 3,
         zIndex: 1000,
       }}
     >
@@ -54,9 +56,13 @@ const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
         <Player
           token={accessToken.token}
           uris={props.trackUris}
-          callback={() => {
+          callback={async (state) => {
             if (Date.now() > accessToken.expiresAt) {
-              refreshAccessToken();
+              const data = await refreshAccessToken();
+              setAccessToken(data);
+            }
+            if (state.currentDeviceId !== '' && state.repeat !== 'context') {
+              await spotifyApi.repeat(accessToken.token, 'context');
             }
           }}
           play={props.playing}
@@ -65,8 +71,9 @@ const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
             activeColor: '#fff',
             bgColor: '#111',
             color: '#fff',
-            loaderColor: '#fff',
+            loaderColor: '#ff6a48',
             sliderColor: '#ff6a48',
+            sliderHandleColor: '#fff',
             trackArtistColor: 'grey',
             trackNameColor: '#fff',
           }}

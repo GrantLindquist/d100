@@ -36,7 +36,7 @@ export async function GET() {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       Authorization: `Basic ${Buffer.from(
-        `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
+        `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,
       ).toString('base64')}`,
     },
     body: new URLSearchParams({
@@ -46,12 +46,14 @@ export async function GET() {
   };
   const tokenResponse = await fetch(
     'https://accounts.spotify.com/api/token',
-    options
+    options,
   );
   const tokenData = await tokenResponse.json();
-  await setCookie('spotify_access_token', {
+  const token: SpotifyAccessToken = {
     token: tokenData.access_token,
     expiresAt: Date.now() + tokenData.expires_in * 1000,
-  } as SpotifyAccessToken);
-  return NextResponse.json(tokenData.access_token);
+  };
+
+  await setCookie('spotify_access_token', token);
+  return NextResponse.json(token);
 }

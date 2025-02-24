@@ -47,22 +47,20 @@ export const SpotifyPlayerProvider = ({ children }: {
   }, [campaign?.id]);
 
   useEffect(() => {
-    if (activeUnitId) {
-      async function fetchSpotifyItems() {
-        const unitDocSnap = await getDoc(doc(db, 'units', activeUnitId));
-        if (unitDocSnap.exists()) {
-          const data = unitDocSnap.data();
-          const spotifyIds = [];
-          for (let item of data.spotifyItems) {
-            spotifyIds.push(`spotify:${item.type}:${item.id}`);
-          }
-          setTrackUris(spotifyIds);
-          setPlaying(true);
+    async function fetchSpotifyItems(unitId: string) {
+      const unitDocSnap = await getDoc(doc(db, 'units', unitId));
+      if (unitDocSnap.exists()) {
+        const data = unitDocSnap.data();
+        const spotifyIds = [];
+        for (let item of data.spotifyItems) {
+          spotifyIds.push(`spotify:${item.type}:${item.id}`);
         }
+        setTrackUris(spotifyIds);
+        setPlaying(true);
       }
-
-      fetchSpotifyItems();
     }
+
+    activeUnitId && fetchSpotifyItems(activeUnitId);
   }, [activeUnitId]);
 
   const toggleDisplayPlayerSetting = async () => {
