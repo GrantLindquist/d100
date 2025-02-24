@@ -1,31 +1,11 @@
 'use client';
 
-import {
-  Box,
-  Container,
-  Grid,
-  IconButton,
-  Stack,
-  Tooltip,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Box, Container, Grid, IconButton, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 import { Article, Breadcrumb, ImageUrl, Quest } from '@/types/Unit';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import {
-  arrayRemove,
-  arrayUnion,
-  doc,
-  onSnapshot,
-  updateDoc,
-} from '@firebase/firestore';
+import { arrayRemove, arrayUnion, doc, onSnapshot, updateDoc } from '@firebase/firestore';
 import db, { storage } from '@/utils/firebase';
-import {
-  deleteObject,
-  getDownloadURL,
-  ref,
-  uploadBytes,
-} from '@firebase/storage';
+import { deleteObject, getDownloadURL, ref, uploadBytes } from '@firebase/storage';
 import { generateUUID } from '@/utils/uuid';
 import { useCampaign } from '@/hooks/useCampaign';
 import ImageList from '@/components/content/ImageList';
@@ -36,12 +16,7 @@ import { usePathname } from 'next/navigation';
 import CheckIcon from '@mui/icons-material/Check';
 import ArticleAside from '@/components/content/ArticleAside';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import {
-  BubbleMenu,
-  EditorContent,
-  useEditor,
-  useEditorState,
-} from '@tiptap/react';
+import { BubbleMenu, EditorContent, useEditor, useEditorState } from '@tiptap/react';
 import Bulletlist from '@tiptap/extension-bullet-list';
 import Document from '@tiptap/extension-document';
 import HardBreak from '@tiptap/extension-hard-break';
@@ -65,6 +40,8 @@ import Highlight from '@tiptap/extension-highlight';
 import FileDropzone from '@/components/content/text-editor/FileDropzone';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import AddToContentButton from '@/components/buttons/AddToContentButton';
+import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
+import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
@@ -82,17 +59,20 @@ export const PageContent = () => {
   );
 };
 
+// TODO: Make floating buttons more pleasant
 export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
-  const [unit, setUnit] = useState<Article | Quest | null>(null);
-  const [sectionTitles, setSectionTitles] = useState<string[]>([]);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { isUnsavedChanges, setUnsavedChanges } = useUnsavedChanges();
   const { isUserDm, campaign, setBreadcrumbs } = useCampaign();
   const { displayAlert } = useAlert();
+  const { activeUnitId, setActiveUnitId } = useSpotifyPlayer();
   const pathname = usePathname();
   const theme = useTheme();
+
+  const [unit, setUnit] = useState<Article | Quest | null>(null);
+  const [sectionTitles, setSectionTitles] = useState<string[]>([]);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // TODO: Focus editor on create
   useEffect(() => {
@@ -125,7 +105,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
             setUnit(unitDocSnap.data() as Article | Quest);
             setBreadcrumbs(unitDocSnap.data().breadcrumbs as Breadcrumb[]);
           }
-        }
+        },
       );
       return () => {
         unsubscribe();
@@ -143,8 +123,8 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
       Highlight.configure({
         HTMLAttributes: !props.displayHiddenMarks
           ? {
-              class: 'hidden',
-            }
+            class: 'hidden',
+          }
           : {},
       }),
       HardBreak,
@@ -324,8 +304,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
       });
     }
   };
-
-  // console.log(editor?.getJSON().content);
 
   return (
     <>
@@ -517,6 +495,17 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                     </IconButton>
                   </span>
                 </Tooltip>
+                {unit.spotifyItems && unit.spotifyItems.length >= 0 && (
+                  <Tooltip title={`Play Theme Tracks`} placement={'left'}>
+                  <span>
+                    <IconButton
+                      size="large"
+                      onClick={() => setActiveUnitId(unit.id)}
+                    >
+                     <PlaylistPlayIcon style={unit.id === activeUnitId ? { color: theme.palette.primary.main } : {}} />
+                    </IconButton>
+                  </span>
+                  </Tooltip>)}
                 <AddToContentButton
                   unit={unit}
                   handleAddImage={handleAddImage}

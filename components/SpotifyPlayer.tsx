@@ -1,23 +1,27 @@
 import { getCookie } from '@/utils/cookie';
-import { CallbackState, default as Player } from 'react-spotify-web-playback';
+import { default as Player, spotifyApi } from 'react-spotify-web-playback';
 import { useEffect, useState } from 'react';
 import { SpotifyAccessToken } from '@/types/User';
-import { Box, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
 
-const SpotifyPlayer = (props: { trackUris: string[] }) => {
-  const theme = useTheme();
-  console.log(theme.palette.primary.main);
+export const refreshAccessToken = async () => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/music/refresh-token`,
+  );
+  return await response.json();
+};
 
+const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
   const [accessToken, setAccessToken] = useState<SpotifyAccessToken | null>(
     null,
   );
-  const [playerState, setPlayerState] = useState<CallbackState | null>(null);
 
   useEffect(() => {
     async function initAccessToken() {
       const token = await getCookie('spotify_access_token');
-      if (Date.now() > token.obj.expiresAt) {
-        refreshToken();
+      if (!token || Date.now() > token.obj.expiresAt) {
+        const data = await refreshAccessToken();
+        setAccessToken(data);
       } else {
         setAccessToken(token.obj);
       }
@@ -26,20 +30,11 @@ const SpotifyPlayer = (props: { trackUris: string[] }) => {
     initAccessToken();
   }, []);
 
-  const refreshToken = async () => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/music/refresh-token`,
-    );
-    const data = await response.json();
-    console.log(data);
-    setAccessToken(data);
-  };
-
   return (
     <Box
       sx={{
         position: 'fixed',
-        bottom: 0,
+        bottom: -1,
         width: {
           xs: '100%',
           sm: '80%',
@@ -51,6 +46,9 @@ const SpotifyPlayer = (props: { trackUris: string[] }) => {
           md: 'translateX(40%)',
           lg: 'translateX(50%)',
         },
+        border: 'solid 2px #222',
+        borderTopRightRadius: 3,
+        borderTopLeftRadius: 3,
         zIndex: 1000,
       }}
     >
@@ -58,19 +56,24 @@ const SpotifyPlayer = (props: { trackUris: string[] }) => {
         <Player
           token={accessToken.token}
           uris={props.trackUris}
-          callback={(state) => {
+          callback={async (state) => {
             if (Date.now() > accessToken.expiresAt) {
-              refreshToken();
+              const data = await refreshAccessToken();
+              setAccessToken(data);
             }
-            setPlayerState(state);
+            if (state.currentDeviceId !== '' && state.repeat !== 'context') {
+              await spotifyApi.repeat(accessToken.token, 'context');
+            }
           }}
+          play={props.playing}
           inlineVolume={false}
           styles={{
             activeColor: '#fff',
             bgColor: '#111',
             color: '#fff',
-            loaderColor: '#fff',
-            sliderColor: theme.palette.primary.main,
+            loaderColor: '#ff6a48',
+            sliderColor: '#ff6a48',
+            sliderHandleColor: '#fff',
             trackArtistColor: 'grey',
             trackNameColor: '#fff',
           }}

@@ -10,6 +10,7 @@ import { doc, updateDoc } from '@firebase/firestore';
 import { useUser } from '@/hooks/useUser';
 import db from '@/utils/firebase';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 
 export const outfit = Outfit({ subsets: ['latin'] });
 
@@ -19,6 +20,7 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
   const { isUnsavedChanges, setUnsavedChanges } = useUnsavedChanges();
   const { user } = useUser();
   const { campaign, setCampaignId } = useCampaign();
+  const { setDisplayPlayer } = useSpotifyPlayer();
   const url = pathname.split('/').slice(1);
 
   useEffect(() => {
@@ -52,6 +54,7 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
       }
     } else {
       setCampaignId(null);
+      setDisplayPlayer(false);
     }
   }, [pathname, user]);
 
