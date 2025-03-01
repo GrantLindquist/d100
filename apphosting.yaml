@@ -1,6 +1,6 @@
 env:
   - variable: NEXT_PUBLIC_APP_URL
-    value: https://d100--d100-7cb14.us-central1.hosted.app
+    value: https://d100.space
     availability:
       - BUILD
       - RUNTIME
