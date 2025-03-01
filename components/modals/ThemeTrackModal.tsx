@@ -80,10 +80,11 @@ const ThemeTrackModal = (props: { unitId: string }) => {
               </Box>
             </Grid2>
             <Grid2 size={6}>
-              <Typography variant={'subtitle2'} color={'grey'} mt={-3}>
-                Saved Tracks
-              </Typography>
-              <SpotifyItemList isDeletingItem spotifyItems={spotifyItems} updateState={modifyTrackList} />
+              {spotifyItems.length > 0 && <>
+                <Typography variant={'subtitle2'} color={'grey'} mt={-3}>
+                  Saved Tracks
+                </Typography>
+                <SpotifyItemList isDeletingItem spotifyItems={spotifyItems} updateState={modifyTrackList} /></>}
             </Grid2>
           </Grid2>
         </Box>

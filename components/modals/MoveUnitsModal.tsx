@@ -15,20 +15,12 @@ import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
 import { useEffect, useState } from 'react';
 import { outfit } from '@/components/AppWrapper';
 import { Collection } from '@/types/Unit';
-import {
-  arrayRemove,
-  arrayUnion,
-  collection,
-  doc,
-  getDocs,
-  query,
-  runTransaction,
-  where,
-} from '@firebase/firestore';
+import { arrayRemove, arrayUnion, collection, doc, getDocs, query, runTransaction, where } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useCampaign } from '@/hooks/useCampaign';
 import { useAlert } from '@/hooks/useAlert';
 
+// TODO: Snackbar displays "1 item moved" regardless of how many items are selected
 const CollectionCheckbox = (props: {
   checked: boolean;
   collection: Collection;
@@ -79,7 +71,7 @@ const MoveUnitsModal = (props: {
   const [modalOpen, setModalOpen] = useState(false);
   const [collections, setCollections] = useState<Collection[] | null>(null);
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>(
-    []
+    [],
   );
 
   // TODO: Organize collections in parental order / re-create breadcrumbs on move
@@ -89,7 +81,7 @@ const MoveUnitsModal = (props: {
       const collectionQuery = query(
         collection(db, 'units'),
         where('campaignId', '==', campaignId),
-        where('type', '==', 'collection')
+        where('type', '==', 'collection'),
       );
       const collectionQuerySnap = await getDocs(collectionQuery);
       collectionQuerySnap.forEach((doc) => {
@@ -113,12 +105,12 @@ const MoveUnitsModal = (props: {
 
   const updateSelectedCollectionIds = (
     checked: boolean,
-    collectionId: string
+    collectionId: string,
   ) => {
     setSelectedCollectionIds((prev) =>
       checked
         ? [...prev, collectionId]
-        : prev.filter((id) => id !== collectionId)
+        : prev.filter((id) => id !== collectionId),
     );
   };
 
@@ -136,6 +128,7 @@ const MoveUnitsModal = (props: {
           });
         }
       });
+      console.log(selectedCollectionIds);
       displayAlert({
         message: `${selectedCollectionIds.length} items successfully moved.`,
       });

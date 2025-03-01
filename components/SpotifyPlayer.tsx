@@ -12,7 +12,6 @@ export const refreshAccessToken = async () => {
   return await response.json();
 };
 
-// TODO: Ensure that non-dm users cannot add tracks
 const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
   const [accessToken, setAccessToken] = useState<SpotifyAccessToken | null>(
     null,

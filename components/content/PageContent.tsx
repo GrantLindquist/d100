@@ -161,7 +161,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
     },
   });
 
-  // TODO: Get this working
+  // TODO: Fix placeholders
   const shouldDisplayPlaceholder = () => {
     return (
       !editor?.getJSON()?.content?.[1]?.content ||

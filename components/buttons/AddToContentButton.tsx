@@ -6,7 +6,6 @@ import { doc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import ThemeTrackModal from '@/components/modals/ThemeTrackModal';
 
-// TODO: Keep scrollbar visible when menu opens
 const AddToContentButton = (props: {
   unit: Quest | Article;
   handleAddImage: Function;
