@@ -1,15 +1,6 @@
 'use client';
 import { useUser } from '@/hooks/useUser';
-import {
-  Avatar,
-  Button,
-  Menu,
-  MenuItem,
-  Stack,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Avatar, Button, Menu, MenuItem, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useState } from 'react';
 import { clearCookie } from '@/utils/cookie';
 import db, { auth } from '@/utils/firebase';
@@ -19,16 +10,11 @@ import { useAlert } from '@/hooks/useAlert';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useCampaign } from '@/hooks/useCampaign';
-import {
-  arrayRemove,
-  doc,
-  runTransaction,
-  updateDoc,
-} from '@firebase/firestore';
+import { arrayRemove, doc, runTransaction, updateDoc } from '@firebase/firestore';
 import { UserBase } from '@/types/User';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 
-// TODO: Signout bug - pushing router to '/' persists collection content ???
+// TODO: Replace each img tag with Next Image
 const UserButton = () => {
   const router = useRouter();
   const { user, signOutUser, setListening } = useUser();
@@ -66,6 +52,7 @@ const UserButton = () => {
     try {
       handleClose();
       signOutUser();
+      setListening(false);
       await updateDoc(doc(db, 'users', user!.id), {
         spotifyRefreshToken: null,
       });
@@ -73,7 +60,6 @@ const UserButton = () => {
       await clearCookie('session');
       await clearCookie('spotify_access_token');
       router.push('/');
-      setListening(false);
     } catch (e: any) {
       displayAlert({
         message: 'An error occurred while signing out.',
