@@ -1,11 +1,7 @@
 'use client';
 import { Box, Typography } from '@mui/material';
 import { useUser } from '@/hooks/useUser';
-import {
-  getAdditionalUserInfo,
-  GoogleAuthProvider,
-  signInWithPopup,
-} from 'firebase/auth';
+import { getAdditionalUserInfo, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import db, { auth } from '@/utils/firebase';
 import { User, UserBase } from '@/types/User';
 import { doc, setDoc } from '@firebase/firestore';
@@ -17,6 +13,7 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { outfit } from '@/components/AppWrapper';
 import RoundButton from '@/components/buttons/RoundButton';
 
+// TODO: Fix bug where sign-in page is shown before user session is received
 export default function AuthPage() {
   const { user, setListening } = useUser();
   const { displayAlert } = useAlert();

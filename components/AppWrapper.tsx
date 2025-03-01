@@ -72,11 +72,15 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
       },
     },
     components: {
+      MuiMenu: {
+        defaultProps: {
+          disableScrollLock: true,
+        },
+      },
       MuiCssBaseline: {
         styleOverrides: {
           html: {
-            // Scrollbar styles
-            scrollbarColor: '#666666 rgba(0, 0, 0, 0)', // thumb and track colors
+            scrollbarColor: '#666666 rgba(0, 0, 0, 0)', // Scrollbar thumb and track colors
 
             '&::-webkit-scrollbar': {
               width: '8px', // Width of the scrollbar

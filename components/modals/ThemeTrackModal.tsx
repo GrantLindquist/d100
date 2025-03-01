@@ -6,10 +6,14 @@ import { useAlert } from '@/hooks/useAlert';
 import { doc, getDoc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { SpotifyBase } from '@/types/Spotify';
+import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
+import { useCampaign } from '@/hooks/useCampaign';
 
 // TODO: Organize song order by drag and drop
 const ThemeTrackModal = (props: { unitId: string }) => {
   const { displayAlert } = useAlert();
+  const { spotifyAuthenticated } = useSpotifyPlayer();
+  const { isUserDm } = useCampaign();
 
   const [open, setOpen] = useState(false);
   const [spotifyItems, setSpotifyItems] = useState<SpotifyBase[]>([]);
@@ -55,7 +59,7 @@ const ThemeTrackModal = (props: { unitId: string }) => {
 
   return (
     <>
-      <MenuItem onClick={() => setOpen(true)}>
+      <MenuItem disabled={!spotifyAuthenticated || !isUserDm} onClick={() => setOpen(true)}>
         Theme Track
       </MenuItem>
       <Modal open={open} onClose={handleUpdateTracks}>
