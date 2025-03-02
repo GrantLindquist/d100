@@ -16,7 +16,7 @@ import { usePathname } from 'next/navigation';
 import CheckIcon from '@mui/icons-material/Check';
 import ArticleAside from '@/components/content/ArticleAside';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { BubbleMenu, EditorContent, useEditor, useEditorState } from '@tiptap/react';
+import { BubbleMenu, Editor, EditorContent, useEditor, useEditorState } from '@tiptap/react';
 import Bulletlist from '@tiptap/extension-bullet-list';
 import Document from '@tiptap/extension-document';
 import HardBreak from '@tiptap/extension-hard-break';
@@ -65,16 +65,16 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
   const { isUnsavedChanges, setUnsavedChanges } = useUnsavedChanges();
   const { isUserDm, campaign, setBreadcrumbs } = useCampaign();
   const { displayAlert } = useAlert();
-  const { activeUnitId, setActiveUnitId } = useSpotifyPlayer();
+  const { activeUnitId, setActiveUnitId, displayPlayer } = useSpotifyPlayer();
   const pathname = usePathname();
   const theme = useTheme();
 
   const [unit, setUnit] = useState<Article | Quest | null>(null);
   const [sectionTitles, setSectionTitles] = useState<string[]>([]);
+  const [displayPlaceholder, setDisplayPlaceholder] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // TODO: Focus editor on create
   useEffect(() => {
     if (editor && unit?.content) {
       editor.commands.setContent(unit.content);
@@ -103,6 +103,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
         (unitDocSnap) => {
           if (unitDocSnap.exists()) {
             setUnit(unitDocSnap.data() as Article | Quest);
+            setDisplayPlaceholder(!Boolean(unitDocSnap.data().lastEdited));
             setBreadcrumbs(unitDocSnap.data().breadcrumbs as Breadcrumb[]);
           }
         },
@@ -112,6 +113,17 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
       };
     }
   }, []);
+
+  const shouldDisplayPlaceholder = (editor: Editor) => {
+    const content = editor.getJSON().content ?? [];
+    for (let i = content.length - 1; i > 0; i--) {
+      // @ts-ignore
+      if (content[i]?.content?.[0]?.text?.trim()?.length > 0) {
+        return false;
+      }
+    }
+    return true;
+  };
 
   const editor = useEditor({
     extensions: [
@@ -157,17 +169,13 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
     shouldRerenderOnTransaction: false,
     content: '',
     onUpdate: () => {
+      if (editor && !unit?.lastEdited) {
+        const result = shouldDisplayPlaceholder(editor);
+        result !== displayPlaceholder && setDisplayPlaceholder(result);
+      }
       setUnsavedChanges(true);
     },
   });
-
-  // TODO: Fix placeholders
-  const shouldDisplayPlaceholder = () => {
-    return (
-      !editor?.getJSON()?.content?.[1]?.content ||
-      editor?.getJSON()?.content?.[1]?.content?.[0]?.text?.trim().length === 0
-    );
-  };
 
   const currentEditorState = useEditorState({
     editor,
@@ -179,7 +187,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
       isHidden: ctx.editor?.isActive('highlight'),
     }),
     equalityFn: (prev, next) => {
-      if (!next || shouldDisplayPlaceholder()) {
+      if (!next) {
         return false;
       }
       return (
@@ -447,11 +455,22 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                       </BubbleMenu>
                     )}
                     <EditorContent id={'editor-content'} editor={editor} />
-                    {shouldDisplayPlaceholder() && (
+                    {displayPlaceholder && (
                       <Typography
-                        sx={{ color: 'grey', position: 'relative', top: -135 }}
+                        sx={{
+                          color: 'grey',
+                          position: 'relative',
+                          top: -136,
+                          pointerEvents: 'none',
+                          whiteSpace: 'pre-line',
+                        }}
                       >
-                        Here is my cool placeholder
+                        {`This is a${unit.type === 'quest' ? ' ' : 'n '}`}
+                        {unit.type === 'quest' ? <b>Quest</b> : <b>Article</b>}
+                        {`. Type any information you'd like inside this area.\n\n`}
+                        {`To save or edit the `}
+                        {unit.type === 'quest' ? <b>Quest</b> : <b>Article</b>}
+                        {`, use the action buttons on the bottom right.\nTry highlighting some text and experimenting with font types and headings!`}
                       </Typography>
                     )}
                     {/* @ts-ignore */}
@@ -495,7 +514,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                     </IconButton>
                   </span>
                 </Tooltip>
-                {unit.spotifyItems && unit.spotifyItems.length >= 0 && (
+                {displayPlayer && unit.spotifyItems && unit.spotifyItems.length >= 0 && (
                   <Tooltip title={`Play Theme Tracks`} placement={'left'}>
                   <span>
                     <IconButton
