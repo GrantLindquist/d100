@@ -37,7 +37,7 @@ export default function CollectionPage() {
                 setCollection(unitDocSnap.data() as Collection);
                 setBreadcrumbs(unitDocSnap.data().breadcrumbs as Breadcrumb[]);
               }
-            }
+            },
           );
           return () => {
             unsubscribe();
@@ -60,7 +60,7 @@ export default function CollectionPage() {
         }}
       >
         {displayBgImage && (
-          <img src={'/d100-grey.svg'} style={{ width: '50%' }} />
+          <img src={'/d100-grey.svg'} style={{ width: '50%', pointerEvents: 'none' }} />
         )}
       </Box>
       {collection && (

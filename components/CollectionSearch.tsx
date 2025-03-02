@@ -52,6 +52,7 @@ import { outfit } from '@/components/AppWrapper';
 import MoveUnitsModal from '@/components/modals/MoveUnitsModal';
 
 // TODO: Include sub-collections inside unit selection
+// TODO: CollectionSearch UI is buggy when loading images, horizontal scrollbar pops into view and images flicker
 const UnitTab = (props: {
   unit: Unit;
   checked?: boolean;

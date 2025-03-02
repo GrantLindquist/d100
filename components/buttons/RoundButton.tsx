@@ -4,6 +4,7 @@ import { Button, Typography, useTheme } from '@mui/material';
 const RoundButton = (props: {
   children: ReactNode;
   icon?: ReactNode;
+  disabled?: boolean;
   onClick: Function;
 }) => {
   const theme = useTheme();
@@ -12,6 +13,7 @@ const RoundButton = (props: {
       variant={'contained'}
       onClick={() => props.onClick()}
       startIcon={props.icon}
+      disabled={props.disabled}
       sx={{
         backgroundColor: '#222222',
         borderRadius: 50,
