@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { SpotifyAccessToken } from '@/types/User';
 import { Box } from '@mui/material';
 
-// TODO: Add playlists and album art
 export const refreshAccessToken = async () => {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_APP_URL}/api/music/refresh-token`,
