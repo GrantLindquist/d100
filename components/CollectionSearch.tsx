@@ -1,36 +1,10 @@
 'use client';
 
 import { ChangeEvent, ReactNode, useEffect, useState } from 'react';
-import {
-  Box,
-  Card,
-  Checkbox,
-  Grid,
-  IconButton,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Box, Card, Checkbox, Grid, IconButton, Stack, TextField, Tooltip, Typography, useTheme } from '@mui/material';
 
-import {
-  Article,
-  Collection,
-  ImageUrl,
-  Quest,
-  Unit,
-  UnitDisplayValues,
-} from '@/types/Unit';
-import {
-  arrayRemove,
-  collection,
-  doc,
-  getDocs,
-  query,
-  runTransaction,
-  where,
-} from '@firebase/firestore';
+import { Article, Collection, ImageUrl, Quest, Unit, UnitDisplayValues } from '@/types/Unit';
+import { arrayRemove, collection, doc, getDocs, query, runTransaction, where } from '@firebase/firestore';
 import db, { storage } from '@/utils/firebase';
 import CreateUnitModal from '@/components/modals/CreateUnitModal';
 import { useRouter } from 'next/navigation';
@@ -44,6 +18,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import KeyIcon from '@mui/icons-material/Key';
 import DescriptionIcon from '@mui/icons-material/Description';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import { useAlert } from '@/hooks/useAlert';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { deleteObject, listAll, ref } from '@firebase/storage';
@@ -71,7 +46,7 @@ const UnitTab = (props: {
       onClick={() =>
         !props.isEditing &&
         router.push(
-          `/campaigns/${props.unit.campaignId}/${props.unit.type}s/${props.unit.id}`
+          `/campaigns/${props.unit.campaignId}/${props.unit.type}s/${props.unit.id}`,
         )
       }
     >
@@ -84,8 +59,8 @@ const UnitTab = (props: {
           cursor: 'pointer',
           ':hover': !props.isEditing
             ? {
-                backgroundColor: 'rgba(28, 28, 28)',
-              }
+              backgroundColor: 'rgba(28, 28, 28)',
+            }
             : {},
         }}
       >
@@ -164,7 +139,7 @@ const CollectionSearch = (props: {
         for (const chunk of chunks) {
           const unitQuery = query(
             collection(db, 'units'),
-            where('id', 'in', chunk)
+            where('id', 'in', chunk),
           );
           const unitQuerySnap = await getDocs(unitQuery);
           unitQuerySnap.forEach((doc) => {
@@ -196,7 +171,7 @@ const CollectionSearch = (props: {
       setSelectedUnitIds(newSelectedUnitIds);
     } else {
       let newSelectedUnitIds = [...selectedUnitIds].filter(
-        (id) => id !== unitId
+        (id) => id !== unitId,
       );
       setSelectedUnitIds(newSelectedUnitIds);
     }
@@ -329,7 +304,7 @@ const CollectionSearch = (props: {
                   ? { xs: 1, sm: 2, md: 3 }
                   : searchResults.length
               }
-              sx={{ width: '100% ' }}
+              sx={{ width: '100%' }}
             >
               {searchResults.map((unit: Unit, index) => {
                 if (
@@ -344,13 +319,16 @@ const CollectionSearch = (props: {
                       key={index}
                       unit={unit}
                       checked={selectedUnitIds.includes(unit.id)}
-                      icon={
-                        unit.type === 'quest' ? (
-                          <KeyIcon />
-                        ) : (
-                          <DescriptionIcon />
-                        )
-                      }
+                      icon={(() => {
+                        switch (unit.type) {
+                          case 'quest':
+                            return <KeyIcon />;
+                          case 'encounter':
+                            return <AutoFixHighIcon />;
+                          default:
+                            return <DescriptionIcon />;
+                        }
+                      })()}
                       isEditing={isEditing}
                       updateState={updateSelectedUnitIds}
                       {...(unit.type === 'article' ||

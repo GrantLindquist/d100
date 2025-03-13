@@ -79,7 +79,6 @@ export const SpotifyPlayerProvider = ({ children }: {
           }
         }
         setTrackUris(spotifyIds);
-        console.log(spotifyIds);
         setPlaying(true);
       }
     }
