@@ -134,6 +134,7 @@ const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {
               logs: [],
               roundCount: 0,
               turnCount: 0,
+              initiativeOrder: [],
               hidden: true,
             } as Encounter;
           }
