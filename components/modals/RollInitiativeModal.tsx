@@ -54,15 +54,14 @@ const RollInitiativeModal = (props: { encounter: Encounter; setRoundCount: Funct
 
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState(props.encounter.tokens);
-  const itemIds = props.encounter.initiativeOrder;
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
 
     if (active.id !== over.id) {
       setItems((items) => {
-        const oldIndex = itemIds.indexOf(active.id);
-        const newIndex = itemIds.indexOf(over.id);
+        const oldIndex = items.indexOf(active.id);
+        const newIndex = items.indexOf(over.id);
 
         return arrayMove(items, oldIndex, newIndex);
       });
@@ -73,7 +72,7 @@ const RollInitiativeModal = (props: { encounter: Encounter; setRoundCount: Funct
     try {
       const roundCount = props.encounter.roundCount === 0 ? 1 : props.encounter.roundCount;
       await updateDoc(doc(db, 'units', props.encounter.id), {
-        initiativeOrder: itemIds,
+        initiativeOrder: items.map((item) => item.id),
         roundCount: roundCount,
       });
       props.setRoundCount(roundCount);
@@ -106,10 +105,7 @@ const RollInitiativeModal = (props: { encounter: Encounter; setRoundCount: Funct
               items={items}
               strategy={verticalListSortingStrategy}
             >
-              {itemIds.map((id) => {
-                const token = items.find((item) => item.id === id);
-                return token ? <SortableToken key={token.id} token={token} /> : null;
-              })}
+              {items.map((item) => <SortableToken key={item.id} token={item} />)}
             </SortableContext>
           </DndContext>
         </Box>

@@ -15,7 +15,11 @@ import RollInitiativeModal from '@/components/modals/RollInitiativeModal';
 import CreateEncounterTokenModal from '@/components/modals/CreateEncounterTokenModal';
 import DamageMenu from '@/components/DamageMenu';
 
-const DragInterface = ({ children, tokenId }: { children: ReactNode; tokenId: string }) => {
+const DragInterface = ({ children, encounter, tokenId }: {
+  children: ReactNode;
+  encounter: Encounter;
+  tokenId: string
+}) => {
 
   const theme = useTheme();
 
@@ -61,7 +65,7 @@ const DragInterface = ({ children, tokenId }: { children: ReactNode; tokenId: st
         transformOrigin={{ horizontal: 'center', vertical: 'bottom' }}
         anchorOrigin={{ horizontal: 'center', vertical: 'top' }}
       >
-        <DamageMenu inflictedTokenId={selectedId} closeMenu={() => setAnchor(null)} />
+        <DamageMenu inflictedTokenId={selectedId} encounter={encounter} closeMenu={() => setAnchor(null)} />
       </Menu>}
       <Box
         sx={{ position: 'relative' }}>
@@ -127,7 +131,8 @@ const ConditionsInterface = ({ children, conditions }: { children: ReactNode; co
         flexWrap: 'wrap',
         gap: .5,
       }}>
-        {conditions.map((condition: Condition) => <Box sx={{ backgroundColor: '#c61a09', borderRadius: 1 }}>
+        {conditions.map((condition: Condition, index) => <Box key={`${condition.name}-${index}`}
+                                                              sx={{ backgroundColor: '#8B0000', borderRadius: 1 }}>
           <Typography variant={'subtitle2'} px={.5}>{condition.name}</Typography></Box>)}
       </Box>
     </Box>
@@ -137,7 +142,7 @@ const ConditionsInterface = ({ children, conditions }: { children: ReactNode; co
 
 const EncounterTokenCard = (props: { token: EncounterToken; isCurrentTurn: boolean }) => {
 
-  return <DragInterface tokenId={props.token.id}>
+  return (
     <ConditionsInterface conditions={props.token.conditions}>
       <Card sx={{
         userSelect: 'none',
@@ -170,7 +175,7 @@ const EncounterTokenCard = (props: { token: EncounterToken; isCurrentTurn: boole
         </Box>
       </Card>
     </ConditionsInterface>
-  </DragInterface>;
+  );
 };
 
 
@@ -239,18 +244,19 @@ const EncounterTokenField = (props: { encounter: Encounter }) => {
     <Grid2 container columns={13} spacing={2} p={3}>
       <Grid2 size={6} sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2, justifyContent: 'right' }}>
         {props.encounter.tokens.filter((token) => token.isPlayer).map((token) => (
-          <Box key={token.id}>
+          <DragInterface key={token.id} encounter={props.encounter} tokenId={token.id}>
             <EncounterTokenCard token={token} isCurrentTurn={token.id === currentTurnToken?.id} />
-          </Box>))}
+          </DragInterface>
+        ))}
       </Grid2>
       <Grid2 size={1} justifyContent={'center'} display={'flex'}>
         <Box sx={{ backgroundColor: '#222', width: '1px', height: '100%' }}></Box>
       </Grid2>
       <Grid2 size={6} sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
         {props.encounter.tokens.filter((token) => !token.isPlayer).map((token) => (
-          <Box key={token.id}>
+          <DragInterface key={token.id} encounter={props.encounter} tokenId={token.id}>
             <EncounterTokenCard token={token} isCurrentTurn={token.id === currentTurnToken?.id} />
-          </Box>
+          </DragInterface>
         ))}
       </Grid2>
     </Grid2>
