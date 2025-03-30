@@ -455,12 +455,13 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                       </BubbleMenu>
                     )}
                     <EditorContent id={'editor-content'} editor={editor} />
+                    {/* TODO: This doesn't act right. */}
                     {displayPlaceholder && (
                       <Typography
                         sx={{
                           color: 'grey',
                           position: 'relative',
-                          top: -136,
+                          top: -285,
                           pointerEvents: 'none',
                           whiteSpace: 'pre-line',
                         }}

@@ -1,5 +1,6 @@
 .ProseMirror {
     min-height: 200px;
+    margin-bottom: 150px;
 }
 
 .ProseMirror:focus {
@@ -26,7 +27,7 @@
 
 .ProseMirror mark {
     color: white;
-    background-color: #333333;
+    background-color: #232323;
 }
 
 a {

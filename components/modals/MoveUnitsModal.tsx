@@ -117,18 +117,23 @@ const MoveUnitsModal = (props: {
   const handleMoveUnits = async (event: any) => {
     event.preventDefault();
 
+    // TODO: Clone items instead of moving them
     try {
       await runTransaction(db, async (transaction) => {
         transaction.update(doc(db, 'units', props.currentCollection.id), {
           unitIds: arrayRemove(...props.selectedUnitIds),
         });
-        for (let id of selectedCollectionIds) {
-          transaction.update(doc(db, 'units', id), {
+        for (let collectionId of selectedCollectionIds) {
+          transaction.update(doc(db, 'units', collectionId), {
             unitIds: arrayUnion(...props.selectedUnitIds),
           });
         }
+        for (let unitId of props.selectedUnitIds) {
+          transaction.update(doc(db, 'units', unitId), {
+            breadcrumbs: [],
+          });
+        }
       });
-      console.log(selectedCollectionIds);
       displayAlert({
         message: `${selectedCollectionIds.length} items successfully moved.`,
       });

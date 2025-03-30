@@ -89,10 +89,10 @@ export default function AuthPage() {
             etc. etc. Whatever you want to use it for, really.
           </Typography>
           <RoundButton disabled={!cookieConsent} onClick={handleSignIn}>Sign In With Google</RoundButton>
-          <Stack direction={'row'} alignItems={'center'} pt={1}>
+          <Stack direction={'row'} alignItems={'center'} pt={1} sx={{ cursor: 'pointer' }}
+                 onClick={() => setCookieConsent(!cookieConsent)}>
             <Checkbox
               checked={cookieConsent}
-              onChange={(event) => setCookieConsent(event.target.checked)}
             />
             <Typography variant={'subtitle2'} color={'grey'} pr={1}>
               Consent to session cookies
