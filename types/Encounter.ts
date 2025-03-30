@@ -9,6 +9,7 @@ export interface Encounter extends Unit {
 }
 
 export interface EncounterLog {
+  id: string;
   content: string;
   timestamp: number;
 }

@@ -32,7 +32,6 @@ const ConditionsDropdown = (props: { inflictedToken: EncounterToken; updateToken
       name: formData.conditionName,
       duration: formData.roundDuration,
       removeOnEnemyTurn: formData.removeOnEnemyTurn,
-      
     };
     const updatedConditions = [...conditions, newCondition];
     setConditions(updatedConditions);
@@ -102,7 +101,7 @@ const ConditionsDropdown = (props: { inflictedToken: EncounterToken; updateToken
           >
             <InfoOutlinedIcon sx={{ color: 'grey', height: 20, width: 20 }} />
           </ThemeTooltip>
-          <Typography variant={'subtitle2'}>End on enemy's turn</Typography>
+          <Typography variant={'subtitle2'}>{'End on enemy\'s turn'}</Typography>
           <Checkbox
             name="removeOnEnemyTurn"
             checked={formData.removeOnEnemyTurn}
