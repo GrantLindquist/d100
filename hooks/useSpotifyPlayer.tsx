@@ -63,7 +63,6 @@ export const SpotifyPlayerProvider = ({ children }: {
         const spotifyIds = [];
         for (let item of data.spotifyItems) {
           if (item.type === 'playlist') {
-            console.log(item);
             const response = await fetch(`https://api.spotify.com/v1/playlists/${item.id}?limit=100`, {
               method: 'GET',
               headers: {

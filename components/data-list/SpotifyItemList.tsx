@@ -7,7 +7,6 @@ import { SpotifyItemTabMemo } from '@/components/data-list/SpotifyItemTab';
 import { SpotifyBase } from '@/types/Spotify';
 import SearchIcon from '@mui/icons-material/Search';
 
-// TODO: Memoize so that hoveredItemId doesn't rerender entire list
 const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyBase[]; isDeletingItem?: boolean }) => {
 
   const theme = useTheme();
@@ -21,7 +20,8 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
   const [menuAnchor, setMenuAnchor] = useState(null);
 
   useEffect(() => {
-    searchTerm.length > 0 && fetchSpotifyItems(searchTerm);
+    const scrubbedSearchTerm = searchTerm.replace(/[^A-Z0-9 ,?!/$-:]/gi, '');
+    scrubbedSearchTerm.length > 0 && fetchSpotifyItems(scrubbedSearchTerm);
   }, [searchTerm, searchType]);
 
   const fetchSpotifyItems = async (searchTerm: string) => {

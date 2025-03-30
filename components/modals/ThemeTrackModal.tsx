@@ -10,7 +10,6 @@ import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import { useCampaign } from '@/hooks/useCampaign';
 
 // TODO: Organize song order by drag and drop
-// TODO: Some characters cause fetch to break (&, and maybe others)
 // TODO: Entering character 'T' first as a search term doesn't work
 const ThemeTrackModal = (props: { unitId: string }) => {
   const { displayAlert } = useAlert();
