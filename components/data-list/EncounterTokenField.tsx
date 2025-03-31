@@ -2,13 +2,13 @@
 
 import { Condition, Encounter, EncounterToken } from '@/types/Encounter';
 import { Box, Card, Grid2, IconButton, Menu, Stack, Typography, useTheme } from '@mui/material';
-import { ReactNode, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import { useAlert } from '@/hooks/useAlert';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import ImageFrame from '@/components/content/ImageFrame';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import { doc, updateDoc } from '@firebase/firestore';
+import { arrayRemove, doc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useDrag } from '@use-gesture/react';
 import RollInitiativeModal from '@/components/modals/RollInitiativeModal';
@@ -112,7 +112,11 @@ const DragInterface = ({ children, encounter, tokenId }: {
   );
 };
 
-const ConditionsInterface = ({ children, conditions }: { children: ReactNode; conditions: Condition[] }) => {
+const ConditionsInterface = ({ children, conditions, handleRemoveCondition }: {
+  children: ReactNode;
+  handleRemoveCondition: Function;
+  conditions: Condition[]
+}) => {
 
   return <Box
     sx={{ position: 'relative' }}>
@@ -132,18 +136,49 @@ const ConditionsInterface = ({ children, conditions }: { children: ReactNode; co
         gap: .5,
       }}>
         {conditions.map((condition: Condition, index) => <Box key={`${condition.name}-${index}`}
-                                                              sx={{ backgroundColor: '#8B0000', borderRadius: 1 }}>
-          <Typography variant={'subtitle2'} px={.5}>{condition.name}</Typography></Box>)}
+                                                              sx={{
+                                                                backgroundColor: '#8B0000',
+                                                                borderRadius: 1,
+                                                                zIndex: 11,
+                                                                cursor: 'pointer',
+                                                              }}>
+          <Typography onClick={() => handleRemoveCondition(index)} variant={'subtitle2'}
+                      px={.5}>{condition.name}</Typography></Box>)}
       </Box>
     </Box>
     {children}
   </Box>;
 };
 
-const EncounterTokenCard = (props: { token: EncounterToken; isCurrentTurn: boolean }) => {
+// TODO: Consider implementing a hook for encounters
+const EncounterTokenCard = (props: {
+  token: EncounterToken;
+  encounter: Encounter;
+  isCurrentTurn: boolean
+}) => {
+
+  const [conditions, setConditions] = useState<Condition[]>([]);
+
+  useEffect(() => {
+    const currentActiveConditions = props.encounter.activeConditions.filter((condition) => {
+      return condition.inflictedTokenId === props.token.id &&
+        props.encounter.roundCount >= condition.roundInflicted &&
+        props.encounter.roundCount <= condition.roundInflicted + condition.roundDuration;
+    });
+
+    setConditions(currentActiveConditions);
+  }, [props.encounter.turnCount]);
+
+  const handleRemoveCondition = async (removeIndex: number) => {
+    const removeCondition = conditions[removeIndex];
+    setConditions(conditions.filter((_, index) => index !== removeIndex));
+    await updateDoc(doc(db, 'units', props.encounter.id), {
+      activeConditions: arrayRemove(removeCondition),
+    });
+  };
 
   return (
-    <ConditionsInterface conditions={props.token.conditions}>
+    <ConditionsInterface handleRemoveCondition={handleRemoveCondition} conditions={conditions}>
       <Card sx={{
         userSelect: 'none',
         maxWidth: '150px',
@@ -245,7 +280,8 @@ const EncounterTokenField = (props: { encounter: Encounter }) => {
       <Grid2 size={6} sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2, justifyContent: 'right' }}>
         {props.encounter.tokens.filter((token) => token.isPlayer).map((token) => (
           <DragInterface key={token.id} encounter={props.encounter} tokenId={token.id}>
-            <EncounterTokenCard token={token} isCurrentTurn={token.id === currentTurnToken?.id} />
+            <EncounterTokenCard token={token} encounter={props.encounter}
+                                isCurrentTurn={token.id === currentTurnToken?.id} />
           </DragInterface>
         ))}
       </Grid2>
@@ -255,7 +291,8 @@ const EncounterTokenField = (props: { encounter: Encounter }) => {
       <Grid2 size={6} sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
         {props.encounter.tokens.filter((token) => !token.isPlayer).map((token) => (
           <DragInterface key={token.id} encounter={props.encounter} tokenId={token.id}>
-            <EncounterTokenCard token={token} isCurrentTurn={token.id === currentTurnToken?.id} />
+            <EncounterTokenCard token={token} encounter={props.encounter}
+                                isCurrentTurn={token.id === currentTurnToken?.id} />
           </DragInterface>
         ))}
       </Grid2>

@@ -5,6 +5,7 @@ export interface Encounter extends Unit {
   roundCount: number;
   turnCount: number;
   initiativeOrder: string[];
+  activeConditions: Condition[];
   logs: EncounterLog[];
 }
 
@@ -21,7 +22,6 @@ export interface EncounterToken {
   currentHitPoints: number;
   maxHitPoints: number;
   tempHitPoints: number;
-  conditions: Condition[];
   isPlayer: boolean;
   deathSaves: boolean[] | null;
   isDead: boolean;
@@ -29,7 +29,7 @@ export interface EncounterToken {
 
 export interface Condition {
   name: string;
-  totalDuration: number;
+  roundDuration: number;
   roundInflicted: number;
   inflictedTokenId: string;
   removeOnEnemyTurn: boolean;

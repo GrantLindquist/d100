@@ -30,7 +30,6 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
             currentHitPoints: formData.tokenHitPoints,
             maxHitPoints: formData.tokenHitPoints,
             tempHitPoints: 0,
-            conditions: [],
             isPlayer: formData.tokenIsPlayer === 'on',
             deathSaves: null,
             isDead: false,

@@ -22,3 +22,4 @@ export const LINK_STYLE = {
 };
 
 export const SUBTITLE_VARIANT = 'h4';
+

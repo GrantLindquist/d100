@@ -1,7 +1,7 @@
 import { Box, Button, Divider, Modal, Stack, Typography } from '@mui/material';
 import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
 import CasinoIcon from '@mui/icons-material/Casino';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Encounter, EncounterToken } from '@/types/Encounter';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import {
@@ -53,7 +53,15 @@ const RollInitiativeModal = (props: { encounter: Encounter; setRoundCount: Funct
   const { displayAlert } = useAlert();
 
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState(props.encounter.tokens);
+  const [items, setItems] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (props.encounter.initiativeOrder.length > 0) {
+      setItems(props.encounter.initiativeOrder);
+    } else {
+      setItems(props.encounter.tokens.map((item) => item.id));
+    }
+  }, [props.encounter.tokens]);
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
@@ -72,7 +80,7 @@ const RollInitiativeModal = (props: { encounter: Encounter; setRoundCount: Funct
     try {
       const roundCount = props.encounter.roundCount === 0 ? 1 : props.encounter.roundCount;
       await updateDoc(doc(db, 'units', props.encounter.id), {
-        initiativeOrder: items.map((item) => item.id),
+        initiativeOrder: items,
         roundCount: roundCount,
       });
       props.setRoundCount(roundCount);
@@ -105,7 +113,12 @@ const RollInitiativeModal = (props: { encounter: Encounter; setRoundCount: Funct
               items={items}
               strategy={verticalListSortingStrategy}
             >
-              {items.map((item) => <SortableToken key={item.id} token={item} />)}
+              {items.map((itemId) => {
+                const token = props.encounter.tokens.find((token) => token.id === itemId);
+                if (!token) return null;
+
+                return <SortableToken key={itemId} token={token} />;
+              })}
             </SortableContext>
           </DndContext>
         </Box>

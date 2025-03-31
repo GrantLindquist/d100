@@ -1,7 +1,7 @@
 import { useAlert } from '@/hooks/useAlert';
 import { ChangeEvent, useState } from 'react';
-import { doc, updateDoc } from '@firebase/firestore';
-import { Encounter, EncounterToken } from '@/types/Encounter';
+import { arrayUnion, doc, updateDoc } from '@firebase/firestore';
+import { Condition, Encounter, EncounterToken } from '@/types/Encounter';
 import { Box, Button, Checkbox, IconButton, Stack, TextField, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -11,8 +11,7 @@ import db from '@/utils/firebase';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ThemeTooltip from '@/components/ThemeTooltip';
 
-const ConditionsDropdown = (props: { inflictedToken: EncounterToken; updateToken: Function }) => {
-  const [conditions, setConditions] = useState(props.inflictedToken.conditions);
+const ConditionsDropdown = (props: { encounter: Encounter, inflictedToken: EncounterToken }) => {
   const [formData, setFormData] = useState({
     conditionName: '',
     roundDuration: 0,
@@ -27,32 +26,22 @@ const ConditionsDropdown = (props: { inflictedToken: EncounterToken; updateToken
     }));
   };
 
-  const handleAddCondition = () => {
-    const newCondition = {
+  const handleAddCondition = async () => {
+    const newCondition: Condition = {
       name: formData.conditionName,
-      duration: formData.roundDuration,
+      roundDuration: Number(formData.roundDuration),
       removeOnEnemyTurn: formData.removeOnEnemyTurn,
+      roundInflicted: props.encounter.roundCount,
+      inflictedTokenId: props.inflictedToken.id,
     };
-    const updatedConditions = [...conditions, newCondition];
-    setConditions(updatedConditions);
-    props.updateToken({ ...props.inflictedToken, conditions: updatedConditions });
+    await updateDoc(doc(db, 'units', props.encounter.id), {
+      activeConditions: arrayUnion(newCondition),
+    });
     setFormData({ conditionName: '', roundDuration: 0, removeOnEnemyTurn: false });
   };
 
-  const handleRemoveCondition = (index: number) => {
-    const updatedConditions = conditions.filter((_, i) => i !== index);
-    setConditions(updatedConditions);
-    props.updateToken({ ...props.inflictedToken, conditions: updatedConditions });
-  };
-
   return (
-    <Box width={240}>
-      {conditions.map((condition, index) => (
-        <Stack key={`${condition.name}-${index}`} direction={'row'} alignItems={'center'}>
-          <Typography flexGrow={1}>{condition.name}</Typography>
-          <Button onClick={() => handleRemoveCondition(index)}>x</Button>
-        </Stack>
-      ))}
+    <Box width={280}>
       <Stack direction={'row'} spacing={1}>
         <TextField
           name="conditionName"
@@ -74,6 +63,7 @@ const ConditionsDropdown = (props: { inflictedToken: EncounterToken; updateToken
           size="small"
           value={formData.roundDuration}
           type="number"
+          placeholder={'∞'}
           onChange={handleInputChange}
           sx={{
             width: '30%',
@@ -108,7 +98,7 @@ const ConditionsDropdown = (props: { inflictedToken: EncounterToken; updateToken
             onChange={handleInputChange}
           />
         </Stack>
-        <Button variant={'contained'} size={'small'} onClick={handleAddCondition}>
+        <Button variant={'contained'} size={'small'} onClick={() => handleAddCondition()}>
           <AddIcon />
         </Button>
       </Stack>
@@ -150,6 +140,7 @@ const DamageMenu = (props: { inflictedTokenId: string; encounter: Encounter; clo
           if (inflictedToken.currentHitPoints <= 0) {
             inflictedToken.currentHitPoints = 0;
             inflictedToken.isDead = true;
+            // TODO: Make this an object with an active:boolean property to maintain initiative state
             initiativeOrder = initiativeOrder.filter((id: string) => id !== inflictedToken.id);
           }
         } else {
@@ -162,7 +153,11 @@ const DamageMenu = (props: { inflictedTokenId: string; encounter: Encounter; clo
               inflictedToken.isDead = false;
               initiativeOrder.push(inflictedToken.id);
             }
-            inflictedToken.currentHitPoints += healthCounter;
+            if (inflictedToken.currentHitPoints + healthCounter <= inflictedToken.maxHitPoints) {
+              inflictedToken.currentHitPoints += healthCounter;
+            } else {
+              inflictedToken.currentHitPoints = inflictedToken.maxHitPoints;
+            }
           }
         }
 
@@ -196,7 +191,7 @@ const DamageMenu = (props: { inflictedTokenId: string; encounter: Encounter; clo
              backgroundColor: '#222',
              borderRadius: 1,
              alignItems: 'center',
-             width: '250px',
+             width: '300px',
              justifyContent: 'space-between',
            }}>
       <IconButton onClick={() => tickHealth(1)}>
@@ -263,11 +258,7 @@ const DamageMenu = (props: { inflictedTokenId: string; encounter: Encounter; clo
         </Stack>
       </Stack>
       {displayConditionsDropdown && inflictedToken && <>
-        <ConditionsDropdown inflictedToken={inflictedToken} updateToken={async (newTokens: EncounterToken[]) => {
-          await updateDoc(doc(db, 'units', props.encounter.id), {
-            tokens: newTokens,
-          });
-        }} />
+        <ConditionsDropdown encounter={props.encounter} inflictedToken={inflictedToken} />
       </>}
     </Box>
 
