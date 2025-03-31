@@ -1,11 +1,12 @@
 import { SpotifyBase } from '@/types/Spotify';
 
-export type UnitType = 'article' | 'quest' | 'collection';
-export const UnitEnum = ['article', 'quest', 'collection'];
+export type UnitType = 'article' | 'quest' | 'collection' | 'encounter';
+export const UnitEnum = ['article', 'quest', 'collection', 'encounter'];
 export const UnitDisplayValues = {
   article: 'Article',
   quest: 'Quest',
   collection: 'Sub-Collection',
+  encounter: 'Encounter',
 };
 
 export interface Unit {

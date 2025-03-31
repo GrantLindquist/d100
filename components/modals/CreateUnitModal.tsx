@@ -15,14 +15,7 @@ import {
 import { FormEvent, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import { generateUUID } from '@/utils/uuid';
-import {
-  Article,
-  Breadcrumb,
-  Collection,
-  Quest,
-  Unit,
-  UnitType,
-} from '@/types/Unit';
+import { Article, Breadcrumb, Collection, Quest, Unit, UnitType } from '@/types/Unit';
 import { useParams } from 'next/navigation';
 import { arrayUnion, doc, runTransaction } from '@firebase/firestore';
 import db from '@/utils/firebase';
@@ -33,6 +26,8 @@ import { useAlert } from '@/hooks/useAlert';
 import DescriptionIcon from '@mui/icons-material/Description';
 import KeyIcon from '@mui/icons-material/Key';
 import FolderIcon from '@mui/icons-material/Folder';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import { Encounter } from '@/types/Encounter';
 
 const generateDefaultContent = (title: string) => {
   return {
@@ -132,6 +127,17 @@ const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {
               ...newUnitObj,
               unitIds: [],
             } as Collection;
+          } else if (modalState === 'encounter') {
+            newUnitObj = {
+              ...newUnitObj,
+              tokens: [],
+              logs: [],
+              roundCount: 0,
+              turnCount: 0,
+              activeConditions: [],
+              initiativeOrder: [],
+              hidden: true,
+            } as Encounter;
           }
 
           await runTransaction(db, async (transaction) => {
@@ -173,7 +179,7 @@ const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {
               fullWidth
               onChange={handleInputChange}
             />
-            {isUserDm && (
+            {isUserDm && modalState !== 'encounter' && (
               <FormControlLabel
                 control={
                   <Checkbox
@@ -209,6 +215,12 @@ const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {
           <FolderIcon sx={{ width: 20, height: 20 }} />
           &nbsp; Create new Sub-Collection
         </MenuItem>
+        {isUserDm &&
+          <MenuItem onClick={() => setModalState('encounter')}>
+            <AutoFixHighIcon sx={{ width: 20, height: 20 }} />
+            &nbsp; Create new Encounter
+          </MenuItem>
+        }
       </Menu>
       <Modal open={Boolean(modalState)} onClose={() => setModalState(null)}>
         <Box sx={MODAL_STYLE}>

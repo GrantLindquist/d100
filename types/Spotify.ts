@@ -1,7 +1,9 @@
 export interface SpotifyBase {
   id: string;
   title: string;
-  artistName: string;
+  creatorName: string;
   type: string;
+  albumArtUrl?: string;
+  trackCount?: number;
 }
 

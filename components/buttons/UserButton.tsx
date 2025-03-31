@@ -13,6 +13,7 @@ import { useCampaign } from '@/hooks/useCampaign';
 import { arrayRemove, doc, runTransaction, updateDoc } from '@firebase/firestore';
 import { UserBase } from '@/types/User';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
+import Image from 'next/image';
 
 // TODO: Replace each img tag with Next Image
 const UserButton = () => {
@@ -128,10 +129,7 @@ const UserButton = () => {
               onClick={handleConnectSpotify}
             >
               <Stack direction={'row'}>
-                <img
-                  src={'/spotify.svg'}
-                  style={{ width: 22, marginRight: 6 }}
-                />
+                <Image src={'/spotify.svg'} alt={'Spotify Logo'} width={22} height={22} style={{ marginRight: 6 }} />
                 {spotifyAuthenticated ? 'Connected' : 'Connect Spotify'}
               </Stack>
             </MenuItem>

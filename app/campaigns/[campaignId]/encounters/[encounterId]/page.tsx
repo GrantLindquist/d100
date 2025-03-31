@@ -1,0 +1,65 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Breadcrumb } from '@/types/Unit';
+import { useCampaign } from '@/hooks/useCampaign';
+import { useUser } from '@/hooks/useUser';
+import { usePathname, useRouter } from 'next/navigation';
+import { getCurrentUnitIdFromUrl } from '@/utils/url';
+import { doc, onSnapshot } from '@firebase/firestore';
+import db from '@/utils/firebase';
+import { Encounter } from '@/types/Encounter';
+import { Box, Container, Typography } from '@mui/material';
+import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import EncounterTokenField from '@/components/data-list/EncounterTokenField';
+
+export default function CollectionPage() {
+  const { user } = useUser();
+  const { campaign, setBreadcrumbs } = useCampaign();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [encounter, setEncounter] = useState<Encounter | null>(null);
+
+  useEffect(() => {
+    if (campaign && user) {
+      if (!user.campaignIds.includes(campaign.id)) {
+        router.push('/campaigns/unauthorized');
+      } else {
+        const url = pathname.split('/').slice(1);
+        const unitId = getCurrentUnitIdFromUrl(url);
+        if (unitId) {
+          const unsubscribe = onSnapshot(
+            doc(db, 'units', unitId),
+            (unitDocSnap) => {
+              if (unitDocSnap.exists()) {
+                setEncounter(unitDocSnap.data() as Encounter);
+                setBreadcrumbs(unitDocSnap.data().breadcrumbs as Breadcrumb[]);
+              }
+            },
+          );
+          return () => {
+            unsubscribe();
+          };
+        }
+      }
+    }
+  }, [user?.id, campaign?.id]);
+
+  return (
+    <Container>
+      <Box
+        sx={{
+          pt: 12,
+        }}
+      >
+        {encounter && <>
+          <Typography variant={'h2'} fontWeight={BOLD_FONT_WEIGHT}>
+            {encounter.title}
+          </Typography>
+          <EncounterTokenField encounter={encounter} />
+        </>}
+      </Box>
+    </Container>
+  );
+}

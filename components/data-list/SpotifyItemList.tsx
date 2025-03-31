@@ -1,25 +1,30 @@
 import { useEffect, useState } from 'react';
-import { Box, Divider, Stack, TextField, Typography } from '@mui/material';
+import { Box, Divider, Menu, MenuItem, Stack, TextField, Typography, useTheme } from '@mui/material';
 import { useAlert } from '@/hooks/useAlert';
 import { getCookie } from '@/utils/cookie';
 import { refreshAccessToken } from '@/components/SpotifyPlayer';
 import { SpotifyItemTabMemo } from '@/components/data-list/SpotifyItemTab';
 import { SpotifyBase } from '@/types/Spotify';
+import SearchIcon from '@mui/icons-material/Search';
 
-// TODO: Memoize so that hoveredItemId doesn't rerender entire list
 const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyBase[]; isDeletingItem?: boolean }) => {
 
+  const theme = useTheme();
   const { displayAlert } = useAlert();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
   const [data, setData] = useState<SpotifyBase[]>([]);
+  const [searchType, setSearchType] = useState<'tracks' | 'playlists'>('tracks');
+
+  const [menuAnchor, setMenuAnchor] = useState(null);
 
   useEffect(() => {
-    searchTerm.length > 0 && fetchSpotifySearchTerm(searchTerm);
-  }, [searchTerm]);
+    const scrubbedSearchTerm = searchTerm.replace(/[^A-Z0-9 ,?!/$-:]/gi, '');
+    scrubbedSearchTerm.length > 0 && fetchSpotifyItems(scrubbedSearchTerm);
+  }, [searchTerm, searchType]);
 
-  const fetchSpotifySearchTerm = async (searchTerm: string) => {
+  const fetchSpotifyItems = async (searchTerm: string) => {
     try {
       let accessToken;
       const tokenCookie = await getCookie('spotify_access_token');
@@ -36,13 +41,26 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
       });
       const data = await response.json();
       let items: SpotifyBase[] = [];
-      for (let item of data.tracks.items) {
-        items.push({
-          id: item.id,
-          title: item.name,
-          artistName: item.artists[0].name,
-          type: item.type,
-        } as SpotifyBase);
+      if (searchType === 'playlists') {
+        for (let item of data.playlists.items) {
+          item && items.push({
+            id: item.id,
+            title: item.name,
+            creatorName: item.owner.display_name,
+            type: item.type,
+            trackCount: item.tracks.total,
+          } as SpotifyBase);
+        }
+      } else {
+        for (let item of data.tracks.items) {
+          items.push({
+            id: item.id,
+            title: item.name,
+            creatorName: item.artists[0].name,
+            type: item.type,
+            albumArtUrl: item.album.images[2].url,
+          } as SpotifyBase);
+        }
       }
       setData(items);
     } catch (e: any) {
@@ -51,6 +69,10 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
         message: e.message,
       });
     }
+  };
+
+  const handleOpenMenu = (event: any) => {
+    setMenuAnchor(event.currentTarget);
   };
 
   return (<Box px={1} height={'60vh'}>
@@ -67,6 +89,28 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
           borderRadius: 1,
           color: '#DDDDDD',
           '& fieldset': { border: 'none' },
+        }}
+        slotProps={{
+          input: {
+            startAdornment: <SearchIcon style={{ marginRight: 6, color: 'grey', width: 20 }} />,
+            endAdornment: (
+              <>
+                <Typography onClick={handleOpenMenu} color={theme.palette.primary.main} sx={{ cursor: 'pointer' }}>
+                  {searchType}
+                </Typography>
+                <Menu
+                  anchorEl={menuAnchor}
+                  open={Boolean(menuAnchor)}
+                  onClose={() => setMenuAnchor(null)}
+                  transformOrigin={{ horizontal: 'center', vertical: 'top' }}
+                  anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+                >
+                  <MenuItem onClick={() => setSearchType('tracks')}>Tracks</MenuItem>
+                  <MenuItem onClick={() => setSearchType('playlists')}>Playlists</MenuItem>
+                </Menu>
+              </>
+            ),
+          },
         }}
       />
     }
@@ -87,7 +131,9 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
                 item={result}
                 displayModifyButton={result.id === hoveredItemId}
                 updateState={props.updateState}
-                isDeletingItem={Boolean(props.isDeletingItem)} />
+                isDeletingItem={Boolean(props.isDeletingItem)}
+                albumArtUrl={result.albumArtUrl}
+              />
             </Box>
           </Stack>
         </Stack>

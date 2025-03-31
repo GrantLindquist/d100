@@ -12,6 +12,7 @@ import db from '@/utils/firebase';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useAlert } from '@/hooks/useAlert';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
+import Image from 'next/image';
 
 const PlayerList = (props: { players: UserBase[] }) => {
   const { user } = useUser();
@@ -207,7 +208,7 @@ const SettingsButton = () => {
         {spotifyAuthenticated && (
           <MenuItem onClick={() => toggleDisplayPlayerSetting(!displayPlayer)}>
             <Stack direction={'row'}>
-              <img src={'/spotify.svg'} style={{ width: 24, marginRight: 6 }} />
+              <Image src={'/spotify.svg'} alt={'Spotify Logo'} width={24} height={24} style={{ marginRight: 6 }} />
               {displayPlayer ? 'Hide Player' : 'Show Player'}
             </Stack>
           </MenuItem>

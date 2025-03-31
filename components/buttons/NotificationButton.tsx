@@ -1,25 +1,8 @@
 import { ReactNode, useEffect, useState } from 'react';
-import {
-  arrayRemove,
-  arrayUnion,
-  doc,
-  onSnapshot,
-  runTransaction,
-  updateDoc,
-} from '@firebase/firestore';
+import { arrayRemove, arrayUnion, doc, onSnapshot, runTransaction, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useCampaign } from '@/hooks/useCampaign';
-import {
-  Badge,
-  Box,
-  Button,
-  Divider,
-  IconButton,
-  Menu,
-  Stack,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Badge, Box, Button, Divider, IconButton, Menu, Stack, Tooltip, Typography } from '@mui/material';
 import BellIcon from '@mui/icons-material/Notifications';
 import { UserBase } from '@/types/User';
 import { useAlert } from '@/hooks/useAlert';
@@ -115,7 +98,7 @@ const NotificationButton = () => {
               }
               setNotifications(notificationData);
             }
-          }
+          },
         );
 
         return () => unsubscribe();
@@ -152,7 +135,6 @@ const NotificationButton = () => {
         onClose={() => setAnchor(null)}
         transformOrigin={{ horizontal: 'center', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
-        disableScrollLock
       >
         <Box sx={{ maxWidth: 300, maxHeight: 300 }}>
           {notifications.length > 0 ? (
