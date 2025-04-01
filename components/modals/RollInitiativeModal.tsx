@@ -17,7 +17,6 @@ import { doc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useAlert } from '@/hooks/useAlert';
 
-// TODO: Fix this
 const SortableToken = (props: { token: EncounterToken }) => {
   const {
     attributes,

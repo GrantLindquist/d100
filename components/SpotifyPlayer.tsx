@@ -49,7 +49,7 @@ const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
         border: 'solid 2px #222',
         borderTopRightRadius: 3,
         borderTopLeftRadius: 3,
-        zIndex: 1000,
+        zIndex: 20,
       }}
     >
       {accessToken && (

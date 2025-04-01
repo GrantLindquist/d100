@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box, Skeleton } from '@mui/material';
 import { generateUUID } from '@/utils/uuid';
 import { ImageUrl } from '@/types/Unit';
@@ -15,6 +15,7 @@ const ImageFrame = (props: { image: ImageUrl; alt?: string }) => {
     if (frameRef.current) {
       setFrameWidth(frameRef.current.offsetWidth);
     }
+
     const img = new Image();
     img.src = props.image.src;
     img.onload = () => {
@@ -24,7 +25,12 @@ const ImageFrame = (props: { image: ImageUrl; alt?: string }) => {
       console.error(`Failed to load image: ${props.image.src}`);
       setLoading(false);
     };
-  }, []);
+
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [props.image.src]);
 
   return (
     <Box
@@ -34,6 +40,7 @@ const ImageFrame = (props: { image: ImageUrl; alt?: string }) => {
         flex: 1,
         display: 'flex',
         justifyContent: 'center',
+        minHeight: frameWidth / props.image.ratio,
       }}
     >
       {loading ? (
@@ -51,6 +58,7 @@ const ImageFrame = (props: { image: ImageUrl; alt?: string }) => {
             width: '100%',
             maxWidth: maxImageHeight * props.image.ratio,
             maxHeight: maxImageHeight,
+            objectFit: 'contain',
           }}
           src={props.image.src}
           alt={props.alt ?? ''}
