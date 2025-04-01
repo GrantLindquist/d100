@@ -181,7 +181,7 @@ const MoveUnitsModal = (props: {
                   updateState={updateSelectedCollectionIds}
                 />
               ))}
-              <Button sx={{ marginTop: 2 }} onClick={handleMoveUnits}>
+              <Button sx={{ marginTop: 2 }} disabled onClick={handleMoveUnits}>
                 Move Items
               </Button>
             </Stack>
