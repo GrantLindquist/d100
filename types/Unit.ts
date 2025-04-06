@@ -27,6 +27,7 @@ export interface Collection extends Unit {
 export interface Article extends Unit {
   content: Object;
   imageUrls: ImageUrl[];
+  hasEncounterToken?: boolean;
 }
 
 export interface Quest extends Article {

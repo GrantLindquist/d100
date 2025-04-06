@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { doc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import ThemeTrackModal from '@/components/modals/ThemeTrackModal';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const AddToContentButton = (props: {
   unit: Quest | Article;
@@ -19,6 +20,13 @@ const AddToContentButton = (props: {
       loot: props.unit.loot ? null : [],
     });
     setAnchorEl(null);
+  };
+
+  const toggleHasEncounterToken = async () => {
+    await updateDoc(doc(db, 'units', props.unit.id), {
+      // @ts-ignore
+      hasEncounterToken: !props.unit.hasEncounterToken,
+    });
   };
 
   return (
@@ -47,6 +55,13 @@ const AddToContentButton = (props: {
         >
           Reference Image
         </MenuItem>
+        {props.unit.type === 'article' && (
+          <MenuItem
+            onClick={toggleHasEncounterToken}
+          >
+            Encounter Token{props.unit.hasEncounterToken && <CheckCircleIcon style={{ marginLeft: 3 }} />}
+          </MenuItem>
+        )}
         <ThemeTrackModal unitId={props.unit.id} />
       </Menu>
     </>

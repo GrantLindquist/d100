@@ -8,19 +8,19 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import ImageFrame from '@/components/content/ImageFrame';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import { arrayRemove, doc, updateDoc } from '@firebase/firestore';
+import { arrayRemove, doc, getDoc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useDrag } from '@use-gesture/react';
 import RollInitiativeModal from '@/components/modals/RollInitiativeModal';
 import CreateEncounterTokenModal from '@/components/modals/CreateEncounterTokenModal';
 import DamageMenu from '@/components/DamageMenu';
+import { ImageUrl } from '@/types/Unit';
 
 const DragInterface = ({ children, encounter, tokenId }: {
   children: ReactNode;
   encounter: Encounter;
   tokenId: string
 }) => {
-
   const theme = useTheme();
 
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
@@ -56,6 +56,7 @@ const DragInterface = ({ children, encounter, tokenId }: {
     }
   }, {});
 
+  // TODO: DragInterface stretches farther on Y-Axis than card boundaries
   return (
     <>
       {selectedId && <Menu
@@ -158,6 +159,21 @@ const EncounterTokenCard = (props: {
 }) => {
 
   const [conditions, setConditions] = useState<Condition[]>([]);
+  const [tokenImage, setTokenImage] = useState<ImageUrl>({
+    src: '/blank_token_img.png',
+    ratio: 1,
+  });
+
+  useEffect(() => {
+    async function fetchTokenImage(articleId: string) {
+      const articleDocSnap = await getDoc(doc(db, 'units', articleId));
+      if (articleDocSnap.exists()) {
+        setTokenImage(articleDocSnap.data().imageUrls[0]);
+      }
+    }
+
+    props.token.articleId && fetchTokenImage(props.token.articleId);
+  }, []);
 
   useEffect(() => {
     const currentActiveConditions = props.encounter.activeConditions.filter((condition) => {
@@ -185,18 +201,10 @@ const EncounterTokenCard = (props: {
         maxHeight: '230px',
         border: `2px solid ${props.isCurrentTurn ? 'yellow' : 'transparent'}`,
       }}>
-        {/*{props.article.imageUrls.length > 0 && (*/}
-        {/*  <ImageFrame*/}
-        {/*    image={props.article.imageUrls[0]}*/}
-        {/*    alt={props.article.title}*/}
-        {/*  />*/}
-        {/*)}*/}
         <div style={{ filter: props.token.isDead ? 'grayscale(1)' : '' }}>
           <ImageFrame
-            image={{
-              src: '/blank_token_img.png',
-              ratio: 1,
-            }}
+            image={tokenImage}
+            alt={props.token.title}
           />
         </div>
         <Box
