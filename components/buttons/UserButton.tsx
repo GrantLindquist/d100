@@ -15,7 +15,6 @@ import { UserBase } from '@/types/User';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import Image from 'next/image';
 
-// TODO: Replace each img tag with Next Image
 const UserButton = () => {
   const router = useRouter();
   const { user, signOutUser, setListening } = useUser();

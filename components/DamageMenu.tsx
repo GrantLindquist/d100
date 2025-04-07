@@ -141,7 +141,7 @@ const DamageMenu = (props: { inflictedTokenId: string; encounter: Encounter; clo
             inflictedToken.currentHitPoints = 0;
             inflictedToken.isDead = true;
             // TODO: Make this an object with an active:boolean property to maintain initiative state
-            initiativeOrder = initiativeOrder.filter((id: string) => id !== inflictedToken.id);
+            // initiativeOrder = initiativeOrder.filter((id: string) => id !== inflictedToken.id);
           }
         } else {
           if (applyTempHitPointsChecked) {
@@ -151,7 +151,7 @@ const DamageMenu = (props: { inflictedTokenId: string; encounter: Encounter; clo
           } else {
             if (inflictedToken.isDead) {
               inflictedToken.isDead = false;
-              initiativeOrder.push(inflictedToken.id);
+              // initiativeOrder.push(inflictedToken.id);
             }
             if (inflictedToken.currentHitPoints + healthCounter <= inflictedToken.maxHitPoints) {
               inflictedToken.currentHitPoints += healthCounter;

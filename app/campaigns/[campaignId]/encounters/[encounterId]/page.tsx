@@ -12,8 +12,9 @@ import { Encounter } from '@/types/Encounter';
 import { Box, Container, Typography } from '@mui/material';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import EncounterTokenField from '@/components/data-list/EncounterTokenField';
+import EncounterAside from '@/components/content/EncounterAside';
 
-export default function CollectionPage() {
+export default function EncounterPage() {
   const { user } = useUser();
   const { campaign, setBreadcrumbs } = useCampaign();
   const router = useRouter();
@@ -46,20 +47,40 @@ export default function CollectionPage() {
     }
   }, [user?.id, campaign?.id]);
 
+  if (!encounter) return null;
   return (
-    <Container>
-      <Box
-        sx={{
-          pt: 12,
-        }}
-      >
-        {encounter && <>
-          <Typography variant={'h2'} fontWeight={BOLD_FONT_WEIGHT}>
-            {encounter.title}
-          </Typography>
-          <EncounterTokenField encounter={encounter} />
-        </>}
+    <Box display={'flex'}>
+      <Box width={'75%'}>
+        <Container>
+          <Box
+            sx={{
+              pt: 12,
+            }}
+          >
+            <Typography variant={'h2'} fontWeight={BOLD_FONT_WEIGHT}>
+              {encounter.title}
+            </Typography>
+            <EncounterTokenField encounter={encounter} />
+
+          </Box>
+        </Container>
       </Box>
-    </Container>
+      <Box sx={{
+        width: '25%',
+        flexShrink: 0,
+        borderLeft: '1px solid',
+        borderColor: 'divider',
+        p: 3,
+        backgroundColor: 'background.paper',
+        overflow: 'auto',
+        height: '100vh',
+      }}>
+        <EncounterAside
+          articleIds={encounter?.tokens
+            .map((token) => token.articleId ?? null)
+            .filter((id): id is string => id !== null)}
+        />
+      </Box>
+    </Box>
   );
 }

@@ -17,7 +17,6 @@ import { doc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useAlert } from '@/hooks/useAlert';
 
-// TODO: Fix this
 const SortableToken = (props: { token: EncounterToken }) => {
   const {
     attributes,
@@ -57,7 +56,8 @@ const RollInitiativeModal = (props: { encounter: Encounter; setRoundCount: Funct
 
   useEffect(() => {
     if (props.encounter.initiativeOrder.length > 0) {
-      setItems(props.encounter.initiativeOrder);
+      const tokensExcludedFromInitiative = props.encounter.tokens.filter((token: EncounterToken) => !props.encounter.initiativeOrder.includes(token.id));
+      setItems([...props.encounter.initiativeOrder, ...tokensExcludedFromInitiative.map((token) => token.id)]);
     } else {
       setItems(props.encounter.tokens.map((item) => item.id));
     }

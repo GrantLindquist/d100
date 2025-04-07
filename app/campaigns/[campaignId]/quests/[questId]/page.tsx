@@ -4,10 +4,9 @@ import { getDoc } from '@firebase/firestore';
 import { doc } from 'firebase/firestore';
 import db from '@/utils/firebase';
 
-// TODO: Display 1st reference image as OpenGraph attribute if exists
 export async function generateMetadata({
-  params,
-}: {
+                                         params,
+                                       }: {
   params: Promise<{ questId: string }>;
 }): Promise<Metadata> {
   const questId = (await params).questId;

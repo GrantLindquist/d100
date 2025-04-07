@@ -1,34 +1,39 @@
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { MouseEvent, ReactNode } from 'react';
+import Link, { LinkProps } from 'next/link';
 
-const SaveCheckLink = ({
-  children,
-  href,
-}: {
+const SaveCheckLink = ({ children, href, ...props }: {
   children: ReactNode;
   href: string;
-}) => {
+} & LinkProps) => {
   const { isUnsavedChanges } = useUnsavedChanges();
-  const router = useRouter();
 
-  const handlePushUrl = (href: string) => {
+  const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
     if (isUnsavedChanges) {
       if (
         !confirm(
-          'You have unsaved changes on this page. Are you sure you want to exit?'
+          'You have unsaved changes on this page. Are you sure you want to exit?',
         )
       ) {
+        e.preventDefault();
         return;
       }
     }
-    router.push(href);
   };
 
   return (
-    <div style={{ cursor: 'pointer' }} onClick={() => handlePushUrl(href)}>
+    <Link
+      href={href}
+      onClick={handleClick}
+      {...props}
+      style={{
+        color: 'inherit',
+        textDecoration: 'none',
+      }}
+    >
       {children}
-    </div>
+    </Link>
   );
 };
+
 export default SaveCheckLink;
