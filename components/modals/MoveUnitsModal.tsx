@@ -15,12 +15,22 @@ import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
 import { useEffect, useState } from 'react';
 import { outfit } from '@/components/AppWrapper';
 import { Collection } from '@/types/Unit';
-import { arrayRemove, arrayUnion, collection, doc, getDocs, query, runTransaction, where } from '@firebase/firestore';
+import {
+  arrayRemove,
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  runTransaction,
+  where,
+} from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useCampaign } from '@/hooks/useCampaign';
 import { useAlert } from '@/hooks/useAlert';
+import { generateUUID } from '@/utils/uuid';
 
-// TODO: Snackbar displays "1 item moved" regardless of how many items are selected
 const CollectionCheckbox = (props: {
   checked: boolean;
   collection: Collection;
@@ -74,7 +84,7 @@ const MoveUnitsModal = (props: {
     [],
   );
 
-  // TODO: Organize collections in parental order / re-create breadcrumbs on move
+  // TODO: Organize collections in parental order
   useEffect(() => {
     const getCollections = async (campaignId: string) => {
       const collections: Collection[] = [];
@@ -117,25 +127,42 @@ const MoveUnitsModal = (props: {
   const handleMoveUnits = async (event: any) => {
     event.preventDefault();
 
-    // TODO: Clone items instead of moving them
+    // TODO: Clone reference images as well.
     try {
       await runTransaction(db, async (transaction) => {
-        transaction.update(doc(db, 'units', props.currentCollection.id), {
-          unitIds: arrayRemove(...props.selectedUnitIds),
-        });
-        for (let collectionId of selectedCollectionIds) {
-          transaction.update(doc(db, 'units', collectionId), {
-            unitIds: arrayUnion(...props.selectedUnitIds),
+        for (const staleUnitId of props.selectedUnitIds) {
+          const unitDocSnap = await getDoc(doc(db, 'units', staleUnitId));
+          for (let collectionId of selectedCollectionIds) {
+            const collectionDocSnap = await getDoc(doc(db, 'units', collectionId));
+            if (unitDocSnap.exists() && collectionDocSnap.exists()) {
+
+              const clonedUnitId = generateUUID();
+              let breadcrumbs = collectionDocSnap.data().breadcrumbs;
+              breadcrumbs.push({
+                unitId: clonedUnitId,
+                url: `/campaigns/${campaign!.id}/${unitDocSnap.data().type}s/${clonedUnitId}`,
+              });
+
+              const clonedUnit = {
+                ...unitDocSnap.data(),
+                id: clonedUnitId,
+                breadcrumbs: breadcrumbs,
+              };
+
+              transaction.set(doc(db, 'units', clonedUnitId), clonedUnit);
+              transaction.update(doc(db, 'units', collectionId), {
+                unitIds: arrayUnion(clonedUnitId),
+              });
+            }
+          }
+          transaction.update(doc(db, 'units', props.currentCollection.id), {
+            unitIds: arrayRemove(staleUnitId),
           });
-        }
-        for (let unitId of props.selectedUnitIds) {
-          transaction.update(doc(db, 'units', unitId), {
-            breadcrumbs: [],
-          });
+          transaction.delete(doc(db, 'units', staleUnitId));
         }
       });
       displayAlert({
-        message: `${selectedCollectionIds.length} items successfully moved.`,
+        message: `${props.selectedUnitIds.length} items successfully moved.`,
       });
     } catch (e: any) {
       displayAlert({
@@ -181,7 +208,7 @@ const MoveUnitsModal = (props: {
                   updateState={updateSelectedCollectionIds}
                 />
               ))}
-              <Button sx={{ marginTop: 2 }} disabled onClick={handleMoveUnits}>
+              <Button sx={{ marginTop: 2 }} onClick={handleMoveUnits}>
                 Move Items
               </Button>
             </Stack>
