@@ -1,5 +1,5 @@
 'use client';
-import { Breadcrumbs, Typography, useTheme } from '@mui/material';
+import { Breadcrumbs, Skeleton, Typography, useTheme } from '@mui/material';
 import { useCampaign } from '@/hooks/useCampaign';
 import { useEffect, useState } from 'react';
 import db from '@/utils/firebase';
@@ -36,19 +36,26 @@ const NavBreadcrumbs = () => {
       }
     >
       {breadcrumbs.map((crumb, index) => {
-        if (index < breadcrumbs.length - 1) {
-          return (
-            <SaveCheckLink key={index} href={crumb.url}>
-              <Typography sx={LINK_STYLE} color={theme.palette.primary.main}>
-                {crumbTitles[index] ?? '-'}
-              </Typography>
-            </SaveCheckLink>
-          );
-        } else {
-          return (
-            <Typography key={index}>{crumbTitles[index] ?? '-'}</Typography>
-          );
-        }
+        const isLast = index === breadcrumbs.length - 1;
+        const title = crumbTitles[index];
+
+        const content = title ? (
+          <Typography sx={!isLast ? LINK_STYLE : undefined} color={!isLast ? theme.palette.primary.main : undefined}>
+            {title}
+          </Typography>
+        ) : (
+          <Skeleton width={100} />
+        );
+
+        return (
+          <div key={index}>
+            {!isLast && title ? (
+              <SaveCheckLink href={crumb.url}>{content}</SaveCheckLink>
+            ) : (
+              content
+            )}
+          </div>
+        );
       })}
     </Breadcrumbs>
   );
