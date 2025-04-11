@@ -78,8 +78,8 @@ const DragInterface = ({ children, encounter, tokenId }: {
             position: 'absolute',
             top: 0,
             left: 0,
-            width: '100%',
-            height: '100%',
+            width: '150px',
+            height: '230px',
             zIndex: 10,
             touchAction: 'none',
           }}
@@ -197,8 +197,8 @@ const EncounterTokenCard = (props: {
     <ConditionsInterface handleRemoveCondition={handleRemoveCondition} conditions={conditions}>
       <Card sx={{
         userSelect: 'none',
-        maxWidth: '150px',
-        maxHeight: '230px',
+        width: '150px',
+        height: '230px',
         border: `2px solid ${props.isCurrentTurn ? 'yellow' : 'transparent'}`,
       }}>
         <div style={{ filter: props.token.isDead ? 'grayscale(1)' : '' }}>
