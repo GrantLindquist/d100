@@ -124,6 +124,7 @@ const MoveUnitsModal = (props: {
     );
   };
 
+
   const handleMoveUnits = async (event: any) => {
     event.preventDefault();
 
