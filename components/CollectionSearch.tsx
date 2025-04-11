@@ -40,8 +40,6 @@ import { outfit } from '@/components/AppWrapper';
 import MoveUnitsModal from '@/components/modals/MoveUnitsModal';
 
 // TODO: Collection search needs new UI. One that doesn't use mui/masonry
-
-// TODO: Include sub-collections inside unit selection
 // TODO: CollectionSearch UI is buggy when loading images, horizontal scrollbar pops into view and images flicker
 const UnitTab = (props: {
   unit: Unit;
