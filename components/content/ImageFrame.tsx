@@ -11,11 +11,20 @@ const ImageFrame = (props: { image: ImageUrl; alt?: string }) => {
   const [frameWidth, setFrameWidth] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // Resize observer to keep frameWidth updated
   useEffect(() => {
-    if (frameRef.current) {
-      setFrameWidth(frameRef.current.offsetWidth);
-    }
+    if (!frameRef.current) return;
 
+    const observer = new ResizeObserver(([entry]) => {
+      setFrameWidth(entry.contentRect.width);
+    });
+
+    observer.observe(frameRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     const img = new Image();
     img.src = props.image.src;
     img.onload = () => {
@@ -32,31 +41,33 @@ const ImageFrame = (props: { image: ImageUrl; alt?: string }) => {
     };
   }, [props.image.src]);
 
+  const calculatedHeight = Math.min(frameWidth / props.image.ratio, maxImageHeight);
+
   return (
     <Box
       id={frameId.current}
       ref={frameRef}
       sx={{
-        flex: 1,
+        width: '100%',
+        height: calculatedHeight,
         display: 'flex',
         justifyContent: 'center',
-        minHeight: frameWidth / props.image.ratio,
+        alignItems: 'center',
       }}
     >
       {loading ? (
         <Skeleton
-          variant={'rounded'}
+          variant="rounded"
           sx={{
             width: '100%',
-            height: frameWidth / props.image.ratio,
-            maxHeight: maxImageHeight,
+            height: calculatedHeight,
           }}
         />
       ) : (
         <img
           style={{
             width: '100%',
-            maxWidth: maxImageHeight * props.image.ratio,
+            height: calculatedHeight,
             maxHeight: maxImageHeight,
             objectFit: 'contain',
           }}

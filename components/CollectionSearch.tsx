@@ -1,7 +1,20 @@
 'use client';
 
 import { ChangeEvent, ReactNode, useEffect, useState } from 'react';
-import { Box, Card, Checkbox, Grid, IconButton, Stack, TextField, Tooltip, Typography, useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  Checkbox,
+  Grid,
+  IconButton,
+  Modal,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material';
 
 import { Article, Collection, ImageUrl, Quest, Unit, UnitDisplayValues } from '@/types/Unit';
 import { arrayRemove, collection, doc, getDocs, query, runTransaction, where } from '@firebase/firestore';
@@ -9,7 +22,7 @@ import db, { storage } from '@/utils/firebase';
 import CreateUnitModal from '@/components/modals/CreateUnitModal';
 import { useRouter } from 'next/navigation';
 import FolderIcon from '@mui/icons-material/Folder';
-import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
 import Masonry from '@mui/lab/Masonry';
 import { useCampaign } from '@/hooks/useCampaign';
 import EditIcon from '@mui/icons-material/Edit';
@@ -27,21 +40,19 @@ import { outfit } from '@/components/AppWrapper';
 import MoveUnitsModal from '@/components/modals/MoveUnitsModal';
 
 // TODO: Collection search needs new UI. One that doesn't use mui/masonry
-
-// TODO: Include sub-collections inside unit selection
 // TODO: CollectionSearch UI is buggy when loading images, horizontal scrollbar pops into view and images flicker
 const UnitTab = (props: {
   unit: Unit;
   checked?: boolean;
   icon: ReactNode;
   isEditing: boolean;
-  updateState: (removeId: boolean, unitId: string) => void;
+  updateState: (removeId: boolean, unit: Unit) => void;
   imageUrl?: ImageUrl;
 }) => {
   const router = useRouter();
 
   const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
-    props.updateState(!event.target.checked, props.unit.id);
+    props.updateState(!event.target.checked, props.unit);
   };
   return (
     <div
@@ -96,7 +107,7 @@ const UnitTab = (props: {
               </Typography>
             </Stack>
           </Stack>
-          {props.isEditing && props.unit.type !== 'collection' && (
+          {props.isEditing && (
             <Checkbox
               checked={props.checked}
               onChange={handleCheck}
@@ -126,56 +137,69 @@ const CollectionSearch = (props: {
   const [units, setUnits] = useState<Unit[]>([]);
 
   const [isEditing, setEditing] = useState(false);
-  const [selectedUnitIds, setSelectedUnitIds] = useState<string[]>([]);
+  const [selectedUnits, setSelectedUnits] = useState<Unit[]>([]);
+  const selectedUnitIds = selectedUnits.map((unit) => unit.id);
+  const selectedUnitsIncludeCollection = selectedUnits.filter((unit) => unit.type === 'collection').length > 0;
 
-  useEffect(() => {
-    const fetchUnits = async () => {
-      try {
-        let units: Unit[] = [];
-        const chunkSize = 30;
-        const chunks = [];
-        for (let i = 0; i < props.unitIds.length; i += chunkSize) {
-          chunks.push(props.unitIds.slice(i, i + chunkSize));
-        }
+  const [displayDeleteWarningModal, setDisplayDeleteWarningModal] = useState(false);
 
-        for (const chunk of chunks) {
-          const unitQuery = query(
-            collection(db, 'units'),
-            where('id', 'in', chunk),
-          );
-          const unitQuerySnap = await getDocs(unitQuery);
-          unitQuerySnap.forEach((doc) => {
-            units.push(doc.data() as Unit);
-          });
-        }
-        setUnits(units);
-      } catch (e: any) {
-        displayAlert({
-          message: 'An error occurred while fetching articles.',
-          isError: true,
-          errorType: e.message,
+  const fetchUnits = async (unitIds: string[]) => {
+    try {
+      let units: Unit[] = [];
+      const chunkSize = 30;
+      const chunks = [];
+      for (let i = 0; i < unitIds.length; i += chunkSize) {
+        chunks.push(unitIds.slice(i, i + chunkSize));
+      }
+
+      for (const chunk of chunks) {
+        const unitQuery = query(
+          collection(db, 'units'),
+          where('id', 'in', chunk),
+        );
+        const unitQuerySnap = await getDocs(unitQuery);
+        unitQuerySnap.forEach((doc) => {
+          units.push(doc.data() as Unit);
         });
       }
-    };
+      return units;
+    } catch (e: any) {
+      displayAlert({
+        message: 'An error occurred while fetching articles.',
+        isError: true,
+        errorType: e.message,
+      });
+    }
+  };
 
-    props.unitIds.length > 0 ? fetchUnits() : setUnits([]);
+  useEffect(() => {
+    async function initializeState() {
+      if (props.unitIds.length > 0) {
+        const response = await fetchUnits(props.unitIds);
+        setUnits(response ?? []);
+      } else {
+        setUnits([]);
+      }
+    }
+
+    initializeState();
   }, [props.unitIds]);
 
   // Resets selected unit ids when done editing
   useEffect(() => {
-    setSelectedUnitIds([]);
+    setSelectedUnits([]);
   }, [isEditing]);
 
-  const updateSelectedUnitIds = (removeId: boolean, unitId: string) => {
+  const updateSelectedUnits = (removeId: boolean, unit: Unit) => {
     if (!removeId) {
-      let newSelectedUnitIds = [...selectedUnitIds];
-      newSelectedUnitIds.push(unitId);
-      setSelectedUnitIds(newSelectedUnitIds);
+      let newSelectedUnits = [...selectedUnits];
+      newSelectedUnits.push(unit);
+      setSelectedUnits(newSelectedUnits);
     } else {
-      let newSelectedUnitIds = [...selectedUnitIds].filter(
-        (id) => id !== unitId,
+      let newSelectedUnits = [...selectedUnits].filter(
+        (selectedUnit) => selectedUnit.id !== unit.id,
       );
-      setSelectedUnitIds(newSelectedUnitIds);
+      setSelectedUnits(newSelectedUnits);
     }
   };
 
@@ -184,26 +208,40 @@ const CollectionSearch = (props: {
     setSearchQuery(value);
   };
 
-  const handleDeleteUnits = async () => {
-    if (campaign) {
-      try {
-        await runTransaction(db, async (transaction) => {
-          for (let unitId of selectedUnitIds) {
-            transaction.update(doc(db, 'units', props.collection.id), {
-              unitIds: arrayRemove(unitId),
-            });
-          }
-          listAll(ref(storage, campaign.id)).then((res) => {
-            res.items.forEach(async (itemRef) => {
-              if (selectedUnitIds.includes(itemRef.name.split('-')[0])) {
-                await deleteObject(itemRef);
-              }
-            });
-          });
+  const recursiveDelete = async (units: Unit[]) => {
+    let deletedItemCount = 0;
+    for (let unit of units) {
+      if (unit.type === 'collection') {
+        const response = await fetchUnits((unit as Collection).unitIds) ?? [];
+        deletedItemCount += await recursiveDelete(response);
+      }
+      await runTransaction(db, async (transaction) => {
+        transaction.update(doc(db, 'units', props.collection.id), {
+          unitIds: arrayRemove(unit.id),
         });
+        transaction.delete(doc(db, 'units', unit.id));
+        deletedItemCount += 1;
+      });
+    }
+    const allItems = await listAll(ref(storage, campaign!.id));
+    await Promise.all(
+      allItems.items.map(async (itemRef) => {
+        if (selectedUnitIds.includes(itemRef.name.split('-')[0])) {
+          await deleteObject(itemRef);
+        }
+      }),
+    );
+    return deletedItemCount;
+  };
 
+  const handleDeleteUnits = async (bypassWarning: boolean) => {
+    if (!bypassWarning && selectedUnitsIncludeCollection) {
+      setDisplayDeleteWarningModal(true);
+    } else {
+      try {
+        const deletedItemCount = await recursiveDelete(selectedUnits);
         displayAlert({
-          message: `Successfully deleted ${selectedUnitIds.length} item${selectedUnitIds.length > 1 ? 's' : ''}`,
+          message: `Successfully deleted ${deletedItemCount} item${deletedItemCount > 1 ? 's' : ''}`,
         });
       } catch (e: any) {
         displayAlert({
@@ -212,8 +250,8 @@ const CollectionSearch = (props: {
           errorType: e.message,
         });
       }
+      setEditing(false);
     }
-    setEditing(false);
   };
 
   const searchResults =
@@ -287,7 +325,8 @@ const CollectionSearch = (props: {
                         unit={collection}
                         icon={<FolderIcon />}
                         isEditing={isEditing}
-                        updateState={updateSelectedUnitIds}
+                        updateState={updateSelectedUnits}
+                        checked={selectedUnitIds.includes(collection.id)}
                       />
                     </Box>
                   );
@@ -332,7 +371,7 @@ const CollectionSearch = (props: {
                         }
                       })()}
                       isEditing={isEditing}
-                      updateState={updateSelectedUnitIds}
+                      updateState={updateSelectedUnits}
                       {...(unit.type === 'article' ||
                       (unit.type === 'quest' &&
                         (unit as Article | Quest).imageUrls[0])
@@ -375,7 +414,7 @@ const CollectionSearch = (props: {
                     <span>
                       <MoveUnitsModal
                         selectedUnitIds={selectedUnitIds}
-                        disabled={selectedUnitIds.length === 0}
+                        disabled={selectedUnitIds.length === 0 || selectedUnitsIncludeCollection}
                         setEditing={setEditing}
                         currentCollection={props.collection}
                       />
@@ -386,7 +425,7 @@ const CollectionSearch = (props: {
                       <IconButton
                         size="large"
                         disabled={selectedUnitIds.length === 0}
-                        onClick={handleDeleteUnits}
+                        onClick={() => handleDeleteUnits(false)}
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -398,6 +437,23 @@ const CollectionSearch = (props: {
           </>
         )}
       </Grid>
+      <Modal open={displayDeleteWarningModal} onClose={() => setDisplayDeleteWarningModal(false)}>
+        <Box sx={MODAL_STYLE} width={600}>
+          <Typography variant={'h4'} fontWeight={BOLD_FONT_WEIGHT}>WARNING</Typography>
+          <Box py={2}>
+            <Typography>You have selected a Sub-Collection for deletion. Deleting a Sub-Collection will result in
+              each
+              child item also being deleted.</Typography>
+            <Typography fontWeight={BOLD_FONT_WEIGHT}>This includes other
+              Sub-Collections.</Typography>
+            <Typography pt={1}>Do you wish to proceed?</Typography>
+          </Box>
+          <Button onClick={() => {
+            handleDeleteUnits(true).then(() => setDisplayDeleteWarningModal(false));
+          }}>Yes</Button>
+          <Button onClick={() => setDisplayDeleteWarningModal(false)}>On second thought...</Button>
+        </Box>
+      </Modal>
     </Grid>
   );
 };

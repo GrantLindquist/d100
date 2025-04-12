@@ -4,9 +4,14 @@ export interface Encounter extends Unit {
   tokens: EncounterToken[];
   roundCount: number;
   turnCount: number;
-  initiativeOrder: string[];
+  initiativeOrder: Initiative[];
   activeConditions: Condition[];
   logs: EncounterLog[];
+}
+
+export interface Initiative {
+  tokenId: string;
+  isActive: boolean;
 }
 
 export interface EncounterLog {
@@ -29,9 +34,13 @@ export interface EncounterToken {
 
 export interface Condition {
   name: string;
-  roundDuration: number;
   roundInflicted: number;
+
+  roundEnd: number;
+  turnEnd: number;
+
+  inflictingTokenId: string;
   inflictedTokenId: string;
-  removeOnEnemyTurn: boolean;
 }
+
 

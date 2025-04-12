@@ -10,6 +10,7 @@ import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { Encounter } from '@/types/Encounter';
 import { Box, Container, Typography } from '@mui/material';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import EncounterTokenField from '@/components/data-list/EncounterTokenField';
 import EncounterAside from '@/components/content/EncounterAside';
@@ -21,6 +22,7 @@ export default function EncounterPage() {
   const pathname = usePathname();
 
   const [encounter, setEncounter] = useState<Encounter | null>(null);
+  const [asideOpen, setAsideOpen] = useState(false);
 
   useEffect(() => {
     if (campaign && user) {
@@ -48,39 +50,55 @@ export default function EncounterPage() {
   }, [user?.id, campaign?.id]);
 
   if (!encounter) return null;
+
   return (
-    <Box display={'flex'}>
-      <Box width={'75%'}>
+    <Box display="flex" height="100vh">
+      <Box width={asideOpen ? '75%' : '100%'}>
         <Container>
-          <Box
-            sx={{
-              pt: 12,
-            }}
-          >
-            <Typography variant={'h2'} fontWeight={BOLD_FONT_WEIGHT}>
+          <Box sx={{ pt: 12 }}>
+            <Typography variant="h2" fontWeight={BOLD_FONT_WEIGHT}>
               {encounter.title}
             </Typography>
             <EncounterTokenField encounter={encounter} />
-
           </Box>
         </Container>
       </Box>
-      <Box sx={{
-        width: '25%',
-        flexShrink: 0,
-        borderLeft: '1px solid',
-        borderColor: 'divider',
-        p: 3,
-        backgroundColor: 'background.paper',
-        overflow: 'auto',
-        height: '100vh',
-      }}>
-        <EncounterAside
-          articleIds={encounter?.tokens
-            .map((token) => token.articleId ?? null)
-            .filter((id): id is string => id !== null)}
-        />
+
+      <Box
+        onClick={() => setAsideOpen((prev) => !prev)}
+        sx={{
+          cursor: 'pointer',
+          width: 'auto',
+          display: 'flex',
+          alignItems: 'center',
+          backgroundColor: 'background.paper',
+          borderLeft: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        {asideOpen ? <ChevronRight /> : <ChevronLeft />}
       </Box>
+
+      {asideOpen && (
+        <Box
+          sx={{
+            width: '25%',
+            flexShrink: 0,
+            borderLeft: '1px solid',
+            borderColor: 'divider',
+            p: 3,
+            backgroundColor: 'background.paper',
+            overflow: 'auto',
+            height: '100vh',
+          }}
+        >
+          <EncounterAside
+            articleIds={encounter.tokens
+              .map((token) => token.articleId ?? null)
+              .filter((id): id is string => id !== null)}
+          />
+        </Box>
+      )}
     </Box>
   );
 }
