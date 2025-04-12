@@ -8,13 +8,16 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import ImageFrame from '@/components/content/ImageFrame';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import { arrayRemove, doc, getDoc, updateDoc } from '@firebase/firestore';
+import { doc, getDoc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useDrag } from '@use-gesture/react';
 import RollInitiativeModal from '@/components/modals/RollInitiativeModal';
 import CreateEncounterTokenModal from '@/components/modals/CreateEncounterTokenModal';
 import DamageMenu from '@/components/DamageMenu';
 import { ImageUrl } from '@/types/Unit';
+
+const EncounterTokenWidth = 150;
+const EncounterTokenHeight = 210;
 
 const DragInterface = ({ children, encounter, tokenId }: {
   children: ReactNode;
@@ -56,7 +59,6 @@ const DragInterface = ({ children, encounter, tokenId }: {
     }
   }, {});
 
-  // TODO: DragInterface stretches farther on Y-Axis than card boundaries
   return (
     <>
       {selectedId && <Menu
@@ -66,7 +68,8 @@ const DragInterface = ({ children, encounter, tokenId }: {
         transformOrigin={{ horizontal: 'center', vertical: 'bottom' }}
         anchorOrigin={{ horizontal: 'center', vertical: 'top' }}
       >
-        <DamageMenu inflictedTokenId={selectedId} encounter={encounter} closeMenu={() => setAnchor(null)} />
+        <DamageMenu inflictedTokenId={selectedId} inflictingTokenId={tokenId} encounter={encounter}
+                    closeMenu={() => setAnchor(null)} />
       </Menu>}
       <Box
         sx={{ position: 'relative' }}>
@@ -78,8 +81,8 @@ const DragInterface = ({ children, encounter, tokenId }: {
             position: 'absolute',
             top: 0,
             left: 0,
-            width: '150px',
-            height: '230px',
+            width: `${EncounterTokenWidth}px`,
+            height: `${EncounterTokenHeight}px`,
             zIndex: 10,
             touchAction: 'none',
           }}
@@ -151,7 +154,6 @@ const ConditionsInterface = ({ children, conditions, handleRemoveCondition }: {
   </Box>;
 };
 
-// TODO: Consider implementing a hook for encounters
 const EncounterTokenCard = (props: {
   token: EncounterToken;
   encounter: Encounter;
@@ -176,20 +178,26 @@ const EncounterTokenCard = (props: {
   }, []);
 
   useEffect(() => {
-    const currentActiveConditions = props.encounter.activeConditions.filter((condition) => {
-      return condition.inflictedTokenId === props.token.id &&
-        props.encounter.roundCount >= condition.roundInflicted &&
-        props.encounter.roundCount <= condition.roundInflicted + condition.roundDuration;
+    const { roundCount, turnCount, activeConditions } = props.encounter;
+    const currentlyVisibleConditions = activeConditions.filter((condition) => {
+      return props.token.id === condition.inflictedTokenId && roundCount >= condition.roundInflicted && roundCount <= condition.roundEnd && (roundCount !== condition.roundEnd || turnCount < condition.turnEnd);
     });
 
-    setConditions(currentActiveConditions);
-  }, [props.encounter.turnCount]);
+    setConditions(currentlyVisibleConditions);
+  }, [props.token.id, props.encounter]);
+
 
   const handleRemoveCondition = async (removeIndex: number) => {
     const removeCondition = conditions[removeIndex];
-    setConditions(conditions.filter((_, index) => index !== removeIndex));
+    removeCondition.roundEnd = props.encounter.roundCount;
+    removeCondition.turnEnd = props.encounter.turnCount;
+
+    const newConditions = conditions.filter((_, index) => index !== removeIndex);
+    newConditions.push(removeCondition);
+
+    setConditions(newConditions);
     await updateDoc(doc(db, 'units', props.encounter.id), {
-      activeConditions: arrayRemove(removeCondition),
+      activeConditions: newConditions,
     });
   };
 
@@ -197,8 +205,8 @@ const EncounterTokenCard = (props: {
     <ConditionsInterface handleRemoveCondition={handleRemoveCondition} conditions={conditions}>
       <Card sx={{
         userSelect: 'none',
-        width: '150px',
-        height: '230px',
+        width: `${EncounterTokenWidth}px`,
+        height: `${EncounterTokenHeight}px`,
         border: `2px solid ${props.isCurrentTurn ? 'yellow' : 'transparent'}`,
       }}>
         <div style={{ filter: props.token.isDead ? 'grayscale(1)' : '' }}>
@@ -228,20 +236,27 @@ const EncounterTokenField = (props: { encounter: Encounter }) => {
   const [turnCount, setTurnCount] = useState(props.encounter.turnCount);
   const [roundCount, setRoundCount] = useState(props.encounter.roundCount);
 
-  const currentTurnToken = roundCount > 0 ? props.encounter.tokens.find((token) => token.id === props.encounter.initiativeOrder[turnCount]) : null;
+  const currentTurnToken = roundCount > 0 ? props.encounter.tokens.find((token) => token.id === props.encounter.initiativeOrder[turnCount].tokenId) : null;
 
   const moveTurn = async (direction: 1 | -1) => {
+    const initiativeLength = props.encounter.initiativeOrder.length;
     let newTurn = turnCount;
     let newRound = roundCount;
-    newTurn += direction;
 
-    if (newTurn >= props.encounter.initiativeOrder.length) {
-      newTurn = 0;
-      newRound += 1;
-    } else if (newTurn < 0) {
-      newTurn = props.encounter.initiativeOrder.length - 1;
-      newRound -= 1;
+    for (let _ = 0; _ < initiativeLength; _++) {
+      newTurn += direction;
+      if (newTurn >= initiativeLength) {
+        newTurn = 0;
+        newRound += 1;
+      } else if (newTurn < 0) {
+        newTurn = initiativeLength - 1;
+        newRound -= 1;
+      }
+      if (props.encounter.initiativeOrder[newTurn].isActive) {
+        break;
+      }
     }
+
     setTurnCount(newTurn);
     newRound != roundCount && setRoundCount(newRound);
 

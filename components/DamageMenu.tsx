@@ -1,43 +1,116 @@
 import { useAlert } from '@/hooks/useAlert';
-import { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { arrayUnion, doc, updateDoc } from '@firebase/firestore';
-import { Condition, Encounter, EncounterToken } from '@/types/Encounter';
-import { Box, Button, Checkbox, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { Condition, Encounter, EncounterToken, Initiative } from '@/types/Encounter';
+import {
+  Box,
+  Button,
+  Checkbox,
+  IconButton,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import db from '@/utils/firebase';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import ThemeTooltip from '@/components/ThemeTooltip';
 
-const ConditionsDropdown = (props: { encounter: Encounter, inflictedToken: EncounterToken }) => {
+interface EndCondition {
+  actor: 'inflicter' | 'inflicted',
+  at: 'start' | 'end'
+}
+
+const defaultEndCondition: EndCondition = {
+  actor: 'inflicted',
+  at: 'end',
+};
+
+const ConditionsDropdown = (props: {
+  encounter: Encounter,
+  inflictingToken: EncounterToken,
+  inflictedToken: EncounterToken
+}) => {
   const [formData, setFormData] = useState({
     conditionName: '',
-    roundDuration: 0,
-    removeOnEnemyTurn: false,
+    roundDuration: 1,
+    endCondition: defaultEndCondition,
   });
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+  const handleInputChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent,
+  ) => {
+    const { name, value } = event.target;
+
+    // Handle nested endCondition updates
+    if (name.startsWith('endCondition.')) {
+      const key = name.split('.')[1] as 'actor' | 'at';
+      setFormData((prev) => ({
+        ...prev,
+        endCondition: {
+          ...prev.endCondition,
+          [key]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const calculateConditionEnd = () => {
+    const tokenCount = props.encounter.initiativeOrder.length - 1;
+    const actorTokenId = formData.endCondition.actor === 'inflicted'
+      ? props.inflictedToken.id
+      : props.inflictingToken.id;
+    const actorTurn = props.encounter.initiativeOrder.findIndex(
+      (order) => order.tokenId === actorTokenId,
+    );
+
+    const hasTokenTurnPassed = actorTurn <= props.encounter.turnCount;
+    let roundEnd = props.encounter.roundCount + formData.roundDuration - (hasTokenTurnPassed ? 0 : 1);
+
+    let turnEnd;
+    if (formData.endCondition.at === 'start') {
+      turnEnd = actorTurn;
+    } else {
+      if (actorTurn === tokenCount) {
+        roundEnd += 1;
+        turnEnd = 0;
+      } else {
+        turnEnd = actorTurn + 1;
+      }
+    }
+
+    return {
+      roundEnd: roundEnd,
+      turnEnd: turnEnd,
+    };
   };
 
   const handleAddCondition = async () => {
+    const { roundEnd, turnEnd } = calculateConditionEnd();
     const newCondition: Condition = {
       name: formData.conditionName,
-      roundDuration: Number(formData.roundDuration),
-      removeOnEnemyTurn: formData.removeOnEnemyTurn,
+
+      roundEnd: roundEnd,
+      turnEnd: turnEnd,
+
       roundInflicted: props.encounter.roundCount,
+      inflictingTokenId: props.inflictingToken.id,
       inflictedTokenId: props.inflictedToken.id,
     };
     await updateDoc(doc(db, 'units', props.encounter.id), {
       activeConditions: arrayUnion(newCondition),
     });
-    setFormData({ conditionName: '', roundDuration: 0, removeOnEnemyTurn: false });
+    setFormData({ conditionName: '', roundDuration: 1, endCondition: defaultEndCondition });
   };
 
   return (
@@ -56,14 +129,23 @@ const ConditionsDropdown = (props: { encounter: Encounter, inflictedToken: Encou
             color: '#DDDDDD',
             '& fieldset': { border: 'none' },
           }}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <IconButton color="primary" size="small" onClick={handleAddCondition}>
+                  <AddIcon />
+                </IconButton>
+              ),
+            },
+          }}
         />
         <TextField
-          variant="outlined"
           name="roundDuration"
+          variant="outlined"
           size="small"
           value={formData.roundDuration}
           type="number"
-          placeholder={'∞'}
+          placeholder="∞"
           onChange={handleInputChange}
           sx={{
             width: '30%',
@@ -84,29 +166,62 @@ const ConditionsDropdown = (props: { encounter: Encounter, inflictedToken: Encou
           }}
         />
       </Stack>
-      <Stack direction={'row'} spacing={1}>
-        <Stack direction={'row'} spacing={1} alignItems={'center'} flexGrow={1}>
-          <ThemeTooltip
-            title={`If checked, this condition will end after the enemy's turn as opposed to ending after yours.`}
-          >
-            <InfoOutlinedIcon sx={{ color: 'grey', height: 20, width: 20 }} />
-          </ThemeTooltip>
-          <Typography variant={'subtitle2'}>{'End on enemy\'s turn'}</Typography>
-          <Checkbox
-            name="removeOnEnemyTurn"
-            checked={formData.removeOnEnemyTurn}
-            onChange={handleInputChange}
-          />
-        </Stack>
-        <Button variant={'contained'} size={'small'} onClick={() => handleAddCondition()}>
-          <AddIcon />
-        </Button>
-      </Stack>
+      <Box sx={{ mt: 1 }}>
+        <Typography component="span" sx={{ display: 'inline' }}>
+          Condition will end at the{' '}
+        </Typography>
+        <Select
+          name="endCondition.at"
+          value={formData.endCondition.at}
+          onChange={handleInputChange}
+          variant="standard"
+          disableUnderline
+          sx={{
+            ml: 0.5,
+            color: 'primary.main',
+            fontWeight: BOLD_FONT_WEIGHT,
+            display: 'inline-block',
+            verticalAlign: 'middle',
+          }}
+        >
+          <MenuItem value="start">start</MenuItem>
+          <MenuItem value="end">end</MenuItem>
+        </Select>
+        <Typography component="span" sx={{ display: 'inline', ml: 0.5 }}>
+          of
+        </Typography>
+        <Select
+          name="endCondition.actor"
+          value={formData.endCondition.actor}
+          onChange={handleInputChange}
+          variant="standard"
+          disableUnderline
+          sx={{
+            ml: 0.5,
+            color: 'primary.main',
+            fontWeight: BOLD_FONT_WEIGHT,
+            display: 'inline-block',
+            verticalAlign: 'middle',
+          }}
+        >
+          <MenuItem value="inflicted">{props.inflictedToken.title}</MenuItem>
+          <MenuItem value="inflicter">{props.inflictingToken.title}</MenuItem>
+        </Select>
+        <Typography component="span" sx={{ display: 'inline', ml: 0.5 }}>
+          's turn
+        </Typography>
+      </Box>
+
     </Box>
   );
 };
 
-const DamageMenu = (props: { inflictedTokenId: string; encounter: Encounter; closeMenu: Function }) => {
+const DamageMenu = (props: {
+  inflictedTokenId: string;
+  inflictingTokenId: string;
+  encounter: Encounter;
+  closeMenu: Function
+}) => {
   const { displayAlert } = useAlert();
 
   const [healthCounter, setHealthCounter] = useState(0);
@@ -114,6 +229,7 @@ const DamageMenu = (props: { inflictedTokenId: string; encounter: Encounter; clo
   const [displayConditionsDropdown, setDisplayConditionsDropdown] = useState(false);
 
   const inflictedToken = props.encounter.tokens.find((token) => token.id === props.inflictedTokenId);
+  const inflictingToken = props.encounter.tokens.find((token) => token.id === props.inflictingTokenId);
 
   const tickHealth = (direction: -1 | 1) => {
     let temp = healthCounter;
@@ -133,6 +249,7 @@ const DamageMenu = (props: { inflictedTokenId: string; encounter: Encounter; clo
               inflictedToken.currentHitPoints += difference;
             } else {
               inflictedToken.tempHitPoints -= healthCounter;
+              inflictedToken.tempHitPoints -= healthCounter;
             }
           } else {
             inflictedToken.currentHitPoints -= healthCounter;
@@ -140,8 +257,12 @@ const DamageMenu = (props: { inflictedTokenId: string; encounter: Encounter; clo
           if (inflictedToken.currentHitPoints <= 0) {
             inflictedToken.currentHitPoints = 0;
             inflictedToken.isDead = true;
-            // TODO: Make this an object with an active:boolean property to maintain initiative state
-            // initiativeOrder = initiativeOrder.filter((id: string) => id !== inflictedToken.id);
+            initiativeOrder = initiativeOrder.map((item: Initiative) =>
+              item.tokenId === inflictedToken.id
+                ? { ...item, isActive: false }
+                : item,
+            );
+
           }
         } else {
           if (applyTempHitPointsChecked) {
@@ -151,7 +272,11 @@ const DamageMenu = (props: { inflictedTokenId: string; encounter: Encounter; clo
           } else {
             if (inflictedToken.isDead) {
               inflictedToken.isDead = false;
-              // initiativeOrder.push(inflictedToken.id);
+              initiativeOrder = initiativeOrder.map((item: Initiative) =>
+                item.tokenId === inflictedToken.id
+                  ? { ...item, isActive: true }
+                  : item,
+              );
             }
             if (inflictedToken.currentHitPoints + healthCounter <= inflictedToken.maxHitPoints) {
               inflictedToken.currentHitPoints += healthCounter;
@@ -257,11 +382,11 @@ const DamageMenu = (props: { inflictedTokenId: string; encounter: Encounter; clo
           />
         </Stack>
       </Stack>
-      {displayConditionsDropdown && inflictedToken && <>
-        <ConditionsDropdown encounter={props.encounter} inflictedToken={inflictedToken} />
+      {displayConditionsDropdown && inflictedToken && inflictingToken && <>
+        <ConditionsDropdown encounter={props.encounter} inflictingToken={inflictingToken}
+                            inflictedToken={inflictedToken} />
       </>}
     </Box>
-
   </Box>;
 };
 

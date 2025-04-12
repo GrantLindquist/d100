@@ -2,7 +2,7 @@ import { Box, Button, Divider, Modal, Stack, Typography } from '@mui/material';
 import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
 import CasinoIcon from '@mui/icons-material/Casino';
 import { useEffect, useState } from 'react';
-import { Encounter, EncounterToken } from '@/types/Encounter';
+import { Encounter, EncounterToken, Initiative } from '@/types/Encounter';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import {
   arrayMove,
@@ -56,8 +56,9 @@ const RollInitiativeModal = (props: { encounter: Encounter; setRoundCount: Funct
 
   useEffect(() => {
     if (props.encounter.initiativeOrder.length > 0) {
-      const tokensExcludedFromInitiative = props.encounter.tokens.filter((token: EncounterToken) => !props.encounter.initiativeOrder.includes(token.id));
-      setItems([...props.encounter.initiativeOrder, ...tokensExcludedFromInitiative.map((token) => token.id)]);
+      const initiativeTokens = props.encounter.initiativeOrder.map((order) => order.tokenId);
+      const tokensExcludedFromInitiative = props.encounter.tokens.filter((token: EncounterToken) => !initiativeTokens.includes(token.id));
+      setItems([...initiativeTokens, ...tokensExcludedFromInitiative.map((token) => token.id)]);
     } else {
       setItems(props.encounter.tokens.map((item) => item.id));
     }
@@ -79,8 +80,14 @@ const RollInitiativeModal = (props: { encounter: Encounter; setRoundCount: Funct
   const handleSetInitiativeOrder = async () => {
     try {
       const roundCount = props.encounter.roundCount === 0 ? 1 : props.encounter.roundCount;
+      const initiativeOrder: Initiative[] = items.map((id) => {
+        return {
+          tokenId: id,
+          isActive: true,
+        };
+      });
       await updateDoc(doc(db, 'units', props.encounter.id), {
-        initiativeOrder: items,
+        initiativeOrder: initiativeOrder,
         roundCount: roundCount,
       });
       props.setRoundCount(roundCount);

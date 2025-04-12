@@ -89,7 +89,6 @@ const EncounterAside = (props: { articleIds: string[] }) => {
     }
   }, [props.articleIds]);
 
-  // TODO: Make aside retractable
   return (
     <Box pt={8}>
       {articles.length ? (

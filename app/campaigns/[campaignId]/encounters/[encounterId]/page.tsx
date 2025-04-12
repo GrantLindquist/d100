@@ -65,7 +65,9 @@ export default function EncounterPage() {
       </Box>
 
       <Box
+        onClick={() => setAsideOpen((prev) => !prev)}
         sx={{
+          cursor: 'pointer',
           width: 'auto',
           display: 'flex',
           alignItems: 'center',
@@ -74,9 +76,7 @@ export default function EncounterPage() {
           borderColor: 'divider',
         }}
       >
-        <Box onClick={() => setAsideOpen((prev) => !prev)}>
-          {asideOpen ? <ChevronRight /> : <ChevronLeft />}
-        </Box>
+        {asideOpen ? <ChevronRight /> : <ChevronLeft />}
       </Box>
 
       {asideOpen && (
