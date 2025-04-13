@@ -208,7 +208,7 @@ const ConditionsDropdown = (props: {
           <MenuItem value="inflicter">{props.inflictingToken.title}</MenuItem>
         </Select>
         <Typography component="span" sx={{ display: 'inline', ml: 0.5 }}>
-          's turn
+          {'\'s turn'}
         </Typography>
       </Box>
 
