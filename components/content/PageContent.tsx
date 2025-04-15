@@ -501,6 +501,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                   position: 'fixed',
                   right: 16,
                   bottom: 16,
+                  zIndex: 25,
                 }}
               >
                 <Tooltip title={`Hide Content From Players`} placement={'left'}>
