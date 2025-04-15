@@ -1,4 +1,4 @@
-import { Article } from '@/types/Unit';
+import { Article, Quest } from '@/types/Unit';
 import { Box, Card, Typography } from '@mui/material';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import ImageFrame from '@/components/content/ImageFrame';
@@ -19,10 +19,10 @@ const SubheaderAsideSx = {
   paddingY: 0.5,
 };
 
-const ArticleAside = (props: { titles: string[]; article: Article }) => {
+const ArticleAside = (props: { titles: string[]; unit: Article | Quest }) => {
   const scrollToHeader = (headerText: string) => {
     const headerElement = Array.from(document.querySelectorAll('h2')).find(
-      (header) => header.innerHTML === headerText
+      (header) => header.innerHTML === headerText,
     );
 
     // TODO: Make section title temporarily highlight when this activates
@@ -30,7 +30,7 @@ const ArticleAside = (props: { titles: string[]; article: Article }) => {
       const rect = headerElement.getBoundingClientRect();
       const offset = window.scrollY || document.documentElement.scrollTop;
       const targetPosition =
-        rect.top + offset - (headerText === props.article.title ? 100 : 85);
+        rect.top + offset - (headerText === props.unit.title ? 100 : 85);
 
       // console.log(headerElement);
       // headerElement.classList.add('highlight');
@@ -49,10 +49,10 @@ const ArticleAside = (props: { titles: string[]; article: Article }) => {
 
   return (
     <Card sx={{ userSelect: 'none' }}>
-      {props.article.imageUrls.length > 0 && (
+      {props.unit.imageUrls.length > 0 && (
         <ImageFrame
-          image={props.article.imageUrls[0]}
-          alt={props.article.title}
+          image={props.unit.imageUrls[0]}
+          alt={props.unit.title}
         />
       )}
       <Box
@@ -74,7 +74,7 @@ const ArticleAside = (props: { titles: string[]; article: Article }) => {
             </Typography>
           );
         })}
-        {props.article.type === 'quest' && (
+        {props.unit.type === 'quest' && (
           <>
             {/*<Typography*/}
             {/*  onClick={() => scrollToHeader('Quest Timeline')}*/}
@@ -82,15 +82,18 @@ const ArticleAside = (props: { titles: string[]; article: Article }) => {
             {/*>*/}
             {/*  Quest Timeline*/}
             {/*</Typography>*/}
-            <Typography
-              onClick={() => scrollToHeader('Loot Table')}
-              sx={HeaderAsideSx}
-            >
-              Loot Table
-            </Typography>
+            {
+              // @ts-ignore
+              props.unit.loot && <Typography
+                onClick={() => scrollToHeader('Loot Table')}
+                sx={HeaderAsideSx}
+              >
+                Loot Table
+              </Typography>
+            }
           </>
         )}
-        {props.article.imageUrls.length > 0 && (
+        {props.unit.imageUrls.length > 0 && (
           <Typography
             onClick={() => scrollToHeader('Reference Images')}
             sx={HeaderAsideSx}

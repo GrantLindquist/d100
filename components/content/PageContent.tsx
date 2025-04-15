@@ -348,12 +348,12 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                         display: { xs: 'none', md: 'block' },
                       }}
                     >
-                      <ArticleAside titles={sectionTitles} article={unit} />
+                      <ArticleAside titles={sectionTitles} unit={unit} />
                     </Box>
                   </Box>
                 </Grid>
                 <Grid item xs={12} md={8}>
-                  <Box pl={3} zIndex={5}>
+                  <Box pl={3} pb={12} zIndex={5}>
                     <Typography
                       sx={{ userSelect: 'none' }}
                       pb={1}
@@ -461,7 +461,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                         sx={{
                           color: 'grey',
                           position: 'relative',
-                          top: -285,
+                          top: -135,
                           pointerEvents: 'none',
                           whiteSpace: 'pre-line',
                         }}
