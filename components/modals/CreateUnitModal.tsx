@@ -4,7 +4,6 @@ import {
   Button,
   Checkbox,
   FormControlLabel,
-  IconButton,
   Menu,
   MenuItem,
   Modal,
@@ -28,6 +27,7 @@ import KeyIcon from '@mui/icons-material/Key';
 import FolderIcon from '@mui/icons-material/Folder';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import { Encounter } from '@/types/Encounter';
+import { SmallIconButton } from '@/components/buttons/SmallIconButton';
 
 const generateDefaultContent = (title: string) => {
   return {
@@ -199,9 +199,7 @@ const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {
 
   return (
     <>
-      <IconButton color={'primary'} onClick={handleClickMenu}>
-        <AddIcon />
-      </IconButton>
+      <SmallIconButton icon={<AddIcon />} onClick={handleClickMenu} />
       <Menu anchorEl={menuAnchor} open={menuOpen} onClose={handleCloseMenu}>
         <MenuItem onClick={() => setModalState('quest')}>
           <KeyIcon sx={{ width: 20, height: 20 }} />

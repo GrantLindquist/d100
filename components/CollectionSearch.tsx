@@ -6,8 +6,8 @@ import {
   Button,
   Card,
   Checkbox,
-  Grid,
-  IconButton,
+  Divider,
+  Grid2,
   Modal,
   Stack,
   TextField,
@@ -38,9 +38,8 @@ import { deleteObject, listAll, ref } from '@firebase/storage';
 import ImageFrame from '@/components/content/ImageFrame';
 import { outfit } from '@/components/AppWrapper';
 import MoveUnitsModal from '@/components/modals/MoveUnitsModal';
+import { SmallIconButton, SmallIconButtonGroup } from '@/components/buttons/SmallIconButton';
 
-// TODO: Collection search needs new UI. One that doesn't use mui/masonry
-// TODO: CollectionSearch UI is buggy when loading images, horizontal scrollbar pops into view and images flicker
 const UnitTab = (props: {
   unit: Unit;
   checked?: boolean;
@@ -85,7 +84,7 @@ const UnitTab = (props: {
           spacing={1}
           sx={{
             pl: 1,
-            pr: 4,
+            pr: 2,
             py: 1,
           }}
         >
@@ -107,18 +106,20 @@ const UnitTab = (props: {
               </Typography>
             </Stack>
           </Stack>
-          {props.isEditing && (
-            <Checkbox
-              checked={props.checked}
-              onChange={handleCheck}
-              sx={{
-                p: 0,
-                ':hover': {
-                  backgroundColor: 'rgba(0,0,0,0)',
-                },
-              }}
-            />
-          )}
+          <Box width={25} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+            {props.isEditing && (
+              <Checkbox
+                checked={props.checked}
+                onChange={handleCheck}
+                sx={{
+                  p: 0,
+                  ':hover': {
+                    backgroundColor: 'rgba(0,0,0,0)',
+                  },
+                }}
+              />
+            )}
+          </Box>
         </Stack>
       </Card>
     </div>
@@ -258,185 +259,150 @@ const CollectionSearch = (props: {
     units.filter((unit) => unit.type !== 'collection') ?? [];
 
   return (
-    <Grid container columns={24} spacing={3}>
-      <Grid item xs={24} md={11}>
-        <Box
-          sx={{
-            [theme.breakpoints.up('md')]: {
-              position: 'fixed',
-              height: '80vh',
-              width: '30vw',
-            },
-          }}
-        >
-          <Box pt={{ md: 12 }}>
-            <Typography variant={'subtitle2'} color={'grey'}>
-              Collection
-            </Typography>
+    <>
+      <Box pt={{ md: 12 }} alignItems={'center'} display={'flex'} flexDirection={'column'}>
+        <Box width={600}>
+          <Stack direction={'row'} alignItems={'baseline'} px={1}>
             <Typography
               variant={'h3'}
               fontWeight={BOLD_FONT_WEIGHT}
-              pb={2}
+              flexGrow={1}
+              pb={.5}
               sx={{
                 fontFamily: outfit.style.fontFamily,
               }}
             >
               {props.collection.title}
             </Typography>
-            <TextField
-              variant={'outlined'}
-              size={'small'}
-              onChange={handleInputChange}
-              fullWidth
-              placeholder={'Search'}
-              sx={{
-                marginBottom: 5,
-                backgroundColor: '#222222',
-                borderRadius: 50,
-                color: '#DDDDDD',
-                '& fieldset': { border: 'none' },
-              }}
-              slotProps={{
-                input: {
-                  startAdornment: <SearchIcon style={{ marginRight: 6 }} />,
-                  endAdornment: (
-                    <CreateUnitModal
-                      breadcrumbs={props.collection.breadcrumbs}
-                    />
-                  ),
-                },
-              }}
-            />
-            <Box
-              sx={{
-                maxHeight: '40vh',
-                overflowY: 'auto',
-              }}
-            >
-              {units
-                .filter((unit) => unit.type === 'collection')
-                .map((collection) => {
-                  if (!isUserDm && collection.hidden) {
-                    return null;
-                  }
-                  return (
-                    <Box key={collection.id} py={0.75} maxWidth={'80%'}>
-                      <UnitTab
-                        unit={collection}
-                        icon={<FolderIcon />}
-                        isEditing={isEditing}
-                        updateState={updateSelectedUnits}
-                        checked={selectedUnitIds.includes(collection.id)}
-                      />
-                    </Box>
-                  );
-                })}
-            </Box>
-          </Box>
-        </Box>
-      </Grid>
-      <Grid item md={13}>
-        {units && (
-          <>
-            <Masonry
-              spacing={1}
-              columns={
-                searchResults.length > 2
-                  ? { xs: 1, sm: 2, md: 3 }
-                  : searchResults.length
-              }
-              sx={{ width: '100%' }}
-            >
-              {searchResults.map((unit: Unit, index) => {
-                if (
-                  unit.title
-                    .toLowerCase()
-                    .trim()
-                    .includes(searchQuery.toLowerCase().trim()) &&
-                  (isUserDm || !unit.hidden)
-                ) {
-                  return (
-                    <UnitTab
-                      key={index}
-                      unit={unit}
-                      checked={selectedUnitIds.includes(unit.id)}
-                      icon={(() => {
-                        switch (unit.type) {
-                          case 'quest':
-                            return <KeyIcon />;
-                          case 'encounter':
-                            return <AutoFixHighIcon />;
-                          default:
-                            return <DescriptionIcon />;
-                        }
-                      })()}
-                      isEditing={isEditing}
-                      updateState={updateSelectedUnits}
-                      {...(unit.type === 'article' ||
-                      (unit.type === 'quest' &&
-                        (unit as Article | Quest).imageUrls[0])
-                        ? { imageUrl: (unit as Article | Quest).imageUrls[0] }
-                        : {})}
-                    />
-                  );
-                }
-                return null;
-              })}
-            </Masonry>
-            <Stack
-              direction="column"
-              p={3}
-              sx={{
-                position: 'fixed',
-                right: 16,
-                bottom: 16,
-              }}
-            >
+            <SmallIconButtonGroup>
+              <CreateUnitModal
+                breadcrumbs={props.collection.breadcrumbs}
+              />
               {!isEditing ? (
                 <Tooltip title={'Edit Items'} placement={'left'}>
-                  <IconButton size="large" onClick={() => setEditing(true)}>
-                    <EditIcon />
-                  </IconButton>
+                  <SmallIconButton icon={<EditIcon />} onClick={() => setEditing(true)} />
                 </Tooltip>
               ) : (
                 <>
+                  <Divider orientation={'vertical'} flexItem />
                   <Tooltip title={'Save Changes'} placement={'left'}>
-                    <IconButton
-                      size="large"
+                    <SmallIconButton
                       onClick={() => {
                         setEditing(false);
                       }}
-                    >
-                      <CheckIcon />
-                    </IconButton>
+                      icon={<CheckIcon />}
+                    />
                   </Tooltip>
                   <Tooltip title={'Move Items'} placement={'left'}>
-                    <span>
-                      <MoveUnitsModal
-                        selectedUnitIds={selectedUnitIds}
-                        disabled={selectedUnitIds.length === 0 || selectedUnitsIncludeCollection}
-                        setEditing={setEditing}
-                        currentCollection={props.collection}
-                      />
-                    </span>
+                    <MoveUnitsModal
+                      selectedUnitIds={selectedUnitIds}
+                      disabled={selectedUnitIds.length === 0 || selectedUnitsIncludeCollection}
+                      setEditing={setEditing}
+                      currentCollection={props.collection}
+                    />
                   </Tooltip>
                   <Tooltip title={'Delete Items'} placement={'left'}>
-                    <span>
-                      <IconButton
-                        size="large"
-                        disabled={selectedUnitIds.length === 0}
-                        onClick={() => handleDeleteUnits(false)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </span>
+                    <SmallIconButton
+
+                      disabled={selectedUnitIds.length === 0}
+                      onClick={() => handleDeleteUnits(false)}
+                      icon={<DeleteIcon />}
+                    />
                   </Tooltip>
                 </>
               )}
-            </Stack>
-          </>
-        )}
-      </Grid>
+            </SmallIconButtonGroup>
+          </Stack>
+          <TextField
+            variant={'outlined'}
+            size={'small'}
+            onChange={handleInputChange}
+            fullWidth
+            placeholder={'Search'}
+            sx={{
+              backgroundColor: '#222222',
+              borderRadius: 50,
+              color: '#DDDDDD',
+              '& fieldset': { border: 'none' },
+            }}
+            slotProps={{
+              input: {
+                startAdornment: <SearchIcon style={{ marginRight: 6 }} />,
+              },
+            }}
+          />
+        </Box>
+        <Grid2 container spacing={1} py={2} width={750}>
+          {units
+            .filter((unit) => unit.type === 'collection')
+            .map((collection) => {
+              if (!isUserDm && collection.hidden) {
+                return null;
+              }
+              return (
+                <Grid2 size={6} key={collection.id} alignItems={'center'}>
+                  <UnitTab
+                    unit={collection}
+                    icon={<FolderIcon />}
+                    isEditing={isEditing}
+                    updateState={updateSelectedUnits}
+                    checked={selectedUnitIds.includes(collection.id)}
+                  />
+                </Grid2>
+              );
+            })}
+        </Grid2>
+      </Box>
+      {units && (
+        <>
+          <Masonry
+            spacing={1}
+            columns={
+              searchResults.length > 2
+                ? { xs: 1, sm: 2, md: 3, lg: 4 }
+                : searchResults.length
+            }
+            sx={{ width: '100%' }}
+          >
+            {searchResults.map((unit: Unit, index) => {
+              if (
+                unit.title
+                  .toLowerCase()
+                  .trim()
+                  .includes(searchQuery.toLowerCase().trim()) &&
+                (isUserDm || !unit.hidden)
+              ) {
+                return (
+                  <UnitTab
+                    key={index}
+                    unit={unit}
+                    checked={selectedUnitIds.includes(unit.id)}
+                    icon={(() => {
+                      switch (unit.type) {
+                        case 'quest':
+                          return <KeyIcon />;
+                        case 'encounter':
+                          return <AutoFixHighIcon />;
+                        default:
+                          return <DescriptionIcon />;
+                      }
+                    })()}
+                    isEditing={isEditing}
+                    updateState={updateSelectedUnits}
+                    {...(unit.type === 'article' ||
+                    (unit.type === 'quest' &&
+                      (unit as Article | Quest).imageUrls[0])
+                      ? { imageUrl: (unit as Article | Quest).imageUrls[0] }
+                      : {})}
+                  />
+                );
+              }
+              return null;
+            })}
+          </Masonry>
+        </>
+      )}
+
       <Modal open={displayDeleteWarningModal} onClose={() => setDisplayDeleteWarningModal(false)}>
         <Box sx={MODAL_STYLE} width={600}>
           <Typography variant={'h4'} fontWeight={BOLD_FONT_WEIGHT}>WARNING</Typography>
@@ -454,7 +420,7 @@ const CollectionSearch = (props: {
           <Button onClick={() => setDisplayDeleteWarningModal(false)}>On second thought...</Button>
         </Box>
       </Modal>
-    </Grid>
+    </>
   );
 };
 export default CollectionSearch;

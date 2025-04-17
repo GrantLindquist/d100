@@ -6,7 +6,6 @@ import {
   CircularProgress,
   Divider,
   FormControlLabel,
-  IconButton,
   Modal,
   Stack,
   Typography,
@@ -30,6 +29,7 @@ import db from '@/utils/firebase';
 import { useCampaign } from '@/hooks/useCampaign';
 import { useAlert } from '@/hooks/useAlert';
 import { generateUUID } from '@/utils/uuid';
+import { SmallIconButton } from '@/components/buttons/SmallIconButton';
 
 const CollectionCheckbox = (props: {
   checked: boolean;
@@ -179,13 +179,11 @@ const MoveUnitsModal = (props: {
 
   return (
     <>
-      <IconButton
-        size="large"
+      <SmallIconButton
         disabled={props.disabled}
         onClick={() => setModalOpen(true)}
-      >
-        <DriveFileMoveIcon />
-      </IconButton>
+        icon={<DriveFileMoveIcon />}
+      />
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box sx={MODAL_STYLE}>
           <Typography

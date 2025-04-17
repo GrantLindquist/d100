@@ -1,11 +1,12 @@
 import AddIcon from '@mui/icons-material/Add';
-import { IconButton, Menu, MenuItem } from '@mui/material';
+import { Menu, MenuItem } from '@mui/material';
 import { Article, Quest } from '@/types/Unit';
 import React, { useState } from 'react';
 import { doc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import ThemeTrackModal from '@/components/modals/ThemeTrackModal';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { SmallIconButton } from '@/components/buttons/SmallIconButton';
 
 const AddToContentButton = (props: {
   unit: Quest | Article;
@@ -31,17 +32,12 @@ const AddToContentButton = (props: {
 
   return (
     <>
-      <IconButton
-        size="large"
-        onClick={(event) => setAnchorEl(event.currentTarget)}
-      >
-        <AddIcon />
-      </IconButton>
+      <SmallIconButton onClick={(event) => setAnchorEl(event.currentTarget)} icon={<AddIcon />} />
       <Menu
         anchorEl={anchorEl}
         open={open}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         onClose={() => setAnchorEl(null)}
       >
         {props.unit.type === 'quest' && (

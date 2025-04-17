@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Container, Grid, IconButton, Stack, Tooltip, Typography, useTheme } from '@mui/material';
+import { Box, Container, Grid, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 import { Article, Breadcrumb, ImageUrl, Quest } from '@/types/Unit';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { arrayRemove, arrayUnion, doc, onSnapshot, updateDoc } from '@firebase/firestore';
@@ -42,6 +42,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import AddToContentButton from '@/components/buttons/AddToContentButton';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
+import { SmallIconButton, SmallIconButtonGroup } from '@/components/buttons/SmallIconButton';
 
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
@@ -348,21 +349,48 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                         display: { xs: 'none', md: 'block' },
                       }}
                     >
-                      <ArticleAside titles={sectionTitles} article={unit} />
+                      <ArticleAside titles={sectionTitles} unit={unit} />
                     </Box>
                   </Box>
                 </Grid>
                 <Grid item xs={12} md={8}>
-                  <Box pl={3} zIndex={5}>
-                    <Typography
-                      sx={{ userSelect: 'none' }}
-                      pb={1}
-                      mt={-4}
-                      color={'grey'}
-                    >
-                      {unit.hidden && 'Hidden from players'}&nbsp;
-                      {isUnsavedChanges && <em>(unsaved changes)</em>}
-                    </Typography>
+                  <Box pl={3} pb={12} zIndex={5} mt={-4}>
+                    <Stack direction={'row'} spacing={3} alignItems={'center'}>
+                      <SmallIconButtonGroup>
+                        <Tooltip title={'Save Changes'} placement={'left'}>
+                          <SmallIconButton
+                            disabled={!isUnsavedChanges}
+                            onClick={handleSaveContent}
+                            icon={<CheckIcon />}
+                          />
+                        </Tooltip>
+                        <Tooltip title={`Hide Content From Players`} placement={'left'}>
+                          <SmallIconButton
+                            icon={<VisibilityOffIcon />}
+                            onClick={() => toggleHideUnit(!unit?.hidden)}
+                          />
+                        </Tooltip>
+                        <AddToContentButton
+                          unit={unit}
+                          handleAddImage={handleAddImage}
+                        />
+                        {displayPlayer && unit.spotifyItems && unit.spotifyItems.length >= 0 && (
+                          <Tooltip title={`Play Theme Tracks`} placement={'left'}>
+                            <SmallIconButton
+                              onClick={() => setActiveUnitId(unit.id)}
+                              icon={<PlaylistPlayIcon
+                                style={unit.id === activeUnitId ? { color: theme.palette.primary.main } : {}} />}
+                            />
+                          </Tooltip>)}
+                      </SmallIconButtonGroup>
+                      <Typography
+                        sx={{ userSelect: 'none' }}
+                        color={'grey'}
+                      >
+                        {unit.hidden && 'Hidden from players'}&nbsp;
+                        {isUnsavedChanges && <em>(unsaved changes)</em>}
+                      </Typography>
+                    </Stack>
                     {editor && currentEditorState && (
                       <BubbleMenu
                         editor={editor}
@@ -461,7 +489,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                         sx={{
                           color: 'grey',
                           position: 'relative',
-                          top: -285,
+                          top: -135,
                           pointerEvents: 'none',
                           whiteSpace: 'pre-line',
                         }}
@@ -494,54 +522,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
                   </Box>
                 </Grid>
               </Grid>
-              <Stack
-                direction="column"
-                p={3}
-                sx={{
-                  position: 'fixed',
-                  right: 16,
-                  bottom: 16,
-                }}
-              >
-                <Tooltip title={`Hide Content From Players`} placement={'left'}>
-                  <span>
-                    <IconButton
-                      size="large"
-                      onClick={() => toggleHideUnit(!unit?.hidden)}
-                    >
-                      <VisibilityOffIcon
-                        style={!unit?.hidden ? { color: 'grey' } : {}}
-                      />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-                {displayPlayer && unit.spotifyItems && unit.spotifyItems.length >= 0 && (
-                  <Tooltip title={`Play Theme Tracks`} placement={'left'}>
-                  <span>
-                    <IconButton
-                      size="large"
-                      onClick={() => setActiveUnitId(unit.id)}
-                    >
-                     <PlaylistPlayIcon style={unit.id === activeUnitId ? { color: theme.palette.primary.main } : {}} />
-                    </IconButton>
-                  </span>
-                  </Tooltip>)}
-                <AddToContentButton
-                  unit={unit}
-                  handleAddImage={handleAddImage}
-                />
-                <Tooltip title={'Save Changes'} placement={'left'}>
-                  <span>
-                    <IconButton
-                      size="large"
-                      disabled={!isUnsavedChanges}
-                      onClick={handleSaveContent}
-                    >
-                      <CheckIcon />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-              </Stack>
             </Box>
           </Container>
         </FileDropzone>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Container, useMediaQuery, useTheme } from '@mui/material';
 import CollectionSearch from '@/components/CollectionSearch';
 import { Breadcrumb, Collection } from '@/types/Unit';
 import { useCampaign } from '@/hooks/useCampaign';
@@ -49,34 +49,29 @@ export default function CollectionPage() {
 
   return (
     <>
-      <Box
-        sx={{
-          height: '100vh',
-          width: '100vw',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'fixed',
-        }}
-      >
-        {displayBgImage && (
-          <img src={'/d100-grey.svg'} style={{ width: '50%', pointerEvents: 'none' }} />
-        )}
-      </Box>
+      {/*<Box*/}
+      {/*  sx={{*/}
+      {/*    height: '100vh',*/}
+      {/*    width: '100vw',*/}
+      {/*    display: 'flex',*/}
+      {/*    justifyContent: 'center',*/}
+      {/*    alignItems: 'center',*/}
+      {/*    position: 'fixed',*/}
+      {/*  }}*/}
+      {/*>*/}
+      {/*  {displayBgImage && (*/}
+      {/*    <img src={'/d100-grey.svg'} style={{ width: '50%', pointerEvents: 'none' }} />*/}
+      {/*  )}*/}
+      {/*</Box>*/}
       {collection && (
-        <Box
-          sx={{
-            pt: 12,
-            px: { xs: 2, sm: 4, md: 8, lg: 12 },
-            position: 'relative',
-            zIndex: 1,
-          }}
-        >
-          <CollectionSearch
-            unitIds={collection.unitIds}
-            collection={collection}
-          />
-        </Box>
+        <Container>
+          <Box px={{ md: 16, xs: 0 }}>
+            <CollectionSearch
+              unitIds={collection.unitIds}
+              collection={collection}
+            />
+          </Box>
+        </Container>
       )}
     </>
   );
