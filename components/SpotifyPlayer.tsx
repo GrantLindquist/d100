@@ -16,7 +16,7 @@ const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
   const [accessToken, setAccessToken] = useState<SpotifyAccessToken | null>(null);
   const [hovering, setHovering] = useState(false);
   const [visible, setVisible] = useState(false);
-  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hideTimeoutRef = useRef<any | null>(null);
 
   // Load initial access token
   useEffect(() => {

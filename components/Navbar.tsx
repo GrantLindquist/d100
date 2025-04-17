@@ -26,10 +26,7 @@ const Navbar = () => {
             zIndex: 2,
             top: 0,
             width: '100%',
-            backgroundColor:
-              pathname.includes('articles') || pathname.includes('quests')
-                ? '#111111'
-                : '#010101',
+            backgroundColor: '#111',
           }}
         >
           <Stack

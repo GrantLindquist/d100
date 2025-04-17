@@ -68,7 +68,7 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
         main: '#FF956F',
       },
       background: {
-        default: '#010101',
+        default: '#111111',
       },
     },
     components: {
@@ -80,7 +80,7 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
       MuiCssBaseline: {
         styleOverrides: {
           html: {
-            scrollbarColor: '#666666 rgba(0, 0, 0, 0)', // Scrollbar thumb and track colors
+            scrollbarColor: '#666666 #111111', // Scrollbar thumb and track colors
 
             '&::-webkit-scrollbar': {
               width: '8px', // Width of the scrollbar
@@ -91,7 +91,7 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
               borderRadius: '8px', // Round the thumb edges
             },
             '&::-webkit-scrollbar-track': {
-              backgroundColor: 'rgba(0, 0, 0, 0)', // Track color
+              backgroundColor: '#111111', // Track color
             },
           },
         },

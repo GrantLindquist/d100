@@ -12,10 +12,11 @@ import { Box } from '@mui/material';
 /* TODO: UI Overhaul
 * 1. Update Typography in Theme to automatically set styles
 * 2. Change background to one consistent color instead of between black and grey
-* 3. Prevent scrollbar from shifting content
-* 4. Replace Masonry
-* 5. Make components more attractive
-* 6. Animations?
+* 3. Use paper instead of background color
+* 4. Prevent scrollbar from shifting content
+* 5. Replace Masonry
+* 6. Make components more attractive
+* 7. Animations?
 * */
 
 export const metadata: Metadata = {
@@ -47,7 +48,7 @@ export default function RootLayout({
               <AppWrapper>
                 <Box display="flex" flexDirection="column" minHeight="100vh">
                   <Navbar />
-                  <Box component="main" flex={1} overflow="auto">
+                  <Box component="main" flex={1} overflow="auto" sx={{ overflow: 'hidden' }}>
                     {children}
                   </Box>
                 </Box>
