@@ -37,7 +37,7 @@ export default function RootLayout({
     <html lang="en">
     <body
       style={{
-        overscrollBehavior: 'none',
+        overscrollBehaviorX: 'none',
       }}
     >
     <AlertProvider>
