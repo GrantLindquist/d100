@@ -1,26 +1,12 @@
 'use client';
 
-import { ChangeEvent, ReactNode, useEffect, useState } from 'react';
-import {
-  Box,
-  Button,
-  Card,
-  Checkbox,
-  Divider,
-  Grid2,
-  Modal,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { ChangeEvent, useEffect, useState } from 'react';
+import { Box, Button, Divider, Modal, Stack, TextField, Tooltip, Typography, useTheme } from '@mui/material';
 
-import { Article, Collection, ImageUrl, Quest, Unit, UnitDisplayValues } from '@/types/Unit';
+import { Article, Collection, Quest, Unit } from '@/types/Unit';
 import { arrayRemove, collection, doc, getDocs, query, runTransaction, where } from '@firebase/firestore';
 import db, { storage } from '@/utils/firebase';
 import CreateUnitModal from '@/components/modals/CreateUnitModal';
-import { useRouter } from 'next/navigation';
 import FolderIcon from '@mui/icons-material/Folder';
 import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
 import Masonry from '@mui/lab/Masonry';
@@ -33,98 +19,11 @@ import KeyIcon from '@mui/icons-material/Key';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import { useAlert } from '@/hooks/useAlert';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { deleteObject, listAll, ref } from '@firebase/storage';
-import ImageFrame from '@/components/content/ImageFrame';
 import { outfit } from '@/components/AppWrapper';
 import MoveUnitsModal from '@/components/modals/MoveUnitsModal';
 import { SmallIconButton, SmallIconButtonGroup } from '@/components/buttons/SmallIconButton';
-
-const UnitTab = (props: {
-  unit: Unit;
-  checked?: boolean;
-  icon: ReactNode;
-  isEditing: boolean;
-  updateState: (removeId: boolean, unit: Unit) => void;
-  imageUrl?: ImageUrl;
-}) => {
-  const router = useRouter();
-
-  const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
-    props.updateState(!event.target.checked, props.unit);
-  };
-  return (
-    <div
-      onClick={() =>
-        !props.isEditing &&
-        router.push(
-          `/campaigns/${props.unit.campaignId}/${props.unit.type}s/${props.unit.id}`,
-        )
-      }
-    >
-      <Card
-        variant="outlined"
-        sx={{
-          backgroundColor: 'rgba(0, 0, 0, 0)',
-          borderColor: '#444444',
-          borderWidth: '2px',
-          cursor: 'pointer',
-          ':hover': !props.isEditing
-            ? {
-              backgroundColor: 'rgba(28, 28, 28)',
-            }
-            : {},
-        }}
-      >
-        {props.imageUrl && (
-          <ImageFrame image={props.imageUrl} alt={props.unit.title} />
-        )}
-        <Stack
-          direction={'row'}
-          spacing={1}
-          sx={{
-            pl: 1,
-            pr: 2,
-            py: 1,
-          }}
-        >
-          <Stack direction={'row'} spacing={1} flexGrow={1}>
-            <Stack direction={'column'}>
-              {props.icon}
-              {props.unit.hidden && (
-                <Tooltip title={'Hidden from players'}>
-                  <VisibilityOffIcon sx={{ color: 'grey' }} />
-                </Tooltip>
-              )}
-            </Stack>
-            <Stack direction={'column'}>
-              <Typography fontWeight={BOLD_FONT_WEIGHT}>
-                {props.unit.title}
-              </Typography>
-              <Typography color={'grey'}>
-                {UnitDisplayValues[props.unit.type]}
-              </Typography>
-            </Stack>
-          </Stack>
-          <Box width={25} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-            {props.isEditing && (
-              <Checkbox
-                checked={props.checked}
-                onChange={handleCheck}
-                sx={{
-                  p: 0,
-                  ':hover': {
-                    backgroundColor: 'rgba(0,0,0,0)',
-                  },
-                }}
-              />
-            )}
-          </Box>
-        </Stack>
-      </Card>
-    </div>
-  );
-};
+import { CondensedUnitTab, UnitTab } from '@/components/UnitTab';
 
 const CollectionSearch = (props: {
   unitIds: string[];
@@ -261,7 +160,7 @@ const CollectionSearch = (props: {
   return (
     <>
       <Box pt={{ md: 12 }} alignItems={'center'} display={'flex'} flexDirection={'column'}>
-        <Box width={600}>
+        <Box maxWidth={600} width={'100%'}>
           <Stack direction={'row'} alignItems={'baseline'} px={1}>
             <Typography
               variant={'h3'}
@@ -332,29 +231,33 @@ const CollectionSearch = (props: {
             }}
           />
         </Box>
-        <Grid2 container spacing={1} py={2} width={750}>
-          {units
-            .filter((unit) => unit.type === 'collection')
-            .map((collection) => {
-              if (!isUserDm && collection.hidden) {
-                return null;
-              }
-              return (
-                <Grid2 size={6} key={collection.id} alignItems={'center'}>
-                  <UnitTab
+      </Box>
+      {units && (
+        <Box sx={{ width: '100%' }}>
+          <Box sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            width: '100%',
+          }} py={2} width={750}>
+            {units
+              .filter((unit) => unit.type === 'collection')
+              .map((collection) => {
+                if (!isUserDm && collection.hidden) {
+                  return null;
+                }
+                return (
+                  <CondensedUnitTab
+                    key={collection.id}
                     unit={collection}
                     icon={<FolderIcon />}
                     isEditing={isEditing}
                     updateState={updateSelectedUnits}
                     checked={selectedUnitIds.includes(collection.id)}
                   />
-                </Grid2>
-              );
-            })}
-        </Grid2>
-      </Box>
-      {units && (
-        <>
+                );
+              })}
+          </Box>
           <Masonry
             spacing={1}
             columns={
@@ -362,7 +265,6 @@ const CollectionSearch = (props: {
                 ? { xs: 1, sm: 2, md: 3, lg: 4 }
                 : searchResults.length
             }
-            sx={{ width: '100%' }}
           >
             {searchResults.map((unit: Unit, index) => {
               if (
@@ -400,7 +302,7 @@ const CollectionSearch = (props: {
               return null;
             })}
           </Masonry>
-        </>
+        </Box>
       )}
 
       <Modal open={displayDeleteWarningModal} onClose={() => setDisplayDeleteWarningModal(false)}>

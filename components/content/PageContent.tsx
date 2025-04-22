@@ -55,13 +55,19 @@ export const PageContent = () => {
         backgroundColor: '#111111',
       }}
     >
-      {isUserDm !== null && <ContentEditor displayHiddenMarks={isUserDm} />}
+      <Container>
+        <Box
+          sx={{
+            pt: 12,
+          }}
+        >
+          {isUserDm !== null && <ContentEditor displayHiddenMarks={isUserDm} />}
+        </Box></Container>
     </Box>
   );
 };
 
-// TODO: Make floating buttons more pleasant
-export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
+export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?: boolean; unitId?: string }) => {
 
   const { isUnsavedChanges, setUnsavedChanges } = useUnsavedChanges();
   const { isUserDm, campaign, setBreadcrumbs } = useCampaign();
@@ -97,7 +103,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
 
   useEffect(() => {
     const url = pathname.split('/').slice(1);
-    const unitId = getCurrentUnitIdFromUrl(url);
+    const unitId = props.unitId ?? getCurrentUnitIdFromUrl(url);
     if (unitId) {
       const unsubscribe = onSnapshot(
         doc(db, 'units', unitId),
@@ -326,204 +332,196 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean }) => {
             ref={fileInputRef}
             onChange={handleFileChange}
           />
-          <Container>
-            <Box
-              sx={{
-                pt: 12,
-              }}
-            >
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={3}>
-                  <Box
-                    sx={{
-                      position: { xs: 'auto', md: 'fixed' },
-                      width: {
-                        md: '23vw',
-                        lg: '19vw',
-                        xl: '14vw',
-                      },
-                    }}
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={3}>
+              <Box
+                sx={{
+                  position: { xs: 'auto', md: 'fixed' },
+                  width: {
+                    md: '23vw',
+                    lg: '19vw',
+                    xl: '14vw',
+                  },
+                }}
+              >
+                {!props.compactView && <Box
+                  sx={{
+                    display: { xs: 'none', md: 'block' },
+                  }}
+                >
+                  <ArticleAside titles={sectionTitles} unit={unit} />
+                </Box>}
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={props.compactView ? 12 : 8}>
+              <Box pl={props.compactView ? 0 : 3} pb={12} zIndex={5} mt={-4}>
+                <Stack direction={'row'} spacing={3} alignItems={'center'}>
+                  <SmallIconButtonGroup>
+                    <Tooltip title={'Save Changes'} placement={'left'}>
+                      <SmallIconButton
+                        disabled={!isUnsavedChanges}
+                        onClick={handleSaveContent}
+                        icon={<CheckIcon />}
+                      />
+                    </Tooltip>
+                    <Tooltip title={`Hide Content From Players`} placement={'left'}>
+                      <SmallIconButton
+                        icon={<VisibilityOffIcon />}
+                        onClick={() => toggleHideUnit(!unit?.hidden)}
+                      />
+                    </Tooltip>
+                    <AddToContentButton
+                      unit={unit}
+                      handleAddImage={handleAddImage}
+                    />
+                    {displayPlayer && unit.spotifyItems && unit.spotifyItems.length >= 0 && (
+                      <Tooltip title={`Play Theme Tracks`} placement={'left'}>
+                        <SmallIconButton
+                          onClick={() => setActiveUnitId(unit.id)}
+                          icon={<PlaylistPlayIcon
+                            style={unit.id === activeUnitId ? { color: theme.palette.primary.main } : {}} />}
+                        />
+                      </Tooltip>)}
+                  </SmallIconButtonGroup>
+                  <Typography
+                    sx={{ userSelect: 'none' }}
+                    color={'grey'}
+                  >
+                    {unit.hidden && 'Hidden from players'}&nbsp;
+                    {isUnsavedChanges && <em>(unsaved changes)</em>}
+                  </Typography>
+                </Stack>
+                {editor && currentEditorState && (
+                  <BubbleMenu
+                    editor={editor}
+                    tippyOptions={{ duration: 100 }}
                   >
                     <Box
                       sx={{
-                        display: { xs: 'none', md: 'block' },
+                        backgroundColor: '#222222',
+                        borderRadius: 2,
+                        display: 'flex',
+                        alignItems: 'center',
                       }}
                     >
-                      <ArticleAside titles={sectionTitles} unit={unit} />
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} md={8}>
-                  <Box pl={3} pb={12} zIndex={5} mt={-4}>
-                    <Stack direction={'row'} spacing={3} alignItems={'center'}>
-                      <SmallIconButtonGroup>
-                        <Tooltip title={'Save Changes'} placement={'left'}>
-                          <SmallIconButton
-                            disabled={!isUnsavedChanges}
-                            onClick={handleSaveContent}
-                            icon={<CheckIcon />}
-                          />
-                        </Tooltip>
-                        <Tooltip title={`Hide Content From Players`} placement={'left'}>
-                          <SmallIconButton
-                            icon={<VisibilityOffIcon />}
-                            onClick={() => toggleHideUnit(!unit?.hidden)}
-                          />
-                        </Tooltip>
-                        <AddToContentButton
-                          unit={unit}
-                          handleAddImage={handleAddImage}
-                        />
-                        {displayPlayer && unit.spotifyItems && unit.spotifyItems.length >= 0 && (
-                          <Tooltip title={`Play Theme Tracks`} placement={'left'}>
-                            <SmallIconButton
-                              onClick={() => setActiveUnitId(unit.id)}
-                              icon={<PlaylistPlayIcon
-                                style={unit.id === activeUnitId ? { color: theme.palette.primary.main } : {}} />}
-                            />
-                          </Tooltip>)}
-                      </SmallIconButtonGroup>
-                      <Typography
-                        sx={{ userSelect: 'none' }}
-                        color={'grey'}
-                      >
-                        {unit.hidden && 'Hidden from players'}&nbsp;
-                        {isUnsavedChanges && <em>(unsaved changes)</em>}
-                      </Typography>
-                    </Stack>
-                    {editor && currentEditorState && (
-                      <BubbleMenu
-                        editor={editor}
-                        tippyOptions={{ duration: 100 }}
-                      >
-                        <Box
-                          sx={{
-                            backgroundColor: '#222222',
-                            borderRadius: 2,
-                            display: 'flex',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <FormatBoldIcon
-                            onClick={() =>
-                              editor.chain().focus().toggleBold().run()
-                            }
-                            sx={{
-                              margin: 0.75,
-                              cursor: 'pointer',
-                              color: currentEditorState.isBold
-                                ? theme.palette.primary.main
-                                : 'grey',
-                            }}
-                          />
-                          <FormatItalicIcon
-                            onClick={() =>
-                              editor.chain().focus().toggleItalic().run()
-                            }
-                            sx={{
-                              margin: 0.75,
-                              cursor: 'pointer',
-                              color: currentEditorState.isItalic
-                                ? theme.palette.primary.main
-                                : 'grey',
-                            }}
-                          />
-                          <TitleIcon
-                            onClick={() =>
-                              editor
-                                .chain()
-                                .focus()
-                                .toggleHeading({
-                                  level: 2,
-                                })
-                                .run()
-                            }
-                            sx={{
-                              margin: 0.75,
-                              cursor: 'pointer',
-                              color: currentEditorState.isHeading
-                                ? theme.palette.primary.main
-                                : 'grey',
-                            }}
-                          />
-                          <FormatQuoteIcon
-                            onClick={() =>
-                              editor.chain().focus().toggleBlockquote().run()
-                            }
-                            sx={{
-                              margin: 0.75,
-                              cursor: 'pointer',
-                              color: currentEditorState.isBlockquote
-                                ? theme.palette.primary.main
-                                : 'grey',
-                            }}
-                          />
-                          {isUserDm && (
-                            <Tooltip
-                              title={'Hide from players'}
-                              placement={'top'}
-                            >
-                              <VisibilityOffIcon
-                                onClick={() =>
-                                  editor.chain().focus().toggleHighlight().run()
-                                }
-                                sx={{
-                                  width: 22,
-                                  height: 22,
-                                  margin: 0.75,
-                                  cursor: 'pointer',
-                                  color: currentEditorState.isHidden
-                                    ? theme.palette.primary.main
-                                    : 'grey',
-                                }}
-                              />
-                            </Tooltip>
-                          )}
-                        </Box>
-                      </BubbleMenu>
-                    )}
-                    <EditorContent id={'editor-content'} editor={editor} />
-                    {/* TODO: This doesn't act right. */}
-                    {displayPlaceholder && (
-                      <Typography
+                      <FormatBoldIcon
+                        onClick={() =>
+                          editor.chain().focus().toggleBold().run()
+                        }
                         sx={{
-                          color: 'grey',
-                          position: 'relative',
-                          top: -135,
-                          pointerEvents: 'none',
-                          whiteSpace: 'pre-line',
+                          margin: 0.75,
+                          cursor: 'pointer',
+                          color: currentEditorState.isBold
+                            ? theme.palette.primary.main
+                            : 'grey',
                         }}
-                      >
-                        {`This is a${unit.type === 'quest' ? ' ' : 'n '}`}
-                        {unit.type === 'quest' ? <b>Quest</b> : <b>Article</b>}
-                        {`. Type any information you'd like inside this area.\n\n`}
-                        {`To save or edit the `}
-                        {unit.type === 'quest' ? <b>Quest</b> : <b>Article</b>}
-                        {`, use the action buttons on the bottom right.\nTry highlighting some text and experimenting with font types and headings!`}
-                      </Typography>
-                    )}
-                    {/* @ts-ignore */}
-                    {unit.type === 'quest' && unit.loot && (
-                      <>
-                        {/*<QuestTimeline questId={content.id} />*/}
-                        <div style={{ paddingBottom: '28px' }}>
-                          <LootTable questId={unit.id} />
-                        </div>
-                      </>
-                    )}
-                    {unit.imageUrls.length > 0 && (
-                      <div style={{ paddingBottom: '28px' }}>
-                        <ImageList
-                          imageUrls={unit.imageUrls}
-                          handleDeleteImage={handleDeleteImage}
-                        />
-                      </div>
-                    )}
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-          </Container>
+                      />
+                      <FormatItalicIcon
+                        onClick={() =>
+                          editor.chain().focus().toggleItalic().run()
+                        }
+                        sx={{
+                          margin: 0.75,
+                          cursor: 'pointer',
+                          color: currentEditorState.isItalic
+                            ? theme.palette.primary.main
+                            : 'grey',
+                        }}
+                      />
+                      <TitleIcon
+                        onClick={() =>
+                          editor
+                            .chain()
+                            .focus()
+                            .toggleHeading({
+                              level: 2,
+                            })
+                            .run()
+                        }
+                        sx={{
+                          margin: 0.75,
+                          cursor: 'pointer',
+                          color: currentEditorState.isHeading
+                            ? theme.palette.primary.main
+                            : 'grey',
+                        }}
+                      />
+                      <FormatQuoteIcon
+                        onClick={() =>
+                          editor.chain().focus().toggleBlockquote().run()
+                        }
+                        sx={{
+                          margin: 0.75,
+                          cursor: 'pointer',
+                          color: currentEditorState.isBlockquote
+                            ? theme.palette.primary.main
+                            : 'grey',
+                        }}
+                      />
+                      {isUserDm && (
+                        <Tooltip
+                          title={'Hide from players'}
+                          placement={'top'}
+                        >
+                          <VisibilityOffIcon
+                            onClick={() =>
+                              editor.chain().focus().toggleHighlight().run()
+                            }
+                            sx={{
+                              width: 22,
+                              height: 22,
+                              margin: 0.75,
+                              cursor: 'pointer',
+                              color: currentEditorState.isHidden
+                                ? theme.palette.primary.main
+                                : 'grey',
+                            }}
+                          />
+                        </Tooltip>
+                      )}
+                    </Box>
+                  </BubbleMenu>
+                )}
+                <EditorContent id={'editor-content'} editor={editor} />
+                {/* TODO: This doesn't act right. */}
+                {displayPlaceholder && (
+                  <Typography
+                    sx={{
+                      color: 'grey',
+                      position: 'relative',
+                      top: -135,
+                      pointerEvents: 'none',
+                      whiteSpace: 'pre-line',
+                    }}
+                  >
+                    {`This is a${unit.type === 'quest' ? ' ' : 'n '}`}
+                    {unit.type === 'quest' ? <b>Quest</b> : <b>Article</b>}
+                    {`. Type any information you'd like inside this area.\n\n`}
+                    {`To save or edit the `}
+                    {unit.type === 'quest' ? <b>Quest</b> : <b>Article</b>}
+                    {`, use the action buttons on the bottom right.\nTry highlighting some text and experimenting with font types and headings!`}
+                  </Typography>
+                )}
+                {/* @ts-ignore */}
+                {unit.type === 'quest' && unit.loot && (
+                  <>
+                    {/*<QuestTimeline questId={content.id} />*/}
+                    <div style={{ paddingBottom: '28px' }}>
+                      <LootTable questId={unit.id} />
+                    </div>
+                  </>
+                )}
+                {unit.imageUrls.length > 0 && (
+                  <div style={{ paddingBottom: '28px' }}>
+                    <ImageList
+                      imageUrls={unit.imageUrls}
+                      handleDeleteImage={handleDeleteImage}
+                    />
+                  </div>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
         </FileDropzone>
       )}
     </>
