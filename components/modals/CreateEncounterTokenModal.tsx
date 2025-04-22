@@ -52,11 +52,11 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
       }
     };
 
-    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (event: ChangeEvent<HTMLInputElement>, inputValue?: any) => {
       const { name, value } = event.target;
       setFormData((prevData) => ({
         ...prevData,
-        [name]: value,
+        [name]: inputValue || value,
       }));
     };
 
@@ -86,7 +86,7 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
               <Checkbox
                 name="tokenIsPlayer"
                 checked={formData.tokenIsPlayer === 'on'}
-                onChange={handleInputChange}
+                onChange={(event) => handleInputChange(event, formData.tokenIsPlayer === 'on' ? 'off' : 'on')}
               />
             }
             label="Is Player/Ally"

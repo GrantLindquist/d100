@@ -355,7 +355,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
             </Grid>
             <Grid item xs={12} md={props.compactView ? 12 : 8}>
               <Box pl={props.compactView ? 0 : 3} pb={12} zIndex={5} mt={-4}>
-                <Stack direction={'row'} spacing={3} alignItems={'center'}>
+                <Stack direction={'row'} spacing={2} alignItems={'center'}>
                   <SmallIconButtonGroup>
                     <Tooltip title={'Save Changes'} placement={'left'}>
                       <SmallIconButton

@@ -162,7 +162,7 @@ const EncounterTokenCard = (props: {
 
   const [conditions, setConditions] = useState<Condition[]>([]);
   const [tokenImage, setTokenImage] = useState<ImageUrl>({
-    src: '/blank_token_img.png',
+    src: props.token.isPlayer ? '/blank_ally_token_img.png' : '/blank_monster_token_img.png',
     ratio: 1,
   });
 

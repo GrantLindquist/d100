@@ -5,7 +5,7 @@ import { ImageUrl } from '@/types/Unit';
 
 const maxImageHeight = 350;
 
-const ImageFrame = (props: { image: ImageUrl; alt?: string }) => {
+const ImageFrame = (props: { image: ImageUrl | null; alt?: string }) => {
   const frameId = useRef(generateUUID());
   const frameRef = useRef<HTMLDivElement>(null);
   const [frameWidth, setFrameWidth] = useState(0);
@@ -25,23 +25,25 @@ const ImageFrame = (props: { image: ImageUrl; alt?: string }) => {
   }, []);
 
   useEffect(() => {
-    const img = new Image();
-    img.src = props.image.src;
-    img.onload = () => {
-      setLoading(false);
-    };
-    img.onerror = () => {
-      console.error(`Failed to load image: ${props.image.src}`);
-      setLoading(false);
-    };
+    if (props.image?.src) {
+      const img = new Image();
+      img.src = props.image.src;
+      img.onload = () => {
+        setLoading(false);
+      };
+      img.onerror = () => {
+        console.error(`Failed to load image: ${props.image?.src}`);
+        setLoading(false);
+      };
 
-    return () => {
-      img.onload = null;
-      img.onerror = null;
-    };
-  }, [props.image.src]);
+      return () => {
+        img.onload = null;
+        img.onerror = null;
+      };
+    }
+  }, [props.image?.src]);
 
-  const calculatedHeight = Math.min(frameWidth / props.image.ratio, maxImageHeight);
+  const calculatedHeight = Math.min(frameWidth / (props.image?.ratio || 1), maxImageHeight);
 
   return (
     <Box
@@ -71,7 +73,7 @@ const ImageFrame = (props: { image: ImageUrl; alt?: string }) => {
             maxHeight: maxImageHeight,
             objectFit: 'contain',
           }}
-          src={props.image.src}
+          src={props.image?.src || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAYAAjCB0C8AAAAASUVORK5CYII='}
           alt={props.alt ?? ''}
         />
       )}
