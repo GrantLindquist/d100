@@ -2,66 +2,8 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { doc, getDoc } from '@firebase/firestore';
 import { Article } from '@/types/Unit';
 import { Box, Pagination, Typography } from '@mui/material';
-import { generateHTML } from '@tiptap/core';
-import Paragraph from '@tiptap/extension-paragraph';
-import Bold from '@tiptap/extension-bold';
-import Blockquote from '@tiptap/extension-blockquote';
-import Bulletlist from '@tiptap/extension-bullet-list';
-import Document from '@tiptap/extension-document';
-import EnforceTitle from '@/components/content/text-editor/EnforceTitle';
-import Highlight from '@tiptap/extension-highlight';
-import HardBreak from '@tiptap/extension-hard-break';
-import Heading from '@tiptap/extension-heading';
-import History from '@tiptap/extension-history';
-import Italic from '@tiptap/extension-italic';
-import ListItem from '@tiptap/extension-list-item';
-import Link from '@tiptap/extension-link';
-import Text from '@tiptap/extension-text';
 import db from '@/utils/firebase';
-
-// TODO: Fix yellow highlighting on hidden text
-const EncounterAsideContent = (props: { article: Article }) => {
-
-  const content = generateHTML(
-    props.article.content,
-    [
-      Blockquote,
-      Bulletlist,
-      Bold,
-      Document,
-      EnforceTitle,
-      Highlight,
-      HardBreak,
-      Heading.configure({
-        levels: [2],
-      }),
-      History,
-      Italic,
-      ListItem,
-      Link.configure({
-        defaultProtocol: 'https',
-        protocols: ['http', 'https'],
-        isAllowedUri: (url, ctx) => {
-          try {
-            const parsedUrl = url.includes(':')
-              ? new URL(url)
-              : new URL(`${ctx.defaultProtocol}://${url}`);
-            return ctx.defaultValidate(parsedUrl.href);
-          } catch (error) {
-            console.error(error);
-            return false;
-          }
-        },
-      }),
-      Paragraph,
-      Text,
-    ],
-  );
-
-  return (
-    <div dangerouslySetInnerHTML={{ __html: content }} />
-  );
-};
+import { ContentEditor } from '@/components/content/PageContent';
 
 const EncounterAside = (props: { articleIds: string[] }) => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -90,7 +32,7 @@ const EncounterAside = (props: { articleIds: string[] }) => {
   }, [props.articleIds]);
 
   return (
-    <Box pt={8}>
+    <Box pt={5}>
       {articles.length ? (
         <>
           <Pagination
@@ -98,8 +40,10 @@ const EncounterAside = (props: { articleIds: string[] }) => {
             page={focusedArticleIndex + 1}
             onChange={handleChange}
             color="primary"
+            sx={{ marginBottom: 3 }}
           />
-          <EncounterAsideContent article={articles[focusedArticleIndex]} />
+          {articles[focusedArticleIndex] &&
+            <ContentEditor displayHiddenMarks compactView unitId={articles[focusedArticleIndex].id} />}
         </>
       ) : (
         <Typography textAlign="center" color="grey">
