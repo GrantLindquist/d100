@@ -57,8 +57,18 @@ const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
           position: 'fixed',
           bottom: 0,
           left: 0,
-          width: '100%',
-          height: '150px',
+          width: {
+            xs: '100%',
+            sm: '80%',
+            md: '60%',
+            lg: '50%',
+          },
+          transform: {
+            sm: 'translateX(12%)',
+            md: 'translateX(40%)',
+            lg: 'translateX(50%)',
+          },
+          height: '90px',
           zIndex: 20,
         }}
       />
