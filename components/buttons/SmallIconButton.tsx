@@ -28,7 +28,7 @@ export const SmallIconButton = (props: {
 
 export const SmallIconButtonGroup = (props: { children: ReactNode }) => {
   return (
-    <Stack direction="row" spacing={1.5} py={.5} alignItems="center" justifyContent="center">
+    <Stack direction="row" spacing={1.5} py={.5} alignItems="center" justifyContent="right">
       {props.children}
     </Stack>
   );
