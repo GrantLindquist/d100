@@ -52,7 +52,7 @@ export default function EncounterPage() {
   if (!encounter) return null;
 
   return (
-    <Box display="flex" height="100vh">
+    <Box display="flex" minHeight="100vh">
       <Box width={asideOpen ? '75%' : '100%'}>
         <Container>
           <Box sx={{ pt: 12 }}>
