@@ -1,4 +1,4 @@
-export const SESSION_TIMEOUT: number = 604800000;
+export const SESSION_TIMEOUT: number = 1209600000;
 
 export const BOLD_FONT_WEIGHT = 600;
 

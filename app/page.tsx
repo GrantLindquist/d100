@@ -15,7 +15,6 @@ import RoundButton from '@/components/buttons/RoundButton';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ThemeTooltip from '@/components/ThemeTooltip';
 
-// TODO: Fix bug where sign-in page is shown before user session is received
 export default function AuthPage() {
   const { user, setListening } = useUser();
   const { displayAlert } = useAlert();

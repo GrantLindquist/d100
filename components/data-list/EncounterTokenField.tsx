@@ -1,7 +1,7 @@
 'use client';
 
 import { Condition, Encounter, EncounterToken } from '@/types/Encounter';
-import { Box, Card, Grid2, IconButton, Menu, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Card, Grid2, IconButton, Menu, MenuItem, Stack, Typography, useTheme } from '@mui/material';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { useAlert } from '@/hooks/useAlert';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
@@ -15,6 +15,8 @@ import RollInitiativeModal from '@/components/modals/RollInitiativeModal';
 import CreateEncounterTokenModal from '@/components/modals/CreateEncounterTokenModal';
 import DamageMenu from '@/components/DamageMenu';
 import { ImageUrl } from '@/types/Unit';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const EncounterTokenWidth = 150;
 const EncounterTokenHeight = 210;
@@ -159,12 +161,14 @@ const EncounterTokenCard = (props: {
   encounter: Encounter;
   isCurrentTurn: boolean
 }) => {
+  const { displayAlert } = useAlert();
 
   const [conditions, setConditions] = useState<Condition[]>([]);
   const [tokenImage, setTokenImage] = useState<ImageUrl>({
     src: props.token.isPlayer ? '/blank_ally_token_img.png' : '/blank_monster_token_img.png',
     ratio: 1,
   });
+  const [anchor, setAnchor] = useState(null);
 
   useEffect(() => {
     async function fetchTokenImage(articleId: string) {
@@ -186,6 +190,28 @@ const EncounterTokenCard = (props: {
     setConditions(currentlyVisibleConditions);
   }, [props.token.id, props.encounter]);
 
+  const handleClickMenu = (event: any) => {
+    event.stopPropagation();
+    setAnchor(event.currentTarget);
+  };
+
+  const handleDeleteToken = async () => {
+    try {
+      const newTokens = props.encounter.tokens.filter((token) => token.id !== props.token.id);
+      await updateDoc(doc(db, 'units', props.encounter.id), {
+        tokens: newTokens,
+      });
+      displayAlert({
+        message: props.token.title + ' was removed from the encounter.',
+      });
+    } catch (e: any) {
+      displayAlert({
+        message: 'An error occurred while deleting this token.',
+        errorType: e.message,
+        isError: true,
+      });
+    }
+  };
 
   const handleRemoveCondition = async (removeIndex: number) => {
     const removeCondition = conditions[removeIndex];
@@ -202,30 +228,68 @@ const EncounterTokenCard = (props: {
   };
 
   return (
-    <ConditionsInterface handleRemoveCondition={handleRemoveCondition} conditions={conditions}>
-      <Card sx={{
-        userSelect: 'none',
-        width: `${EncounterTokenWidth}px`,
-        height: `${EncounterTokenHeight}px`,
-        border: `2px solid ${props.isCurrentTurn ? 'yellow' : 'transparent'}`,
-      }}>
-        <div style={{ filter: props.token.isDead ? 'grayscale(1)' : '' }}>
-          <ImageFrame
-            image={tokenImage}
-            alt={props.token.title}
-          />
-        </div>
-        <Box
-          py={1}
-          px={1.5}
-          maxHeight={300}
+    <>
+      <ConditionsInterface handleRemoveCondition={handleRemoveCondition} conditions={conditions}>
+        <Card sx={{
+          userSelect: 'none',
+          width: `${EncounterTokenWidth}px`,
+          // height: `${EncounterTokenHeight}px`,
+          border: `2px solid ${props.isCurrentTurn ? 'yellow' : 'transparent'}`,
+        }}>
+          <div style={{ filter: props.token.isDead ? 'grayscale(1)' : '' }}>
+            <ImageFrame
+              image={tokenImage}
+              alt={props.token.title}
+            />
+          </div>
+          <Box
+            py={1}
+            px={1.5}
+          >
+            <Stack direction={'row'} alignItems={'center'}>
+              <Typography flexGrow={1} variant={'subtitle2'}
+                          fontWeight={BOLD_FONT_WEIGHT}>{props.token.title}</Typography>
+              <IconButton
+                onClick={handleClickMenu}
+                disableRipple
+                disableFocusRipple
+                sx={{
+                  paddingY: 0,
+                  paddingX: 1,
+                  marginRight: -.5,
+                  width: '10%',
+                  zIndex: 30,
+                }}
+              >
+                <MoreVertIcon
+                  sx={{
+                    width: 18,
+                    height: 18,
+                  }}
+                />
+              </IconButton>
+            </Stack>
+            <Typography variant={'subtitle2'}
+                        color={'grey'}>{`${props.token.tempHitPoints > 0 ? `(${props.token.tempHitPoints})` : ''} ${props.token.currentHitPoints}/${props.token.maxHitPoints} HP`}</Typography>
+          </Box>
+        </Card>
+      </ConditionsInterface>
+      <Menu
+        anchorEl={anchor}
+        open={Boolean(anchor)}
+        onClose={() => setAnchor(null)}
+        transformOrigin={{ horizontal: 'center', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+        disableScrollLock
+      >
+        <MenuItem
+          onClick={handleDeleteToken}
         >
-          <Typography variant={'subtitle2'} fontWeight={BOLD_FONT_WEIGHT}>{props.token.title}</Typography>
-          <Typography variant={'subtitle2'}
-                      color={'grey'}>{`${props.token.tempHitPoints > 0 ? `(${props.token.tempHitPoints})` : ''} ${props.token.currentHitPoints}/${props.token.maxHitPoints} HP`}</Typography>
-        </Box>
-      </Card>
-    </ConditionsInterface>
+          <DeleteIcon sx={{ width: 20, height: 20 }} />
+          &nbsp; Delete
+        </MenuItem>
+      </Menu>
+    </>
   );
 };
 
@@ -299,7 +363,7 @@ const EncounterTokenField = (props: { encounter: Encounter }) => {
       <CreateEncounterTokenModal encounter={props.encounter} />
       <RollInitiativeModal encounter={props.encounter} setRoundCount={setRoundCount} />
     </Stack>
-    <Grid2 container columns={13} spacing={2} p={3}>
+    <Grid2 container columns={13} spacing={2} p={3} maxHeight={550} sx={{ overflowY: 'auto' }}>
       <Grid2 size={6} sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2, justifyContent: 'right' }}>
         {props.encounter.tokens.filter((token) => token.isPlayer).map((token) => (
           <DragInterface key={token.id} encounter={props.encounter} tokenId={token.id}>

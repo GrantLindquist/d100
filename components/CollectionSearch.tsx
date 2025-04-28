@@ -1,10 +1,10 @@
 'use client';
 
 import { ChangeEvent, useEffect, useState } from 'react';
-import { Box, Button, Divider, Modal, Stack, TextField, Tooltip, Typography, useTheme } from '@mui/material';
+import { Box, Button, Divider, Modal, Stack, TextField, Tooltip, Typography } from '@mui/material';
 
 import { Article, Collection, Quest, Unit } from '@/types/Unit';
-import { arrayRemove, collection, doc, getDocs, query, runTransaction, where } from '@firebase/firestore';
+import { arrayRemove, collection, doc, getDocs, query, runTransaction, updateDoc, where } from '@firebase/firestore';
 import db, { storage } from '@/utils/firebase';
 import CreateUnitModal from '@/components/modals/CreateUnitModal';
 import FolderIcon from '@mui/icons-material/Folder';
@@ -31,9 +31,10 @@ const CollectionSearch = (props: {
 }) => {
   const { isUserDm, campaign } = useCampaign();
   const { displayAlert } = useAlert();
-  const theme = useTheme();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [collectionTitle, setCollectionTitle] = useState(props.collection.title);
+
   const [units, setUnits] = useState<Unit[]>([]);
 
   const [isEditing, setEditing] = useState(false);
@@ -154,6 +155,17 @@ const CollectionSearch = (props: {
     }
   };
 
+  const confirmChanges = async () => {
+
+    if (props.collection.title !== collectionTitle) {
+      await updateDoc((doc(db, 'units', props.collection.id)), {
+        title: collectionTitle,
+      });
+    }
+
+    setEditing(false);
+  };
+
   const searchResults =
     units.filter((unit) => unit.type !== 'collection') ?? [];
 
@@ -161,56 +173,74 @@ const CollectionSearch = (props: {
     <>
       <Box pt={{ md: 12 }} alignItems={'center'} display={'flex'} flexDirection={'column'}>
         <Box maxWidth={600} width={'100%'}>
-          <Stack direction={'row'} alignItems={'baseline'} px={1}>
-            <Typography
-              variant={'h3'}
-              fontWeight={BOLD_FONT_WEIGHT}
-              flexGrow={1}
-              pb={.5}
-              sx={{
-                fontFamily: outfit.style.fontFamily,
-              }}
-            >
-              {props.collection.title}
-            </Typography>
-            <SmallIconButtonGroup>
-              <CreateUnitModal
-                breadcrumbs={props.collection.breadcrumbs}
+          <Stack direction={'row'} px={1}>
+            {isEditing ? (
+              <input
+                value={collectionTitle}
+                onChange={(e) => setCollectionTitle(e.target.value)}
+                autoFocus
+                style={{
+                  all: 'unset',
+                  fontSize: '2.9rem',
+                  fontWeight: BOLD_FONT_WEIGHT,
+                  fontFamily: outfit.style.fontFamily,
+                  flexGrow: 1,
+                  width: '50%',
+                  cursor: 'text',
+                }}
               />
-              {!isEditing ? (
-                <Tooltip title={'Edit Items'} placement={'left'}>
-                  <SmallIconButton icon={<EditIcon />} onClick={() => setEditing(true)} />
-                </Tooltip>
-              ) : (
-                <>
-                  <Divider orientation={'vertical'} flexItem />
-                  <Tooltip title={'Save Changes'} placement={'left'}>
-                    <SmallIconButton
-                      onClick={() => {
-                        setEditing(false);
-                      }}
-                      icon={<CheckIcon />}
-                    />
-                  </Tooltip>
-                  <Tooltip title={'Move Items'} placement={'left'}>
-                    <MoveUnitsModal
-                      selectedUnitIds={selectedUnitIds}
-                      disabled={selectedUnitIds.length === 0 || selectedUnitsIncludeCollection}
-                      setEditing={setEditing}
-                      currentCollection={props.collection}
-                    />
-                  </Tooltip>
-                  <Tooltip title={'Delete Items'} placement={'left'}>
-                    <SmallIconButton
+            ) : (
+              <Typography
+                variant="h3"
+                fontWeight={BOLD_FONT_WEIGHT}
+                flexGrow={1}
+                pb={0.5}
+                sx={{
+                  fontFamily: outfit.style.fontFamily,
+                }}
+              >
+                {props.collection.title}
+              </Typography>
+            )}
 
-                      disabled={selectedUnitIds.length === 0}
-                      onClick={() => handleDeleteUnits(false)}
-                      icon={<DeleteIcon />}
-                    />
+            <Box minWidth={150} py={1} alignSelf={'flex-end'}>
+              <SmallIconButtonGroup>
+                <CreateUnitModal
+                  breadcrumbs={props.collection.breadcrumbs}
+                />
+                {!isEditing ? (
+                  <Tooltip title={'Edit Items'} placement={'left'}>
+                    <SmallIconButton icon={<EditIcon />} onClick={() => setEditing(true)} />
                   </Tooltip>
-                </>
-              )}
-            </SmallIconButtonGroup>
+                ) : (
+                  <>
+                    <Divider orientation={'vertical'} flexItem />
+                    <Tooltip title={'Save Changes'} placement={'left'}>
+                      <SmallIconButton
+                        onClick={confirmChanges}
+                        icon={<CheckIcon />}
+                      />
+                    </Tooltip>
+                    <Tooltip title={'Move Items'} placement={'left'}>
+                      <MoveUnitsModal
+                        selectedUnitIds={selectedUnitIds}
+                        disabled={selectedUnitIds.length === 0 || selectedUnitsIncludeCollection}
+                        setEditing={setEditing}
+                        currentCollection={props.collection}
+                      />
+                    </Tooltip>
+                    <Tooltip title={'Delete Items'} placement={'left'}>
+                      <SmallIconButton
+
+                        disabled={selectedUnitIds.length === 0}
+                        onClick={() => handleDeleteUnits(false)}
+                        icon={<DeleteIcon />}
+                      />
+                    </Tooltip>
+                  </>
+                )}
+              </SmallIconButtonGroup>
+            </Box>
           </Stack>
           <TextField
             variant={'outlined'}
