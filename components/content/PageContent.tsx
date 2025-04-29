@@ -111,7 +111,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
           if (unitDocSnap.exists()) {
             setUnit(unitDocSnap.data() as Article | Quest);
             setDisplayPlaceholder(!Boolean(unitDocSnap.data().lastEdited));
-            setBreadcrumbs(unitDocSnap.data().breadcrumbs as Breadcrumb[]);
+            !props.compactView && setBreadcrumbs(unitDocSnap.data().breadcrumbs as Breadcrumb[]);
           }
         },
       );
@@ -119,7 +119,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
         unsubscribe();
       };
     }
-  }, []);
+  }, [props.unitId]);
 
   const shouldDisplayPlaceholder = (editor: Editor) => {
     const content = editor.getJSON().content ?? [];
@@ -355,7 +355,12 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
             </Grid>
             <Grid item xs={12} md={props.compactView ? 12 : 8}>
               <Box pl={props.compactView ? 0 : 3} pb={12} zIndex={5} mt={-4}>
-                <Stack direction={'row'} spacing={2} alignItems={'center'}>
+                <Stack direction={'row'} spacing={2} alignItems={'center'} sx={!props.compactView ? {
+                  position: 'fixed',
+                  width: '100%',
+                  zIndex: 10,
+                  backgroundColor: 'background.paper',
+                } : {}}>
                   <SmallIconButtonGroup>
                     <Tooltip title={'Save Changes'} placement={'left'}>
                       <SmallIconButton
@@ -482,7 +487,9 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                     </Box>
                   </BubbleMenu>
                 )}
-                <EditorContent id={'editor-content'} editor={editor} />
+                <Box pt={props.compactView ? 0 : 4}>
+                  <EditorContent id={'editor-content'} editor={editor} />
+                </Box>
                 {/* TODO: This doesn't act right. */}
                 {displayPlaceholder && (
                   <Typography
