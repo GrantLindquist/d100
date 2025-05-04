@@ -9,8 +9,6 @@ import { SpotifyBase } from '@/types/Spotify';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import { useCampaign } from '@/hooks/useCampaign';
 
-// TODO: Organize song order by drag and drop
-// TODO: Some characters still break API search (space, `, etc.)
 const ThemeTrackModal = (props: { unitId: string }) => {
   const { displayAlert } = useAlert();
   const { spotifyAuthenticated } = useSpotifyPlayer();
