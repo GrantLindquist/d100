@@ -53,6 +53,12 @@ const UserButton = () => {
       await updateDoc(doc(db, 'users', user!.id), {
         spotifyRefreshToken: null,
       });
+      await updateDoc(doc(db, 'campaigns', campaign!.id), {
+        settings: {
+          ...campaign!.settings,
+          displaySpotifyPlayer: false,
+        },
+      });
       await signOut(auth);
       await clearCookie('session');
       await clearCookie('spotify_access_token');

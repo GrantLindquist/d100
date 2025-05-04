@@ -6,6 +6,7 @@ import { doc, getDoc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import SpotifyPlayer, { refreshAccessToken } from '@/components/SpotifyPlayer';
 import { getCookie } from '@/utils/cookie';
+import { useAlert } from '@/hooks/useAlert';
 
 const SpotifyPlayerContext = createContext<{
   spotifyAuthenticated: boolean;
@@ -31,6 +32,7 @@ export const SpotifyPlayerProvider = ({ children }: {
 }) => {
   const { user } = useUser();
   const { campaign } = useCampaign();
+  const { displayAlert } = useAlert();
 
   const [displayPlayer, setDisplayPlayer] = useState(false);
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
@@ -51,34 +53,41 @@ export const SpotifyPlayerProvider = ({ children }: {
     async function fetchSpotifyItems(unitId: string) {
       let accessToken;
       const tokenCookie = await getCookie('spotify_access_token');
-      if (Date.now() > tokenCookie.obj.expiresAt) {
-        accessToken = await refreshAccessToken();
-      } else {
-        accessToken = tokenCookie.obj;
-      }
-
-      const unitDocSnap = await getDoc(doc(db, 'units', unitId));
-      if (unitDocSnap.exists()) {
-        const data = unitDocSnap.data();
-        const spotifyIds = [];
-        for (let item of data.spotifyItems) {
-          if (item.type === 'playlist') {
-            const response = await fetch(`https://api.spotify.com/v1/playlists/${item.id}?limit=100`, {
-              method: 'GET',
-              headers: {
-                Authorization: 'Bearer ' + accessToken.token,
-              },
-            });
-            const data = await response.json();
-            for (let trackData of data.tracks.items) {
-              spotifyIds.push(`spotify:track:${trackData.track.id}`);
-            }
-          } else {
-            spotifyIds.push(`spotify:track:${item.id}`);
-          }
+      if (tokenCookie) {
+        if (Date.now() > tokenCookie.obj.expiresAt) {
+          accessToken = await refreshAccessToken();
+        } else {
+          accessToken = tokenCookie.obj;
         }
-        setTrackUris(spotifyIds);
-        setPlaying(true);
+
+        const unitDocSnap = await getDoc(doc(db, 'units', unitId));
+        if (unitDocSnap.exists()) {
+          const data = unitDocSnap.data();
+          const spotifyIds = [];
+          for (let item of data.spotifyItems) {
+            if (item.type === 'playlist') {
+              const response = await fetch(`https://api.spotify.com/v1/playlists/${item.id}?limit=100`, {
+                method: 'GET',
+                headers: {
+                  Authorization: 'Bearer ' + accessToken.token,
+                },
+              });
+              const data = await response.json();
+              for (let trackData of data.tracks.items) {
+                spotifyIds.push(`spotify:track:${trackData.track.id}`);
+              }
+            } else {
+              spotifyIds.push(`spotify:track:${item.id}`);
+            }
+          }
+          setTrackUris(spotifyIds);
+          setPlaying(true);
+        }
+      } else {
+        displayAlert({
+          isError: true,
+          message: 'An error occurred while connecting to your Spotify.',
+        });
       }
     }
 

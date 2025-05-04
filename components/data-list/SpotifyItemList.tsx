@@ -78,6 +78,7 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
   return (<Box px={1} height={'60vh'}>
     {!props.spotifyItems &&
       <TextField
+        onKeyDown={(e) => e.stopPropagation()}
         variant={'outlined'}
         size={'small'}
         onChange={(event) => setSearchTerm(event.target.value)}
