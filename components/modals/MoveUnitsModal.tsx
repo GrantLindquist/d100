@@ -128,7 +128,8 @@ const MoveUnitsModal = (props: {
   const handleMoveUnits = async (event: any) => {
     event.preventDefault();
 
-    // TODO: Clone reference images as well.
+    /* TODO: Clone reference images as well. If a unit is cloned and the original is deleted, then the cloned unit will lose
+        access to the original's image */
     try {
       await runTransaction(db, async (transaction) => {
         for (const staleUnitId of props.selectedUnitIds) {

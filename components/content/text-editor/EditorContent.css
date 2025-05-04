@@ -17,9 +17,6 @@
     margin: 0;
     border-radius: 2px;
 
-    /*padding: 5px 40px 5px 40px;*/
-    /*background-color: #222222;*/
-
     padding: 0 40px 0 40px;
     border-left: 6px solid #222222;
 }
@@ -34,11 +31,7 @@ a {
     cursor: pointer;
 }
 
-
 .hidden {
     visibility: hidden;
 }
 
-/*.highlight {*/
-/*    background-color: yellow !important; !* Highlight color *!*/
-/*}*/
