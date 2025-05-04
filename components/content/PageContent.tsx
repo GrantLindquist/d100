@@ -51,18 +51,12 @@ export const PageContent = () => {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
         backgroundColor: '#111111',
       }}
     >
-      <Container>
-        <Box
-          sx={{
-            pt: 12,
-          }}
-        >
-          {isUserDm !== null && <ContentEditor displayHiddenMarks={isUserDm} />}
-        </Box></Container>
+      <Container sx={{ pt: { xs: 0, md: 3.9 } }}>
+        {isUserDm !== null && <ContentEditor displayHiddenMarks={isUserDm} />}
+      </Container>
     </Box>
   );
 };

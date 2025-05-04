@@ -1,15 +1,5 @@
 'use client';
-import {
-  Box,
-  Card,
-  Grid,
-  IconButton,
-  Menu,
-  MenuItem,
-  Skeleton,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Card, Grid2, IconButton, Menu, MenuItem, Skeleton, Stack, Typography } from '@mui/material';
 import { memo, useEffect, useState } from 'react';
 import { Campaign } from '@/types/Campaign';
 import { useUser } from '@/hooks/useUser';
@@ -47,7 +37,7 @@ const CampaignTab = (props: {
           setCampaign(null);
         }
         setLoading(false);
-      }
+      },
     );
 
     return () => unsubscribe();
@@ -61,7 +51,7 @@ const CampaignTab = (props: {
   const handleClickCard = async () => {
     if (campaign && !anchor) {
       router.push(
-        `campaigns/${props.campaignId}/collections/${campaign.baseCollectionId}`
+        `campaigns/${props.campaignId}/collections/${campaign.baseCollectionId}`,
       );
     }
   };
@@ -165,7 +155,7 @@ const CampaignTabMemo = memo(CampaignTab, (prevProps, nextProps) => {
 const CampaignList = () => {
   const { user } = useUser();
   const [hoveredCampaignId, setHoveredCampaignId] = useState<string | null>(
-    null
+    null,
   );
 
   return (
@@ -183,13 +173,11 @@ const CampaignList = () => {
       {user && (
         <>
           {user.campaignIds?.length > 0 ? (
-            <Grid container spacing={2}>
+            <Grid2 container spacing={2}>
               {user.campaignIds.map((id, index) => (
-                <Grid
-                  item
+                <Grid2
                   key={index}
-                  xs={12}
-                  md={user.campaignIds.length <= 1 ? 12 : 6}
+                  size={{ xs: 12, md: user.campaignIds.length <= 1 ? 12 : 6 }}
                   onMouseEnter={() => setHoveredCampaignId(id)}
                   onMouseLeave={() => setHoveredCampaignId(null)}
                 >
@@ -197,9 +185,9 @@ const CampaignList = () => {
                     campaignId={id}
                     displayActions={id === hoveredCampaignId}
                   />
-                </Grid>
+                </Grid2>
               ))}
-            </Grid>
+            </Grid2>
           ) : (
             <Typography
               align={'center'}

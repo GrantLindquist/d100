@@ -13,7 +13,8 @@ interface Alert {
 const AlertContext = createContext<{
   displayAlert: (alert: Alert) => void;
 }>({
-  displayAlert: () => {},
+  displayAlert: () => {
+  },
 });
 
 export const AlertProvider = ({ children }: { children: ReactNode }) => {
@@ -33,7 +34,6 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
     router.push(link);
   };
 
-  // TODO: Add support for displaying multiple snackbars at once
   return (
     <AlertContext.Provider value={{ displayAlert }}>
       <Snackbar
@@ -52,11 +52,11 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
             paddingY: 0.5,
             ...(alert.isError
               ? {
-                  borderColor: 'red',
-                }
+                borderColor: 'red',
+              }
               : {
-                  borderColor: '#00FF00',
-                }),
+                borderColor: '#00FF00',
+              }),
           }}
         >
           <Stack py={1} px={2} direction={'row'} alignItems={'center'}>

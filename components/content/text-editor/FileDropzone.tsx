@@ -66,7 +66,7 @@ const FileDropzone = ({ children, unitId }: {
     <div
       onDrop={dropHandler}
       onDragOver={(event) => event.preventDefault()}
-      style={{ minHeight: '90vh' }}
+      style={{ minHeight: '85vh' }}
     >
       {children}
     </div>

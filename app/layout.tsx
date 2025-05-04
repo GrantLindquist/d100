@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import AppWrapper from '@/components/AppWrapper';
 import { ReactNode } from 'react';
-import Navbar from '@/components/Navbar';
+import { NavbarContainer } from '@/components/Navbar';
 import { CampaignProvider } from '@/hooks/useCampaign';
 import { UserProvider } from '@/hooks/useUser';
 import { AlertProvider } from '@/hooks/useAlert';
@@ -47,12 +47,11 @@ export default function RootLayout({
             <UnsavedChangesProvider>
               <AppWrapper>
                 <Box display="flex" flexDirection="column" minHeight="100vh">
-                  <Navbar />
+                  <NavbarContainer />
                   <Box component="main" flex={1} overflow="auto" sx={{ overflow: 'hidden' }}>
                     {children}
                   </Box>
                 </Box>
-                <Navbar />
               </AppWrapper>
             </UnsavedChangesProvider>
           </SpotifyPlayerProvider>

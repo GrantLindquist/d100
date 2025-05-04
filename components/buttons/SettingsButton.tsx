@@ -1,5 +1,5 @@
 'use client';
-import { Avatar, Box, IconButton, Menu, MenuItem, Paper, Stack, Tooltip, Typography } from '@mui/material';
+import { Avatar, Box, Button, IconButton, Menu, MenuItem, Paper, Stack, Tooltip, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useCampaign } from '@/hooks/useCampaign';
@@ -114,7 +114,7 @@ const PlayerList = (props: { players: UserBase[] }) => {
   );
 };
 
-const SettingsButton = () => {
+const SettingsButton = (props: { includeText?: boolean }) => {
   const { campaign } = useCampaign();
   const { spotifyAuthenticated, displayPlayer, toggleDisplayPlayerSetting } =
     useSpotifyPlayer();
@@ -157,11 +157,13 @@ const SettingsButton = () => {
 
   return (
     <>
-      <Tooltip title={'Settings'}>
-        <IconButton onClick={handleClick}>
-          <SettingsIcon />
-        </IconButton>
-      </Tooltip>
+      {props.includeText ? <Button sx={{ color: 'white' }} startIcon={<SettingsIcon />}>Settings</Button> :
+        <Tooltip title={'Settings'}>
+          <IconButton onClick={handleClick}>
+            <SettingsIcon />
+          </IconButton>
+        </Tooltip>}
+
       <Menu
         anchorEl={anchor}
         open={open}

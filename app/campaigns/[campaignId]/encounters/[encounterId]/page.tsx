@@ -9,7 +9,7 @@ import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { Encounter } from '@/types/Encounter';
-import { Box, Container, Typography } from '@mui/material';
+import { Box, Container, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import EncounterTokenField from '@/components/data-list/EncounterTokenField';
@@ -20,6 +20,9 @@ export default function EncounterPage() {
   const { campaign, setBreadcrumbs } = useCampaign();
   const router = useRouter();
   const pathname = usePathname();
+
+  const theme = useTheme();
+  const isCondensed = !useMediaQuery(theme.breakpoints.up('sm'));
 
   const [encounter, setEncounter] = useState<Encounter | null>(null);
   const [asideOpen, setAsideOpen] = useState(false);
@@ -50,12 +53,11 @@ export default function EncounterPage() {
   }, [user?.id, campaign?.id]);
 
   if (!encounter) return null;
-
   return (
     <Box display="flex" minHeight="100vh">
       <Box width={asideOpen ? '75%' : '100%'}>
         <Container>
-          <Box sx={{ pt: 12 }}>
+          <Box sx={{ pt: { xs: 2, md: 4 } }}>
             <Typography variant="h2" fontWeight={BOLD_FONT_WEIGHT}>
               {encounter.title}
             </Typography>
@@ -64,40 +66,44 @@ export default function EncounterPage() {
         </Container>
       </Box>
 
-      <Box
-        onClick={() => setAsideOpen((prev) => !prev)}
-        sx={{
-          cursor: 'pointer',
-          width: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          backgroundColor: 'background.paper',
-          borderLeft: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        {asideOpen ? <ChevronRight /> : <ChevronLeft />}
-      </Box>
+      {!isCondensed && (
+        <>
+          <Box
+            onClick={() => setAsideOpen((prev) => !prev)}
+            sx={{
+              cursor: 'pointer',
+              width: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              backgroundColor: 'background.paper',
+              borderLeft: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            {asideOpen ? <ChevronRight /> : <ChevronLeft />}
+          </Box>
 
-      {asideOpen && (
-        <Box
-          sx={{
-            width: '25%',
-            flexShrink: 0,
-            borderLeft: '1px solid',
-            borderColor: 'divider',
-            p: 3,
-            backgroundColor: 'background.paper',
-            overflow: 'auto',
-            height: '100vh',
-          }}
-        >
-          <EncounterAside
-            articleIds={encounter.tokens
-              .map((token) => token.articleId ?? null)
-              .filter((id): id is string => id !== null)}
-          />
-        </Box>
+          {asideOpen && (
+            <Box
+              sx={{
+                width: '25%',
+                flexShrink: 0,
+                borderLeft: '1px solid',
+                borderColor: 'divider',
+                p: 3,
+                backgroundColor: 'background.paper',
+                overflow: 'auto',
+                height: '100vh',
+              }}
+            >
+              <EncounterAside
+                articleIds={encounter.tokens
+                  .map((token) => token.articleId ?? null)
+                  .filter((id): id is string => id !== null)}
+              />
+            </Box>
+          )}
+        </>
       )}
     </Box>
   );

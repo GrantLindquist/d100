@@ -9,17 +9,15 @@ export default function CampaignsPage() {
       display="flex"
       justifyContent="center"
       alignItems="center"
-      height="100vh"
     >
       <Container>
         <Box
           sx={{
-            pt: 16,
+            pt: { xs: 0, md: 8 },
             px: { xs: 2, sm: 4, md: 8, lg: 12 },
-            minHeight: '100vh',
           }}
         >
-          <Stack spacing={2} minWidth={350}>
+          <Stack spacing={2}>
             <CampaignList />
 
             <Stack
