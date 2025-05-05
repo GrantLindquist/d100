@@ -38,7 +38,7 @@ const ConditionsDropdown = (props: {
 }) => {
   const [formData, setFormData] = useState({
     conditionName: '',
-    roundDuration: 1,
+    roundDuration: 0,
     endCondition: defaultEndCondition,
   });
 
@@ -75,18 +75,23 @@ const ConditionsDropdown = (props: {
     );
 
     const hasTokenTurnPassed = actorTurn <= props.encounter.turnCount;
-    let roundEnd = props.encounter.roundCount + formData.roundDuration - (hasTokenTurnPassed ? 0 : 1);
+    let roundEnd: number | null = props.encounter.roundCount + Number(formData.roundDuration) - (hasTokenTurnPassed ? 0 : 1);
 
     let turnEnd;
-    if (formData.endCondition.at === 'start') {
-      turnEnd = actorTurn;
-    } else {
-      if (actorTurn === tokenCount) {
-        roundEnd += 1;
-        turnEnd = 0;
+    if (formData.roundDuration > 0) {
+      if (formData.endCondition.at === 'start') {
+        turnEnd = actorTurn;
       } else {
-        turnEnd = actorTurn + 1;
+        if (actorTurn === tokenCount) {
+          roundEnd += 1;
+          turnEnd = 0;
+        } else {
+          turnEnd = actorTurn + 1;
+        }
       }
+    } else {
+      roundEnd = null;
+      turnEnd = null;
     }
 
     return {
@@ -120,6 +125,7 @@ const ConditionsDropdown = (props: {
           name="conditionName"
           variant="outlined"
           size="small"
+          placeholder="e.g. Grappled"
           fullWidth
           value={formData.conditionName}
           onChange={handleInputChange}
@@ -143,7 +149,7 @@ const ConditionsDropdown = (props: {
           name="roundDuration"
           variant="outlined"
           size="small"
-          value={formData.roundDuration}
+          value={formData.roundDuration <= 0 ? '∞' : formData.roundDuration}
           type="number"
           placeholder="∞"
           onChange={handleInputChange}
@@ -166,52 +172,53 @@ const ConditionsDropdown = (props: {
           }}
         />
       </Stack>
-      <Box sx={{ mt: 1 }}>
-        <Typography component="span" sx={{ display: 'inline' }}>
-          Condition will end at the{' '}
-        </Typography>
-        <Select
-          name="endCondition.at"
-          value={formData.endCondition.at}
-          onChange={handleInputChange}
-          variant="standard"
-          disableUnderline
-          sx={{
-            ml: 0.5,
-            color: 'primary.main',
-            fontWeight: BOLD_FONT_WEIGHT,
-            display: 'inline-block',
-            verticalAlign: 'middle',
-          }}
-        >
-          <MenuItem value="start">start</MenuItem>
-          <MenuItem value="end">end</MenuItem>
-        </Select>
-        <Typography component="span" sx={{ display: 'inline', ml: 0.5 }}>
-          of
-        </Typography>
-        <Select
-          name="endCondition.actor"
-          value={formData.endCondition.actor}
-          onChange={handleInputChange}
-          variant="standard"
-          disableUnderline
-          sx={{
-            ml: 0.5,
-            color: 'primary.main',
-            fontWeight: BOLD_FONT_WEIGHT,
-            display: 'inline-block',
-            verticalAlign: 'middle',
-          }}
-        >
-          <MenuItem value="inflicted">{props.inflictedToken.title}</MenuItem>
-          <MenuItem value="inflicter">{props.inflictingToken.title}</MenuItem>
-        </Select>
-        <Typography component="span" sx={{ display: 'inline', ml: 0.5 }}>
-          {'\'s turn'}
-        </Typography>
-      </Box>
-
+      {formData.roundDuration > 0 &&
+        <Box sx={{ mt: 1 }}>
+          <Typography component="span" sx={{ display: 'inline' }}>
+            Condition will end at the{' '}
+          </Typography>
+          <Select
+            name="endCondition.at"
+            value={formData.endCondition.at}
+            onChange={handleInputChange}
+            variant="standard"
+            disableUnderline
+            sx={{
+              ml: 0.5,
+              color: 'primary.main',
+              fontWeight: BOLD_FONT_WEIGHT,
+              display: 'inline-block',
+              verticalAlign: 'middle',
+            }}
+          >
+            <MenuItem value="start">start</MenuItem>
+            <MenuItem value="end">end</MenuItem>
+          </Select>
+          <Typography component="span" sx={{ display: 'inline', ml: 0.5 }}>
+            of
+          </Typography>
+          <Select
+            name="endCondition.actor"
+            value={formData.endCondition.actor}
+            onChange={handleInputChange}
+            variant="standard"
+            disableUnderline
+            sx={{
+              ml: 0.5,
+              color: 'primary.main',
+              fontWeight: BOLD_FONT_WEIGHT,
+              display: 'inline-block',
+              verticalAlign: 'middle',
+            }}
+          >
+            <MenuItem value="inflicted">{props.inflictedToken.title}</MenuItem>
+            <MenuItem value="inflicter">{props.inflictingToken.title}</MenuItem>
+          </Select>
+          <Typography component="span" sx={{ display: 'inline', ml: 0.5 }}>
+            {'\'s turn'}
+          </Typography>
+        </Box>
+      }
     </Box>
   );
 };

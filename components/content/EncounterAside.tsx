@@ -1,7 +1,7 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 import { doc, getDoc } from '@firebase/firestore';
 import { Article } from '@/types/Unit';
-import { Box, Pagination, Typography } from '@mui/material';
+import { Pagination, Typography } from '@mui/material';
 import db from '@/utils/firebase';
 import { ContentEditor } from '@/components/content/PageContent';
 
@@ -32,7 +32,7 @@ const EncounterAside = (props: { articleIds: string[] }) => {
   }, [props.articleIds]);
 
   return (
-    <Box pt={5}>
+    <>
       {articles.length ? (
         <>
           <Pagination
@@ -50,7 +50,7 @@ const EncounterAside = (props: { articleIds: string[] }) => {
           There are no tokens with articles attached to them.
         </Typography>
       )}
-    </Box>
+    </>
   );
 };
 

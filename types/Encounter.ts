@@ -36,8 +36,8 @@ export interface Condition {
   name: string;
   roundInflicted: number;
 
-  roundEnd: number;
-  turnEnd: number;
+  roundEnd: number | null;
+  turnEnd: number | null;
 
   inflictingTokenId: string;
   inflictedTokenId: string;
