@@ -7,7 +7,6 @@ import { ImageUrl } from '@/types/Unit';
 import { arrayUnion, doc, updateDoc } from '@firebase/firestore';
 import { useCampaign } from '@/hooks/useCampaign';
 
-// TODO: This z-index is greater than the modals and causes issues
 const FileDropzone = ({ children, unitId }: {
   children: ReactNode;
   unitId: string;
@@ -66,7 +65,7 @@ const FileDropzone = ({ children, unitId }: {
     <div
       onDrop={dropHandler}
       onDragOver={(event) => event.preventDefault()}
-      style={{ minHeight: '90vh' }}
+      style={{ minHeight: '85vh' }}
     >
       {children}
     </div>

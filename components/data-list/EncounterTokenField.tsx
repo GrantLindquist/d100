@@ -184,7 +184,11 @@ const EncounterTokenCard = (props: {
   useEffect(() => {
     const { roundCount, turnCount, activeConditions } = props.encounter;
     const currentlyVisibleConditions = activeConditions.filter((condition) => {
-      return props.token.id === condition.inflictedTokenId && roundCount >= condition.roundInflicted && roundCount <= condition.roundEnd && (roundCount !== condition.roundEnd || turnCount < condition.turnEnd);
+      if (condition.roundEnd === null && condition.turnEnd === null) {
+        return props.token.id === condition.inflictedTokenId && roundCount >= condition.roundInflicted;
+      } else {
+        return props.token.id === condition.inflictedTokenId && roundCount >= condition.roundInflicted && roundCount <= condition.roundEnd! && (roundCount !== condition.roundEnd || turnCount < condition.turnEnd!);
+      }
     });
 
     setConditions(currentlyVisibleConditions);

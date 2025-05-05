@@ -20,7 +20,7 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
   const [menuAnchor, setMenuAnchor] = useState(null);
 
   useEffect(() => {
-    const scrubbedSearchTerm = searchTerm.replace(/[^A-Z0-9 ,?!/$-:]/gi, '');
+    const scrubbedSearchTerm = searchTerm.replace(/[^A-Z0-9 ,?!/$:-]/gi, '').replace('+', '').trim();
     scrubbedSearchTerm.length > 0 && fetchSpotifyItems(scrubbedSearchTerm);
   }, [searchTerm, searchType]);
 
@@ -78,6 +78,7 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
   return (<Box px={1} height={'60vh'}>
     {!props.spotifyItems &&
       <TextField
+        onKeyDown={(e) => e.stopPropagation()}
         variant={'outlined'}
         size={'small'}
         onChange={(event) => setSearchTerm(event.target.value)}
@@ -139,7 +140,6 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
         </Stack>
         <Divider />
       </Box>)}</>}
-
   </Box>);
 };
 export default SpotifyItemList;

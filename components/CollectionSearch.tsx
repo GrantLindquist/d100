@@ -171,7 +171,7 @@ const CollectionSearch = (props: {
 
   return (
     <>
-      <Box pt={{ md: 12 }} alignItems={'center'} display={'flex'} flexDirection={'column'}>
+      <Box mt={{ md: 6 }} alignItems={'center'} display={'flex'} flexDirection={'column'}>
         <Box maxWidth={600} width={'100%'}>
           <Stack direction={'row'} px={1}>
             {isEditing ? (

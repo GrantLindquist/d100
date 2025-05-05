@@ -68,7 +68,7 @@ const PendingPlayerAction = (props: {
   );
 };
 
-const NotificationButton = () => {
+const NotificationButton = (props: { includeText?: boolean }) => {
   const { campaign } = useCampaign();
   const { displayAlert } = useAlert();
 
@@ -123,11 +123,12 @@ const NotificationButton = () => {
         overlap={'circular'}
         color={'primary'}
       >
-        <Tooltip title={'Notifications'}>
-          <IconButton onClick={handleClick}>
-            <BellIcon />
-          </IconButton>
-        </Tooltip>
+        {props.includeText ? <Button sx={{ color: 'white' }} startIcon={<BellIcon />}>Notifications</Button> :
+          <Tooltip title={'Notifications'}>
+            <IconButton onClick={handleClick}>
+              <BellIcon />
+            </IconButton>
+          </Tooltip>}
       </Badge>
       <Menu
         anchorEl={anchor}

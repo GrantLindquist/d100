@@ -24,19 +24,12 @@ const ArticleAside = (props: { titles: string[]; unit: Article | Quest }) => {
     const headerElement = Array.from(document.querySelectorAll('h2')).find(
       (header) => header.innerHTML === headerText,
     );
-
-    // TODO: Make section title temporarily highlight when this activates
+    
     if (headerElement) {
       const rect = headerElement.getBoundingClientRect();
       const offset = window.scrollY || document.documentElement.scrollTop;
       const targetPosition =
-        rect.top + offset - (headerText === props.unit.title ? 100 : 85);
-
-      // console.log(headerElement);
-      // headerElement.classList.add('highlight');
-      // setTimeout(() => {
-      //   headerElement.classList.remove('highlight');
-      // }, 500);
+        rect.top + offset - (headerText === props.unit.title ? 100 : 90);
 
       window.scrollTo({
         top: targetPosition,

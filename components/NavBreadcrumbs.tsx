@@ -5,13 +5,11 @@ import { useEffect, useState } from 'react';
 import db from '@/utils/firebase';
 import { doc, getDoc } from '@firebase/firestore';
 import { LINK_STYLE } from '@/utils/globals';
-import { useRouter } from 'next/navigation';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import SaveCheckLink from './SaveCheckLink';
 
 const NavBreadcrumbs = () => {
   const { breadcrumbs } = useCampaign();
-  const router = useRouter();
   const theme = useTheme();
   const [crumbTitles, setCrumbTitles] = useState<string[]>([]);
 

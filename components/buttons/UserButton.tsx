@@ -1,6 +1,6 @@
 'use client';
 import { useUser } from '@/hooks/useUser';
-import { Avatar, Button, Menu, MenuItem, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Avatar, Button, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
 import { clearCookie } from '@/utils/cookie';
 import db, { auth } from '@/utils/firebase';
@@ -21,9 +21,6 @@ const UserButton = () => {
   const { campaign, isUserDm } = useCampaign();
   const { displayAlert } = useAlert();
   const { spotifyAuthenticated } = useSpotifyPlayer();
-
-  const theme = useTheme();
-  const displayUserName = useMediaQuery(theme.breakpoints.up('md'));
 
   const [anchor, setAnchor] = useState(null);
   const open = Boolean(anchor);
@@ -55,6 +52,12 @@ const UserButton = () => {
       setListening(false);
       await updateDoc(doc(db, 'users', user!.id), {
         spotifyRefreshToken: null,
+      });
+      await updateDoc(doc(db, 'campaigns', campaign!.id), {
+        settings: {
+          ...campaign!.settings,
+          displaySpotifyPlayer: false,
+        },
       });
       await signOut(auth);
       await clearCookie('session');
@@ -111,11 +114,9 @@ const UserButton = () => {
                 marginRight: 1,
               }}
             />
-            {displayUserName && (
-              <Typography color={'white'} variant={'subtitle2'}>
-                {user?.displayName}
-              </Typography>
-            )}
+            <Typography color={'white'} variant={'subtitle2'}>
+              {user?.displayName}
+            </Typography>
           </Button>
           <Menu
             anchorEl={anchor}

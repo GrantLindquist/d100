@@ -51,18 +51,12 @@ export const PageContent = () => {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
         backgroundColor: '#111111',
       }}
     >
-      <Container>
-        <Box
-          sx={{
-            pt: 12,
-          }}
-        >
-          {isUserDm !== null && <ContentEditor displayHiddenMarks={isUserDm} />}
-        </Box></Container>
+      <Container sx={{ pt: { xs: 0, md: 3.9 } }}>
+        {isUserDm !== null && <ContentEditor displayHiddenMarks={isUserDm} />}
+      </Container>
     </Box>
   );
 };
@@ -79,6 +73,9 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
   const [unit, setUnit] = useState<Article | Quest | null>(null);
   const [sectionTitles, setSectionTitles] = useState<string[]>([]);
   const [displayPlaceholder, setDisplayPlaceholder] = useState(false);
+
+  // Represented in pixels
+  const [placeholderYPosition, setPlaceholderYPosition] = useState<number>(0);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -111,7 +108,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
           if (unitDocSnap.exists()) {
             setUnit(unitDocSnap.data() as Article | Quest);
             setDisplayPlaceholder(!Boolean(unitDocSnap.data().lastEdited));
-            setBreadcrumbs(unitDocSnap.data().breadcrumbs as Breadcrumb[]);
+            !props.compactView && setBreadcrumbs(unitDocSnap.data().breadcrumbs as Breadcrumb[]);
           }
         },
       );
@@ -119,7 +116,33 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
         unsubscribe();
       };
     }
-  }, []);
+  }, [props.unitId]);
+
+  // All of this nonsense is necessary to correctly position the EditorContent placeholder.
+  const editorContentRef = useRef<HTMLElement>(null);
+  const observerRef = useRef<ResizeObserver | null>(null);
+  useEffect(() => {
+    if (!editorContentRef.current) return;
+
+    const updatePlaceholderPosition = () => {
+      const headerElement = editorContentRef.current?.querySelector('h2:first-of-type');
+      if (headerElement) {
+        const { bottom } = headerElement.getBoundingClientRect();
+        setPlaceholderYPosition(bottom + 16);
+      }
+    };
+
+    observerRef.current = new ResizeObserver(updatePlaceholderPosition);
+    const headerElement = editorContentRef.current.querySelector('h2:first-of-type');
+    if (headerElement) {
+      observerRef.current.observe(headerElement);
+    }
+    updatePlaceholderPosition();
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [unit]);
 
   const shouldDisplayPlaceholder = (editor: Editor) => {
     const content = editor.getJSON().content ?? [];
@@ -355,7 +378,12 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
             </Grid>
             <Grid item xs={12} md={props.compactView ? 12 : 8}>
               <Box pl={props.compactView ? 0 : 3} pb={12} zIndex={5} mt={-4}>
-                <Stack direction={'row'} spacing={2} alignItems={'center'}>
+                <Stack direction={'row'} spacing={2} alignItems={'center'} sx={!props.compactView ? {
+                  position: 'fixed',
+                  width: '100%',
+                  zIndex: 10,
+                  backgroundColor: 'background.paper',
+                } : {}}>
                   <SmallIconButtonGroup>
                     <Tooltip title={'Save Changes'} placement={'left'}>
                       <SmallIconButton
@@ -482,25 +510,29 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                     </Box>
                   </BubbleMenu>
                 )}
-                <EditorContent id={'editor-content'} editor={editor} />
-                {/* TODO: This doesn't act right. */}
+                <Box ref={editorContentRef} pt={props.compactView ? 0 : 4.2}>
+                  <EditorContent id={'editor-content'} editor={editor} />
+                </Box>
                 {displayPlaceholder && (
-                  <Typography
-                    sx={{
-                      color: 'grey',
-                      position: 'relative',
-                      top: -135,
-                      pointerEvents: 'none',
-                      whiteSpace: 'pre-line',
-                    }}
-                  >
-                    {`This is a${unit.type === 'quest' ? ' ' : 'n '}`}
-                    {unit.type === 'quest' ? <b>Quest</b> : <b>Article</b>}
-                    {`. Type any information you'd like inside this area.\n\n`}
-                    {`To save or edit the `}
-                    {unit.type === 'quest' ? <b>Quest</b> : <b>Article</b>}
-                    {`, use the action buttons on the bottom right.\nTry highlighting some text and experimenting with font types and headings!`}
-                  </Typography>
+                  <div id={'page-content-placeholder'} style={{
+                    position: 'fixed',
+                    top: `${placeholderYPosition}px`,
+                    pointerEvents: 'none',
+                  }}>
+                    <Typography
+                      sx={{
+                        color: 'grey',
+                        whiteSpace: 'pre-line',
+                      }}
+                    >
+                      {`This is a${unit.type === 'quest' ? ' ' : 'n '}`}
+                      {unit.type === 'quest' ? <b>Quest</b> : <b>Article</b>}
+                      {`. Type any information you'd like inside this area.\n\n`}
+                      {`To save or edit the `}
+                      {unit.type === 'quest' ? <b>Quest</b> : <b>Article</b>}
+                      {`, use the action buttons on the bottom right.\nTry highlighting some text and experimenting with font types and headings!`}
+                    </Typography>
+                  </div>
                 )}
                 {/* @ts-ignore */}
                 {unit.type === 'quest' && unit.loot && (

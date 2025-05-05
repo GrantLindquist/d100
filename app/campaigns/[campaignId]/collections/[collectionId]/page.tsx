@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Container, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Container } from '@mui/material';
 import CollectionSearch from '@/components/CollectionSearch';
 import { Breadcrumb, Collection } from '@/types/Unit';
 import { useCampaign } from '@/hooks/useCampaign';
@@ -16,9 +16,6 @@ export default function CollectionPage() {
   const { campaign, setBreadcrumbs } = useCampaign();
   const router = useRouter();
   const pathname = usePathname();
-
-  const theme = useTheme();
-  const displayBgImage = useMediaQuery(theme.breakpoints.up('md'));
 
   const [collection, setCollection] = useState<Collection | null>(null);
 
@@ -49,20 +46,6 @@ export default function CollectionPage() {
 
   return (
     <>
-      {/*<Box*/}
-      {/*  sx={{*/}
-      {/*    height: '100vh',*/}
-      {/*    width: '100vw',*/}
-      {/*    display: 'flex',*/}
-      {/*    justifyContent: 'center',*/}
-      {/*    alignItems: 'center',*/}
-      {/*    position: 'fixed',*/}
-      {/*  }}*/}
-      {/*>*/}
-      {/*  {displayBgImage && (*/}
-      {/*    <img src={'/d100-grey.svg'} style={{ width: '50%', pointerEvents: 'none' }} />*/}
-      {/*  )}*/}
-      {/*</Box>*/}
       {collection && (
         <Container>
           <Box px={{ md: 16, xs: 0 }}>

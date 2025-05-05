@@ -77,6 +77,11 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
           disableScrollLock: true,
         },
       },
+      MuiMenuItem: {
+        defaultProps: {
+          dense: true,
+        },
+      },
       MuiCssBaseline: {
         styleOverrides: {
           html: {
