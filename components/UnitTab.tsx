@@ -1,10 +1,10 @@
 import { ImageUrl, Unit, UnitDisplayValues } from '@/types/Unit';
 import { ChangeEvent, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
 import { Box, Card, Checkbox, Stack, Tooltip, Typography } from '@mui/material';
 import ImageFrame from '@/components/content/ImageFrame';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import Link from 'next/link';
 
 type UnitTabProps = {
   unit: Unit;
@@ -21,19 +21,21 @@ type UnitTabWrapperProps = {
 };
 
 const UnitTabWrapper = ({ props, children }: UnitTabWrapperProps) => {
-  const router = useRouter();
+  if (props.isEditing) {
+    return <>{children}</>;
+  }
 
+  // Otherwise, wrap with Link
   return (
-    <div
-      onClick={() =>
-        !props.isEditing &&
-        router.push(
-          `/campaigns/${props.unit.campaignId}/${props.unit.type}s/${props.unit.id}`,
-        )
-      }
+    <Link
+      href={`/campaigns/${props.unit.campaignId}/${props.unit.type}s/${props.unit.id}`}
+      style={{
+        color: 'inherit',
+        textDecoration: 'none',
+      }}
     >
       {children}
-    </div>
+    </Link>
   );
 };
 
