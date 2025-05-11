@@ -1,6 +1,6 @@
 import { ImageUrl, Unit, UnitDisplayValues } from '@/types/Unit';
 import { ChangeEvent, ReactNode } from 'react';
-import { Box, Card, Checkbox, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Card, Checkbox, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 import ImageFrame from '@/components/content/ImageFrame';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
@@ -76,6 +76,8 @@ export const CondensedUnitTab = (props: UnitTabProps) => {
 
 export const UnitTab = (props: UnitTabProps) => {
 
+  const theme = useTheme();
+
   const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
     props.updateState(!event.target.checked, props.unit);
   };
@@ -85,13 +87,13 @@ export const UnitTab = (props: UnitTabProps) => {
       <Card
         variant="outlined"
         sx={{
-          backgroundColor: 'rgba(0, 0, 0, 0)',
-          borderColor: '#444444',
+          background: `linear-gradient(140deg, rgba(28, 28, 28), ${theme.palette.background.default})`,
+          borderColor: '#333',
           borderWidth: '2px',
           cursor: 'pointer',
           ':hover': !props.isEditing
             ? {
-              backgroundColor: 'rgba(28, 28, 28)',
+              borderColor: '#555',
             }
             : {},
         }}

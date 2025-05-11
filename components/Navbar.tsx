@@ -24,19 +24,14 @@ import { outfit } from '@/components/AppWrapper';
 import SaveCheckLink from '@/components/SaveCheckLink';
 import { useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
-import { useUser } from '@/hooks/useUser';
 
 export const NavbarContainer = () => {
-  const { user } = useUser();
   const theme = useTheme();
   const isCondensed = !useMediaQuery(theme.breakpoints.up('sm'));
 
-  if (!user) {
-    return null;
-  }
   return (
     <>
-      <Box sx={user ? { paddingTop: '64px' } : {}}></Box>
+      <Box sx={{ paddingTop: '64px' }}></Box>
       <AppBar position="static" elevation={1}>
         <Toolbar
           sx={{
