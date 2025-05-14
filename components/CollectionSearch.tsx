@@ -9,7 +9,6 @@ import db, { storage } from '@/utils/firebase';
 import CreateUnitModal from '@/components/modals/CreateUnitModal';
 import FolderIcon from '@mui/icons-material/Folder';
 import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
-import Masonry from '@mui/lab/Masonry';
 import { useCampaign } from '@/hooks/useCampaign';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
@@ -24,6 +23,7 @@ import { outfit } from '@/components/AppWrapper';
 import MoveUnitsModal from '@/components/modals/MoveUnitsModal';
 import { SmallIconButton, SmallIconButtonGroup } from '@/components/buttons/SmallIconButton';
 import { CondensedUnitTab, UnitTab } from '@/components/UnitTab';
+import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 
 const CollectionSearch = (props: {
   unitIds: string[];
@@ -156,13 +156,11 @@ const CollectionSearch = (props: {
   };
 
   const confirmChanges = async () => {
-
     if (props.collection.title !== collectionTitle) {
       await updateDoc((doc(db, 'units', props.collection.id)), {
         title: collectionTitle,
       });
     }
-
     setEditing(false);
   };
 
@@ -181,7 +179,8 @@ const CollectionSearch = (props: {
                 autoFocus
                 style={{
                   all: 'unset',
-                  fontSize: '2.9rem',
+                  fontSize: '3rem',
+                  height: '3.7rem',
                   fontWeight: BOLD_FONT_WEIGHT,
                   fontFamily: outfit.style.fontFamily,
                   flexGrow: 1,
@@ -288,50 +287,45 @@ const CollectionSearch = (props: {
                 );
               })}
           </Box>
-          <Masonry
-            spacing={1}
-            columns={
-              searchResults.length > 2
-                ? { xs: 1, sm: 2, md: 3, lg: 4 }
-                : searchResults.length
-            }
-          >
-            {searchResults.map((unit: Unit, index) => {
-              if (
-                unit.title
-                  .toLowerCase()
-                  .trim()
-                  .includes(searchQuery.toLowerCase().trim()) &&
-                (isUserDm || !unit.hidden)
-              ) {
-                return (
-                  <UnitTab
-                    key={index}
-                    unit={unit}
-                    checked={selectedUnitIds.includes(unit.id)}
-                    icon={(() => {
-                      switch (unit.type) {
-                        case 'quest':
-                          return <KeyIcon />;
-                        case 'encounter':
-                          return <AutoFixHighIcon />;
-                        default:
-                          return <DescriptionIcon />;
-                      }
-                    })()}
-                    isEditing={isEditing}
-                    updateState={updateSelectedUnits}
-                    {...(unit.type === 'article' ||
-                    (unit.type === 'quest' &&
-                      (unit as Article | Quest).imageUrls[0])
-                      ? { imageUrl: (unit as Article | Quest).imageUrls[0] }
-                      : {})}
-                  />
-                );
-              }
-              return null;
-            })}
-          </Masonry>
+          <ResponsiveMasonry columnsCountBreakPoints={{ 200: 1, 400: 2, 600: 3, 800: 4 }}>
+            <Masonry>
+              {searchResults.map((unit: Unit, index) => {
+                if (
+                  unit.title
+                    .toLowerCase()
+                    .trim()
+                    .includes(searchQuery.toLowerCase().trim()) &&
+                  (isUserDm || !unit.hidden)
+                ) {
+                  return (
+                    <UnitTab
+                      key={index}
+                      unit={unit}
+                      checked={selectedUnitIds.includes(unit.id)}
+                      icon={(() => {
+                        switch (unit.type) {
+                          case 'quest':
+                            return <KeyIcon />;
+                          case 'encounter':
+                            return <AutoFixHighIcon />;
+                          default:
+                            return <DescriptionIcon />;
+                        }
+                      })()}
+                      isEditing={isEditing}
+                      updateState={updateSelectedUnits}
+                      {...(unit.type === 'article' ||
+                      (unit.type === 'quest' &&
+                        (unit as Article | Quest).imageUrls[0])
+                        ? { imageUrl: (unit as Article | Quest).imageUrls[0] }
+                        : {})}
+                    />
+                  );
+                }
+                return null;
+              })}
+            </Masonry>
+          </ResponsiveMasonry>
         </Box>
       )}
 

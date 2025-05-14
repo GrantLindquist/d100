@@ -19,7 +19,7 @@ import { useCampaign } from '@/hooks/useCampaign';
 import NotificationButton from '@/components/buttons/NotificationButton';
 import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 import Image from 'next/image';
-import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import { BOLD_FONT_WEIGHT, NAVBAR_HEIGHT_PIXELS } from '@/utils/globals';
 import { outfit } from '@/components/AppWrapper';
 import SaveCheckLink from '@/components/SaveCheckLink';
 import { useState } from 'react';
@@ -31,7 +31,7 @@ export const NavbarContainer = () => {
 
   return (
     <>
-      <Box sx={{ paddingTop: '64px' }}></Box>
+      <Box sx={{ paddingTop: NAVBAR_HEIGHT_PIXELS }}></Box>
       <AppBar position="static" elevation={1}>
         <Toolbar
           sx={{
@@ -40,6 +40,7 @@ export const NavbarContainer = () => {
             top: 0,
             width: '100%',
             backgroundColor: '#111',
+            boxShadow: '0px 5px 3px #111',
           }}
         >
           {isCondensed ? <NavbarCondensed /> : <Navbar />}

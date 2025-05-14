@@ -21,21 +21,20 @@ type UnitTabWrapperProps = {
 };
 
 const UnitTabWrapper = ({ props, children }: UnitTabWrapperProps) => {
-  if (props.isEditing) {
-    return <>{children}</>;
-  }
-
-  // Otherwise, wrap with Link
   return (
-    <Link
-      href={`/campaigns/${props.unit.campaignId}/${props.unit.type}s/${props.unit.id}`}
-      style={{
-        color: 'inherit',
-        textDecoration: 'none',
-      }}
-    >
-      {children}
-    </Link>
+    <div style={{ width: props.unit.type === 'collection' ? 'auto' : '100%' }}>
+      {props.isEditing ? <>{children}</> :
+        <Link
+          href={`/campaigns/${props.unit.campaignId}/${props.unit.type}s/${props.unit.id}`}
+          style={{
+            color: 'inherit',
+            textDecoration: 'none',
+          }}
+        >
+          {children}
+        </Link>
+      }
+    </div>
   );
 };
 

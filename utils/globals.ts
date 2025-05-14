@@ -4,6 +4,7 @@ export const BOLD_FONT_WEIGHT = 600;
 
 export const PLAYER_INVITATIONS_FEATURE_FLAG = true;
 
+// TODO: Create consistent modal styles, probably a custom modal component as well
 export const MODAL_STYLE = {
   position: 'absolute',
   top: '50%',
@@ -23,3 +24,4 @@ export const LINK_STYLE = {
 
 export const SUBTITLE_VARIANT = 'h4';
 
+export const NAVBAR_HEIGHT_PIXELS = '64px';

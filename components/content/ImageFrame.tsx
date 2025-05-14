@@ -50,7 +50,8 @@ const ImageFrame = (props: { image: ImageUrl | null; alt?: string }) => {
       id={frameId.current}
       ref={frameRef}
       sx={{
-        width: '100%',
+        // TODO: This is an absolutely diabolical hack. It's fine for now but fix this later.
+        width: '101%',
         height: calculatedHeight,
         display: 'flex',
         justifyContent: 'center',

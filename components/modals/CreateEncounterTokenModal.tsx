@@ -9,6 +9,8 @@ import { Box, Button, Checkbox, FormControlLabel, InputLabel, Modal, Stack, Text
 import { MODAL_STYLE } from '@/utils/globals';
 import ExistingEncounterTokenList from '@/components/data-list/ExistingEncounterTokenList';
 import { Article } from '@/types/Unit';
+import { SmallIconButton } from '@/components/buttons/SmallIconButton';
+import AddIcon from '@mui/icons-material/Add';
 
 const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
   const [open, setOpen] = useState(false);
@@ -121,7 +123,7 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Add Token</Button>
+      <SmallIconButton icon={<AddIcon />} onClick={() => setOpen(true)} />
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box sx={MODAL_STYLE} minHeight={370} width={700}>
           <Stack direction={'row'} spacing={2}>
