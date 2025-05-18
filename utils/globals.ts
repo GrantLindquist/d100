@@ -25,3 +25,6 @@ export const LINK_STYLE = {
 export const SUBTITLE_VARIANT = 'h4';
 
 export const NAVBAR_HEIGHT_PIXELS = '64px';
+
+// (X, Y)
+export const DEFAULT_STICKY_NOTE_DIMENSIONS: [number, number] = [225, 150];

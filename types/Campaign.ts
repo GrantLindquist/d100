@@ -7,6 +7,7 @@ export interface Campaign {
   dmId: string;
   players: UserBase[];
   pendingPlayers: UserBase[];
+  stickyNoteIds?: string[];
   settings: {
     displaySpotifyPlayer?: boolean;
   };

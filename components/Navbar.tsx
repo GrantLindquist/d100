@@ -24,6 +24,7 @@ import { outfit } from '@/components/AppWrapper';
 import SaveCheckLink from '@/components/SaveCheckLink';
 import { useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
+import StickyNoteButton from '@/components/buttons/StickyNoteButton';
 
 export const NavbarContainer = () => {
   const theme = useTheme();
@@ -95,7 +96,8 @@ const Navbar = () => {
             </>
           )}
         </Stack>
-        <Stack direction={'row'} spacing={1}>
+        <Stack direction={'row'} spacing={.5}>
+          {campaign && (<StickyNoteButton />)}
           {isUserDm && (
             <>
               <NotificationButton />

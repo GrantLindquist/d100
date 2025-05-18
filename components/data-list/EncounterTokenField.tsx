@@ -23,9 +23,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import { outfit } from '@/components/AppWrapper';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 
-const EncounterTokenWidth = 150;
-const EncounterTokenHeight = 210;
-
 const DragInterface = ({ children, encounter, tokenId }: {
   children: ReactNode;
   encounter: Encounter;
@@ -88,8 +85,6 @@ const DragInterface = ({ children, encounter, tokenId }: {
             position: 'absolute',
             top: 0,
             left: 0,
-            // width: `${EncounterTokenWidth}px`,
-            // height: `${EncounterTokenHeight}px`,
             zIndex: 10,
             touchAction: 'none',
           }}
@@ -248,12 +243,10 @@ const EncounterTokenCard = (props: {
       <ConditionsInterface handleRemoveCondition={handleRemoveCondition} conditions={conditions}>
         <Card sx={{
           userSelect: 'none',
-          // width: `${EncounterTokenWidth}px`,
           border: `2px solid ${props.isCurrentTurn ? theme.palette.primary.main : 'transparent'}`,
         }}>
           <div style={{ filter: props.token.isDead ? 'grayscale(1)' : '' }}>
             <ImageFrame
-              lax
               image={tokenImage}
               alt={props.token.title}
             />

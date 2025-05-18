@@ -11,6 +11,7 @@ import { useUser } from '@/hooks/useUser';
 import db from '@/utils/firebase';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
+import StickyNoteContainer from '@/components/StickyNoteContainer';
 
 export const outfit = Outfit({ subsets: ['latin'] });
 
@@ -107,6 +108,7 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
+      {campaign && <StickyNoteContainer />}
       {children}
     </ThemeProvider>
   );

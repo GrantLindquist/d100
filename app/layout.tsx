@@ -8,6 +8,7 @@ import { AlertProvider } from '@/hooks/useAlert';
 import { UnsavedChangesProvider } from '@/hooks/useUnsavedChanges';
 import { SpotifyPlayerProvider } from '@/hooks/useSpotifyPlayer';
 import { Box } from '@mui/material';
+import { StickyNoteProvider } from '@/hooks/useStickyNotes';
 
 export const metadata: Metadata = {
   title: 'd100',
@@ -35,14 +36,16 @@ export default function RootLayout({
         <CampaignProvider>
           <SpotifyPlayerProvider>
             <UnsavedChangesProvider>
-              <AppWrapper>
-                <Box display="flex" flexDirection="column" minHeight="100vh">
-                  <NavbarContainer />
-                  <Box component="main" flex={1} overflow="auto" sx={{ overflow: 'hidden' }}>
-                    {children}
+              <StickyNoteProvider>
+                <AppWrapper>
+                  <Box display="flex" flexDirection="column" minHeight="100vh">
+                    <NavbarContainer />
+                    <Box component="main" flex={1} overflow="auto" sx={{ overflow: 'hidden' }}>
+                      {children}
+                    </Box>
                   </Box>
-                </Box>
-              </AppWrapper>
+                </AppWrapper>
+              </StickyNoteProvider>
             </UnsavedChangesProvider>
           </SpotifyPlayerProvider>
         </CampaignProvider>
