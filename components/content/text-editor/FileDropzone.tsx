@@ -55,7 +55,6 @@ const FileDropzone = ({ children, unitId }: {
     } catch (err: any) {
       displayAlert({
         message: 'An error occurred while dropping your files.',
-        isError: true,
         errorType: err.message,
       });
     }

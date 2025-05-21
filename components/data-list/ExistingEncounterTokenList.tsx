@@ -40,7 +40,6 @@ const ExistingEncounterTokenList = (props: { selectArticle: Function; selectedAr
       } catch (e: any) {
         displayAlert({
           message: 'An error occurred while fetching your articles.',
-          isError: true,
           errorType: e.message,
         });
       }

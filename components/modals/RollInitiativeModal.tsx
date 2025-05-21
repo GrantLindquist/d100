@@ -16,6 +16,7 @@ import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, us
 import { doc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useAlert } from '@/hooks/useAlert';
+import { SmallIconButton } from '@/components/buttons/SmallIconButton';
 
 const SortableToken = (props: { token: EncounterToken }) => {
   const {
@@ -96,16 +97,13 @@ const RollInitiativeModal = (props: { encounter: Encounter; setRoundCount: Funct
       displayAlert({
         message: 'An error occurred while setting initiative',
         errorType: e.message,
-        isError: true,
       });
     }
   };
 
   return (<>
-    <Button startIcon={<CasinoIcon />} disabled={props.encounter.tokens.length === 0}
-            onClick={() => setOpen(true)}>
-      Roll Initiative
-    </Button>
+    <SmallIconButton icon={<CasinoIcon />} disabled={props.encounter.tokens.length === 0}
+                     onClick={() => setOpen(true)} />
     <Modal open={open} onClose={() => setOpen(false)}>
       <Box sx={MODAL_STYLE}>
         <Typography variant={'h4'} fontWeight={BOLD_FONT_WEIGHT}>Order by Initiative</Typography>

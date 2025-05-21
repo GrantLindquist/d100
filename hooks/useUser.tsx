@@ -1,13 +1,5 @@
 'use client';
-import {
-  createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useEffect, useState } from 'react';
 import { User } from '@/types/User';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
@@ -20,8 +12,10 @@ const UserContext = createContext<{
   signOutUser: () => void;
 }>({
   user: null,
-  setListening: () => {},
-  signOutUser: () => {},
+  setListening: () => {
+  },
+  signOutUser: () => {
+  },
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -43,10 +37,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
               displayAlert({
                 message:
                   'Failed to pull user data from database. This may be a result if mismatched database environments.',
-                isError: true,
+                errorType: '',
               });
             }
-          }
+          },
         );
         return () => {
           unsubscribe();

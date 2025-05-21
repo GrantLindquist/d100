@@ -35,13 +35,14 @@ const EncounterAside = (props: { articleIds: string[] }) => {
     <>
       {articles.length ? (
         <>
-          <Pagination
+          {articles.length > 1 && <Pagination
             count={articles.length}
             page={focusedArticleIndex + 1}
             onChange={handleChange}
             color="primary"
-            sx={{ marginBottom: 3 }}
-          />
+            size={'small'}
+            sx={{ marginBottom: 2 }}
+          />}
           {articles[focusedArticleIndex] &&
             <ContentEditor displayHiddenMarks compactView unitId={articles[focusedArticleIndex].id} />}
         </>

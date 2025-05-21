@@ -154,7 +154,6 @@ const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {
         } catch (e: any) {
           displayAlert({
             message: `An error occurred while creating the ${modalState}.`,
-            isError: true,
             errorType: e.message,
           });
         }

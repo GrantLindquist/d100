@@ -1,16 +1,8 @@
 'use client';
 
-import {
-  createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useEffect, useState } from 'react';
 import { useUser } from '@/hooks/useUser';
-import { doc, getDoc } from '@firebase/firestore';
+import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { Campaign } from '@/types/Campaign';
 import { Breadcrumb } from '@/types/Unit';
@@ -23,10 +15,12 @@ const CampaignContext = createContext<{
   setBreadcrumbs: Dispatch<SetStateAction<Breadcrumb[]>>;
 }>({
   campaign: null,
-  setCampaignId: () => {},
+  setCampaignId: () => {
+  },
   isUserDm: null,
   breadcrumbs: [],
-  setBreadcrumbs: () => {},
+  setBreadcrumbs: () => {
+  },
 });
 
 export const CampaignProvider = ({ children }: { children: ReactNode }) => {
@@ -41,11 +35,15 @@ export const CampaignProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchCampaign = async () => {
       if (campaignId && user) {
-        const campaignDocSnap = await getDoc(doc(db, 'campaigns', campaignId));
-        if (campaignDocSnap.exists()) {
-          setCampaign(campaignDocSnap.data() as Campaign);
-          setIsUserDm(user.id === campaignDocSnap.data().dmId);
-        }
+        const unsubscribe = onSnapshot(doc(db, 'campaigns', campaignId), (campaignDocSnap) => {
+          if (campaignDocSnap.exists()) {
+            setCampaign(campaignDocSnap.data() as Campaign);
+            setIsUserDm(user.id === campaignDocSnap.data().dmId);
+          }
+        });
+        return () => {
+          unsubscribe();
+        };
       } else {
         setCampaign(null);
         setIsUserDm(null);

@@ -17,9 +17,11 @@ import DamageMenu from '@/components/DamageMenu';
 import { ImageUrl } from '@/types/Unit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
-
-const EncounterTokenWidth = 150;
-const EncounterTokenHeight = 210;
+import { SmallIconButton, SmallIconButtonGroup } from '@/components/buttons/SmallIconButton';
+import CheckIcon from '@mui/icons-material/Check';
+import EditIcon from '@mui/icons-material/Edit';
+import { outfit } from '@/components/AppWrapper';
+import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 
 const DragInterface = ({ children, encounter, tokenId }: {
   children: ReactNode;
@@ -83,8 +85,6 @@ const DragInterface = ({ children, encounter, tokenId }: {
             position: 'absolute',
             top: 0,
             left: 0,
-            width: `${EncounterTokenWidth}px`,
-            height: `${EncounterTokenHeight}px`,
             zIndex: 10,
             touchAction: 'none',
           }}
@@ -162,12 +162,10 @@ const EncounterTokenCard = (props: {
   isCurrentTurn: boolean
 }) => {
   const { displayAlert } = useAlert();
+  const theme = useTheme();
 
   const [conditions, setConditions] = useState<Condition[]>([]);
-  const [tokenImage, setTokenImage] = useState<ImageUrl>({
-    src: props.token.isPlayer ? '/blank_ally_token_img.png' : '/blank_monster_token_img.png',
-    ratio: 1,
-  });
+  const [tokenImage, setTokenImage] = useState<ImageUrl | null>(null);
   const [anchor, setAnchor] = useState(null);
 
   useEffect(() => {
@@ -178,7 +176,14 @@ const EncounterTokenCard = (props: {
       }
     }
 
-    props.token.articleId && fetchTokenImage(props.token.articleId);
+    if (props.token.articleId) {
+      fetchTokenImage(props.token.articleId);
+    } else {
+      setTokenImage({
+        src: props.token.isPlayer ? '/blank_ally_token_img.png' : '/blank_monster_token_img.png',
+        ratio: 1,
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -202,8 +207,10 @@ const EncounterTokenCard = (props: {
   const handleDeleteToken = async () => {
     try {
       const newTokens = props.encounter.tokens.filter((token) => token.id !== props.token.id);
+      const newInitiativeOrder = props.encounter.initiativeOrder.filter((order) => order.tokenId !== props.token.id);
       await updateDoc(doc(db, 'units', props.encounter.id), {
         tokens: newTokens,
+        initiativeOrder: newInitiativeOrder,
       });
       displayAlert({
         message: props.token.title + ' was removed from the encounter.',
@@ -212,7 +219,6 @@ const EncounterTokenCard = (props: {
       displayAlert({
         message: 'An error occurred while deleting this token.',
         errorType: e.message,
-        isError: true,
       });
     }
   };
@@ -236,9 +242,7 @@ const EncounterTokenCard = (props: {
       <ConditionsInterface handleRemoveCondition={handleRemoveCondition} conditions={conditions}>
         <Card sx={{
           userSelect: 'none',
-          width: `${EncounterTokenWidth}px`,
-          // height: `${EncounterTokenHeight}px`,
-          border: `2px solid ${props.isCurrentTurn ? 'yellow' : 'transparent'}`,
+          border: `2px solid ${props.isCurrentTurn ? theme.palette.primary.main : 'transparent'}`,
         }}>
           <div style={{ filter: props.token.isDead ? 'grayscale(1)' : '' }}>
             <ImageFrame
@@ -250,9 +254,8 @@ const EncounterTokenCard = (props: {
             py={1}
             px={1.5}
           >
-            <Stack direction={'row'} alignItems={'center'}>
-              <Typography flexGrow={1} variant={'subtitle2'}
-                          fontWeight={BOLD_FONT_WEIGHT}>{props.token.title}</Typography>
+            <Stack direction={'row'} alignItems={'flex-start'}>
+              <Typography flexGrow={1} variant={'subtitle2'}>{props.token.title}</Typography>
               <IconButton
                 onClick={handleClickMenu}
                 disableRipple
@@ -297,14 +300,24 @@ const EncounterTokenCard = (props: {
   );
 };
 
-
-const EncounterTokenField = (props: { encounter: Encounter }) => {
+const EncounterTokenField = (props: { encounter: Encounter; masonryBreakpoints: any }) => {
   const { displayAlert } = useAlert();
 
+  const [isEditing, setEditing] = useState(false);
+  const [encounterTitle, setEncounterTitle] = useState(props.encounter.title);
   const [turnCount, setTurnCount] = useState(props.encounter.turnCount);
   const [roundCount, setRoundCount] = useState(props.encounter.roundCount);
 
   const currentTurnToken = roundCount > 0 ? props.encounter.tokens.find((token) => token.id === props.encounter.initiativeOrder[turnCount].tokenId) : null;
+
+  const confirmTitleChange = async () => {
+    if (props.encounter.title !== encounterTitle) {
+      await updateDoc((doc(db, 'units', props.encounter.id)), {
+        title: encounterTitle,
+      });
+    }
+    setEditing(false);
+  };
 
   const moveTurn = async (direction: 1 | -1) => {
     const initiativeLength = props.encounter.initiativeOrder.length;
@@ -337,55 +350,95 @@ const EncounterTokenField = (props: { encounter: Encounter }) => {
       displayAlert({
         message: 'An error occurred while updating your encounter.',
         errorType: e.message,
-        isError: true,
       });
     }
   };
 
   return <>
-    <Stack direction={'row'} spacing={1} py={1}>
+    {isEditing ? <input
+      value={encounterTitle}
+      onChange={(e) => setEncounterTitle(e.target.value)}
+      autoFocus
+      style={{
+        all: 'unset',
+        fontSize: '3.7rem',
+        height: '4.5rem',
+        fontWeight: BOLD_FONT_WEIGHT,
+        fontFamily: outfit.style.fontFamily,
+        cursor: 'text',
+      }}
+    /> : <Typography variant="h2" fontWeight={BOLD_FONT_WEIGHT} sx={{
+      fontFamily: outfit.style.fontFamily,
+    }}>
+      {encounterTitle}
+    </Typography>}
+    <Stack direction={'row'} spacing={2} mb={1} alignItems={'center'}>
       {currentTurnToken ?
-        <Stack direction={'row'}
+        <Stack direction={'row'} spacing={1}
                sx={{
                  backgroundColor: '#222',
-                 borderRadius: 4,
-                 alignItems: 'center',
-                 width: '400px',
-                 justifyContent: 'space-between',
+                 borderRadius: 50,
                }}>
           <IconButton onClick={() => moveTurn(-1)} disabled={roundCount === 1 && turnCount === 0}>
             <KeyboardArrowLeftIcon />
           </IconButton>
-          <Typography>
-            {`Round ${roundCount} ㆍ ${currentTurnToken.title}'s Turn`}
-          </Typography>
+          <Box sx={{
+            width: { xs: 'auto', sm: '300px' },
+            alignItems: 'center',
+            justifyContent: 'center',
+            display: 'flex',
+            gap: 1,
+          }}>
+            <Typography sx={{ color: 'grey', whiteSpace: 'nowrap' }}>{`Round ${roundCount}`}</Typography>
+            <Typography sx={{
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              display: { xs: 'none', sm: 'inline' },
+            }}>
+              {currentTurnToken.title}&apos;s Turn
+            </Typography>
+          </Box>
           <IconButton onClick={() => moveTurn(1)}>
             <KeyboardArrowRightIcon />
           </IconButton>
-        </Stack> : <Typography color={'grey'}>Roll Initiative to begin the Encounter</Typography>}
-      <Box sx={{ flexGrow: 1 }}></Box>
-      <CreateEncounterTokenModal encounter={props.encounter} />
-      <RollInitiativeModal encounter={props.encounter} setRoundCount={setRoundCount} />
+        </Stack>
+        : <Typography color={'grey'}>Roll Initiative to begin the Encounter</Typography>}
+      <SmallIconButtonGroup>
+        <RollInitiativeModal encounter={props.encounter} setRoundCount={setRoundCount} />
+        {isEditing ?
+          <SmallIconButton icon={<CheckIcon />} onClick={confirmTitleChange} /> :
+          <SmallIconButton icon={<EditIcon />} onClick={() => setEditing(true)} />}
+        <CreateEncounterTokenModal encounter={props.encounter} />
+      </SmallIconButtonGroup>
     </Stack>
-    <Grid2 container columns={13} spacing={2} p={3} maxHeight={550} sx={{ overflowY: 'auto' }}>
-      <Grid2 size={6} sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2, justifyContent: 'right' }}>
-        {props.encounter.tokens.filter((token) => token.isPlayer).map((token) => (
-          <DragInterface key={token.id} encounter={props.encounter} tokenId={token.id}>
-            <EncounterTokenCard token={token} encounter={props.encounter}
-                                isCurrentTurn={token.id === currentTurnToken?.id} />
-          </DragInterface>
-        ))}
+    <Grid2 container columns={13} spacing={2} p={3} sx={{ overflowY: 'auto', height: '70vh' }}>
+      <Grid2 size={6}>
+        <ResponsiveMasonry columnsCountBreakPoints={props.masonryBreakpoints}>
+          <Masonry itemStyle={{ alignItems: 'flex-end' }}>
+            {props.encounter.tokens.filter((token) => token.isPlayer).map((token) => (
+              <DragInterface key={token.id} encounter={props.encounter} tokenId={token.id}>
+                <EncounterTokenCard token={token} encounter={props.encounter}
+                                    isCurrentTurn={token.id === currentTurnToken?.id} />
+              </DragInterface>
+            ))}
+          </Masonry>
+        </ResponsiveMasonry>
       </Grid2>
       <Grid2 size={1} justifyContent={'center'} display={'flex'}>
         <Box sx={{ backgroundColor: '#222', width: '1px', height: '100%' }}></Box>
       </Grid2>
-      <Grid2 size={6} sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
-        {props.encounter.tokens.filter((token) => !token.isPlayer).map((token) => (
-          <DragInterface key={token.id} encounter={props.encounter} tokenId={token.id}>
-            <EncounterTokenCard token={token} encounter={props.encounter}
-                                isCurrentTurn={token.id === currentTurnToken?.id} />
-          </DragInterface>
-        ))}
+      <Grid2 size={6}>
+        <ResponsiveMasonry columnsCountBreakPoints={props.masonryBreakpoints}>
+          <Masonry>
+            {props.encounter.tokens.filter((token) => !token.isPlayer).map((token) => (
+              <DragInterface key={token.id} encounter={props.encounter} tokenId={token.id}>
+                <EncounterTokenCard token={token} encounter={props.encounter}
+                                    isCurrentTurn={token.id === currentTurnToken?.id} />
+              </DragInterface>
+            ))}
+          </Masonry>
+        </ResponsiveMasonry>
       </Grid2>
     </Grid2>
   </>;

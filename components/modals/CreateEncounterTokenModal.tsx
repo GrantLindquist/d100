@@ -9,6 +9,8 @@ import { Box, Button, Checkbox, FormControlLabel, InputLabel, Modal, Stack, Text
 import { MODAL_STYLE } from '@/utils/globals';
 import ExistingEncounterTokenList from '@/components/data-list/ExistingEncounterTokenList';
 import { Article } from '@/types/Unit';
+import { SmallIconButton } from '@/components/buttons/SmallIconButton';
+import AddIcon from '@mui/icons-material/Add';
 
 const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
   const [open, setOpen] = useState(false);
@@ -21,31 +23,35 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
       tokenTitle: formProps.selectedArticle?.title ?? '',
       tokenHitPoints: 1,
       tokenIsPlayer: 'off',
+      tokenCopies: 1,
     });
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (user) {
         try {
-          const newEncounterToken: EncounterToken = {
-            id: generateUUID(),
-            title: formData.tokenTitle,
-            currentHitPoints: formData.tokenHitPoints,
-            maxHitPoints: formData.tokenHitPoints,
-            tempHitPoints: 0,
-            isPlayer: formData.tokenIsPlayer === 'on',
-            deathSaves: null,
-            isDead: false,
-            ...(formProps.selectedArticle ? { articleId: formProps.selectedArticle.id } : {}),
-          };
+          const newEncounterTokens = [];
+          for (let i = 0; i < formData.tokenCopies; i++) {
+            const newEncounterToken: EncounterToken = {
+              id: generateUUID(),
+              title: formData.tokenCopies > 1 ? `${formData.tokenTitle} (${i + 1})` : formData.tokenTitle,
+              currentHitPoints: formData.tokenHitPoints,
+              maxHitPoints: formData.tokenHitPoints,
+              tempHitPoints: 0,
+              isPlayer: formData.tokenIsPlayer === 'on',
+              deathSaves: null,
+              isDead: false,
+              ...(formProps.selectedArticle ? { articleId: formProps.selectedArticle.id } : {}),
+            };
+            newEncounterTokens.push(newEncounterToken);
+          }
           await updateDoc(doc(db, 'units', props.encounter.id), {
-            tokens: [...props.encounter.tokens, newEncounterToken],
+            tokens: [...props.encounter.tokens, ...newEncounterTokens],
           });
           setOpen(false);
         } catch (e: any) {
           displayAlert({
             message: 'An error occurred while creating a token.',
-            isError: true,
             errorType: e.message,
           });
         }
@@ -72,15 +78,30 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
             value={formData.tokenTitle}
             onChange={handleInputChange}
           />
-          <InputLabel>Starting HP</InputLabel>
-          <TextField
-            name="tokenHitPoints"
-            variant="outlined"
-            size="small"
-            type="number"
-            value={formData.tokenHitPoints}
-            onChange={handleInputChange}
-          />
+          <Stack direction={'row'} spacing={1}>
+            <Stack direction={'column'} spacing={1}>
+              <InputLabel>Starting HP</InputLabel>
+              <TextField
+                name="tokenHitPoints"
+                variant="outlined"
+                size="small"
+                type="number"
+                value={formData.tokenHitPoints}
+                onChange={handleInputChange}
+              />
+            </Stack>
+            <Stack direction={'column'} spacing={1}>
+              <InputLabel>Copies</InputLabel>
+              <TextField
+                name="tokenCopies"
+                variant="outlined"
+                size="small"
+                type="number"
+                value={formData.tokenCopies}
+                onChange={handleInputChange}
+              />
+            </Stack>
+          </Stack>
           <FormControlLabel
             control={
               <Checkbox
@@ -91,8 +112,8 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
             }
             label="Is Player/Ally"
           />
-          <Button type="submit" disabled={!formData.tokenTitle.trim()}>
-            {selectedArticle ? `Add ${selectedArticle.title}` : 'Create Token'}
+          <Button type="submit" disabled={!formData.tokenTitle.trim() || formData.tokenCopies < 1}>
+            {selectedArticle ? `Add ${selectedArticle.title}` : `Create Token${formData.tokenCopies > 1 ? 's' : ''}`}
           </Button>
         </Stack>
       </form>
@@ -101,7 +122,7 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Add Token</Button>
+      <SmallIconButton icon={<AddIcon />} onClick={() => setOpen(true)} />
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box sx={MODAL_STYLE} minHeight={370} width={700}>
           <Stack direction={'row'} spacing={2}>

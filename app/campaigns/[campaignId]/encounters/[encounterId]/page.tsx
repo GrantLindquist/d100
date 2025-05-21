@@ -9,11 +9,11 @@ import { getCurrentUnitIdFromUrl } from '@/utils/url';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { Encounter } from '@/types/Encounter';
-import { Box, Container, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Container, useMediaQuery, useTheme } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
-import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import EncounterTokenField from '@/components/data-list/EncounterTokenField';
 import EncounterAside from '@/components/content/EncounterAside';
+import { NAVBAR_HEIGHT_PIXELS } from '@/utils/globals';
 
 export default function EncounterPage() {
   const { user } = useUser();
@@ -22,10 +22,12 @@ export default function EncounterPage() {
   const pathname = usePathname();
 
   const theme = useTheme();
-  const isCondensed = !useMediaQuery(theme.breakpoints.up('sm'));
+  const isCondensed = !useMediaQuery(theme.breakpoints.up('md'));
 
   const [encounter, setEncounter] = useState<Encounter | null>(null);
   const [asideOpen, setAsideOpen] = useState(false);
+
+  const masonryBreakpoints = asideOpen ? { 350: 1, 1100: 2, 1500: 3 } : { 350: 1, 800: 2, 1200: 3 };
 
   useEffect(() => {
     if (campaign && user) {
@@ -54,15 +56,10 @@ export default function EncounterPage() {
 
   if (!encounter) return null;
   return (
-    <Box display="flex" minHeight="100vh">
+    <Box display="flex" height={`calc(100vh - ${NAVBAR_HEIGHT_PIXELS})`}>
       <Box width={asideOpen ? '75%' : '100%'}>
         <Container>
-          <Box sx={{ pt: { xs: 2, md: 4 } }}>
-            <Typography variant="h2" fontWeight={BOLD_FONT_WEIGHT}>
-              {encounter.title}
-            </Typography>
-            <EncounterTokenField encounter={encounter} />
-          </Box>
+          <EncounterTokenField encounter={encounter} masonryBreakpoints={masonryBreakpoints} />
         </Container>
       </Box>
 
@@ -72,37 +69,40 @@ export default function EncounterPage() {
             onClick={() => setAsideOpen((prev) => !prev)}
             sx={{
               cursor: 'pointer',
-              width: 'auto',
+              height: '100px',
+              width: '30px',
               display: 'flex',
               alignItems: 'center',
-              backgroundColor: 'background.paper',
-              borderLeft: '1px solid',
-              borderColor: 'divider',
+              justifyContent: 'center',
+              alignSelf: 'center',
+              marginBottom: NAVBAR_HEIGHT_PIXELS,
+              marginRight: '-1px',
+              borderTopLeftRadius: 5,
+              borderBottomLeftRadius: 5,
+              backgroundColor: '#1E1E1E',
             }}
           >
             {asideOpen ? <ChevronRight /> : <ChevronLeft />}
           </Box>
 
-          {asideOpen && (
-            <Box
-              sx={{
-                width: '25%',
-                flexShrink: 0,
-                borderLeft: '1px solid',
-                borderColor: 'divider',
-                p: 3,
-                backgroundColor: 'background.paper',
-                overflow: 'auto',
-                height: '100vh',
-              }}
-            >
-              <EncounterAside
-                articleIds={encounter.tokens
+          <Box
+            sx={{
+              width: asideOpen ? '25%' : 0,
+              flexShrink: 0,
+              p: asideOpen ? 3 : 0,
+              overflow: 'auto',
+              height: '100%',
+              visibility: asideOpen ? 'visible' : 'hidden',
+              backgroundColor: '#1E1E1E',
+            }}
+          >
+            <EncounterAside
+              articleIds={
+                [...new Set(encounter.tokens
                   .map((token) => token.articleId ?? null)
-                  .filter((id): id is string => id !== null)}
-              />
-            </Box>
-          )}
+                  .filter((id): id is string => id !== null))]}
+            />
+          </Box>
         </>
       )}
     </Box>

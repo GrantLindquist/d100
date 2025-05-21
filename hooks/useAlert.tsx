@@ -1,12 +1,11 @@
 'use client';
 import { createContext, ReactNode, useContext, useState } from 'react';
-import { Box, Button, Snackbar, Stack, Typography } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { Box, Snackbar, Stack, Typography } from '@mui/material';
+import Link from 'next/link';
 
 interface Alert {
   message: string;
   link?: string;
-  isError?: boolean;
   errorType?: string;
 }
 
@@ -18,7 +17,6 @@ const AlertContext = createContext<{
 });
 
 export const AlertProvider = ({ children }: { children: ReactNode }) => {
-  const router = useRouter();
   const [alert, setAlert] = useState<Alert>({
     message: '',
   });
@@ -27,11 +25,6 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
   const displayAlert = (alert: Alert) => {
     setAlert(alert);
     setOpen(true);
-  };
-
-  const handleNavigate = (link: string) => {
-    setOpen(false);
-    router.push(link);
   };
 
   return (
@@ -50,7 +43,7 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
             borderLeftWidth: 10,
             borderStyle: 'solid',
             paddingY: 0.5,
-            ...(alert.isError
+            ...(alert.errorType
               ? {
                 borderColor: 'red',
               }
@@ -69,9 +62,13 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
               )}
             </Box>
             {alert.link && (
-              <Button onClick={() => handleNavigate(alert.link ?? '')}>
-                Open
-              </Button>
+              <Link
+                href={alert.link ?? '#'}
+                style={{
+                  color: 'inherit',
+                  textDecoration: 'none',
+                }}
+              > Open</Link>
             )}
           </Stack>
         </Box>

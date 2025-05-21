@@ -42,14 +42,13 @@ const EditableTable = (props: { questId: string }) => {
           if (questDocSnap.exists()) {
             setRows(questDocSnap.data().loot as Loot[]);
           }
-        }
+        },
       );
 
       return () => unsubscribe();
     } catch (e: any) {
       displayAlert({
         message: `An error occurred while loading quest loot.`,
-        isError: true,
         errorType: e.message,
       });
     }
@@ -85,7 +84,6 @@ const EditableTable = (props: { questId: string }) => {
     } catch (e: any) {
       displayAlert({
         message: `An error occurred while updating the loot table.`,
-        isError: true,
         errorType: e.message,
       });
     }
@@ -106,7 +104,7 @@ const EditableTable = (props: { questId: string }) => {
 
   const handleSaveClick = async (id: string) => {
     let newData = rows.map((row) =>
-      row.id === id ? { ...row, ...editRowData } : row
+      row.id === id ? { ...row, ...editRowData } : row,
     );
     await updateTable(newData);
     setEditRowId(null);
@@ -121,9 +119,9 @@ const EditableTable = (props: { questId: string }) => {
         !isNumber
           ? { ...prev, [name]: value as string }
           : {
-              ...prev,
-              [name]: Number(value),
-            }
+            ...prev,
+            [name]: Number(value),
+          },
       );
     }
   };

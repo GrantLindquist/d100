@@ -303,14 +303,14 @@ const DamageMenu = (props: {
       } else {
         displayAlert({
           message: 'Unable to locate inflicted token in encounter document.',
-          isError: true,
+          errorType: '',
         });
       }
 
     } catch (e: any) {
       displayAlert({
-        message: e.message,
-        isError: true,
+        message: 'An error occurred while making changes to your token.',
+        errorType: e.message,
       });
     }
 

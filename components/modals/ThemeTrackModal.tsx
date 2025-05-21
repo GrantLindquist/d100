@@ -38,7 +38,6 @@ const ThemeTrackModal = (props: { unitId: string }) => {
         });
       } catch (e: any) {
         displayAlert({
-          isError: true,
           errorType: e.message,
           message: 'An error occurred while saving your Spotify tracks.',
         });

@@ -1,13 +1,5 @@
 'use client';
-import {
-  Box,
-  Button,
-  InputLabel,
-  Modal,
-  Stack,
-  TextField,
-  Tooltip,
-} from '@mui/material';
+import { Box, Button, InputLabel, Modal, Stack, TextField, Tooltip } from '@mui/material';
 import { MODAL_STYLE, PLAYER_INVITATIONS_FEATURE_FLAG } from '@/utils/globals';
 import { FormEvent, useState } from 'react';
 import { arrayUnion, doc, getDoc, runTransaction } from '@firebase/firestore';
@@ -62,7 +54,6 @@ const JoinCampaignModal = () => {
           } catch (e: any) {
             displayAlert({
               message: 'An error occurred while joining the campaign.',
-              isError: true,
               errorType: e.message,
             });
           }

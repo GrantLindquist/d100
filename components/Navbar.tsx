@@ -19,24 +19,20 @@ import { useCampaign } from '@/hooks/useCampaign';
 import NotificationButton from '@/components/buttons/NotificationButton';
 import NavBreadcrumbs from '@/components/NavBreadcrumbs';
 import Image from 'next/image';
-import { BOLD_FONT_WEIGHT } from '@/utils/globals';
+import { BOLD_FONT_WEIGHT, NAVBAR_HEIGHT_PIXELS } from '@/utils/globals';
 import { outfit } from '@/components/AppWrapper';
 import SaveCheckLink from '@/components/SaveCheckLink';
 import { useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
-import { useUser } from '@/hooks/useUser';
+import StickyNoteButton from '@/components/buttons/StickyNoteButton';
 
 export const NavbarContainer = () => {
-  const { user } = useUser();
   const theme = useTheme();
   const isCondensed = !useMediaQuery(theme.breakpoints.up('sm'));
 
-  if (!user) {
-    return null;
-  }
   return (
     <>
-      <Box sx={user ? { paddingTop: '64px' } : {}}></Box>
+      <Box sx={{ paddingTop: NAVBAR_HEIGHT_PIXELS }}></Box>
       <AppBar position="static" elevation={1}>
         <Toolbar
           sx={{
@@ -45,6 +41,7 @@ export const NavbarContainer = () => {
             top: 0,
             width: '100%',
             backgroundColor: '#111',
+            boxShadow: '0px 5px 3px #111',
           }}
         >
           {isCondensed ? <NavbarCondensed /> : <Navbar />}
@@ -99,7 +96,8 @@ const Navbar = () => {
             </>
           )}
         </Stack>
-        <Stack direction={'row'} spacing={1}>
+        <Stack direction={'row'} spacing={.5}>
+          {campaign && (<StickyNoteButton />)}
           {isUserDm && (
             <>
               <NotificationButton />

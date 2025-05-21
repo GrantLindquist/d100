@@ -1,26 +1,10 @@
 'use client';
-import {
-  Box,
-  Button,
-  InputLabel,
-  Modal,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, Button, InputLabel, Modal, Stack, TextField, Typography } from '@mui/material';
 import { MODAL_STYLE } from '@/utils/globals';
 import { useAlert } from '@/hooks/useAlert';
 import { FormEvent, useState } from 'react';
 import { Campaign } from '@/types/Campaign';
-import {
-  arrayRemove,
-  collection,
-  doc,
-  getDocs,
-  query,
-  runTransaction,
-  where,
-} from '@firebase/firestore';
+import { arrayRemove, collection, doc, getDocs, query, runTransaction, where } from '@firebase/firestore';
 import db, { storage } from '@/utils/firebase';
 import { useUser } from '@/hooks/useUser';
 import { deleteObject, listAll, ref } from '@firebase/storage';
@@ -49,7 +33,6 @@ const EditCampaignForm = (props: {
     } catch (e: any) {
       displayAlert({
         message: 'An error occurred while updating your campaign.',
-        isError: true,
         errorType: e.message,
       });
     }
@@ -94,14 +77,14 @@ const DeleteCampaignForm = (props: {
       try {
         const deleteQuery = query(
           collection(db, 'units'),
-          where('campaignId', '==', props.campaign.id)
+          where('campaignId', '==', props.campaign.id),
         );
 
         await runTransaction(db, async (transaction) => {
           // Gets all players enrolled in campaign (firebase requires all transaction reads to go before writes)
           let players = [];
           const campaignDoc = await transaction.get(
-            doc(db, 'campaigns', props.campaign.id)
+            doc(db, 'campaigns', props.campaign.id),
           );
           if (campaignDoc.exists()) {
             players = campaignDoc.data().players;
@@ -136,7 +119,6 @@ const DeleteCampaignForm = (props: {
       } catch (e: any) {
         displayAlert({
           message: 'An error occurred while deleting your campaign.',
-          isError: true,
           errorType: e.message,
         });
       }

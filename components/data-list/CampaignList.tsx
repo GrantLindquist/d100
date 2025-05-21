@@ -1,11 +1,10 @@
 'use client';
-import { Box, Card, Grid2, IconButton, Menu, MenuItem, Skeleton, Stack, Typography } from '@mui/material';
+import { Box, Card, Grid2, IconButton, Menu, MenuItem, Skeleton, Stack, Typography, useTheme } from '@mui/material';
 import { memo, useEffect, useState } from 'react';
 import { Campaign } from '@/types/Campaign';
 import { useUser } from '@/hooks/useUser';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
-import { useRouter } from 'next/navigation';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import PlayerAvatarList from '@/components/data-list/PlayerAvatarList';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -13,13 +12,14 @@ import CampaignActionsModal from '@/components/modals/CampaignActionsModal';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { outfit } from '@/components/AppWrapper';
+import Link from 'next/link';
 
 const CampaignTab = (props: {
   campaignId: string;
   displayActions: boolean;
 }) => {
-  const router = useRouter();
   const { user } = useUser();
+  const theme = useTheme();
 
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,25 +48,21 @@ const CampaignTab = (props: {
     setAnchor(event.currentTarget);
   };
 
-  const handleClickCard = async () => {
-    if (campaign && !anchor) {
-      router.push(
-        `campaigns/${props.campaignId}/collections/${campaign.baseCollectionId}`,
-      );
-    }
-  };
-
-  if (!loading && !campaign) {
-    return null;
-  }
   return (
-    <div onClick={handleClickCard}>
+    <Link
+      href={campaign ? `/campaigns/${props.campaignId}/collections/${campaign!.baseCollectionId}` : '#'}
+      style={{
+        color: 'inherit',
+        textDecoration: 'none',
+      }}
+    >
       <Card
         variant="outlined"
         sx={{
+          background: `linear-gradient(130deg, rgba(28, 28, 28), ${theme.palette.background.default})`,
           cursor: 'pointer',
           ':hover': {
-            backgroundColor: 'rgba(28, 28, 28)',
+            borderColor: '#555',
           },
         }}
       >
@@ -141,7 +137,7 @@ const CampaignTab = (props: {
           )}
         </Box>
       </Card>
-    </div>
+    </Link>
   );
 };
 
