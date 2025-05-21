@@ -2,7 +2,7 @@ runConfig:
   maxInstances: 3
   concurrency: 10
   cpu: 1
-  memoryMiB: 256
+  memoryMiB: 512
 
 env:
   - variable: NEXT_PUBLIC_APP_URL
