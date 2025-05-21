@@ -1,12 +1,5 @@
 'use client';
-import {
-  Box,
-  Button,
-  InputLabel,
-  Modal,
-  Stack,
-  TextField,
-} from '@mui/material';
+import { Box, Button, InputLabel, Modal, Stack, TextField } from '@mui/material';
 import { MODAL_STYLE } from '@/utils/globals';
 import { ChangeEvent, FormEvent, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
@@ -79,7 +72,6 @@ const CreateCampaignModal = () => {
         } catch (e: any) {
           displayAlert({
             message: 'An error occurred while creating your campaign.',
-            isError: true,
             errorType: e.message,
           });
         }

@@ -219,7 +219,6 @@ const EncounterTokenCard = (props: {
       displayAlert({
         message: 'An error occurred while deleting this token.',
         errorType: e.message,
-        isError: true,
       });
     }
   };
@@ -351,7 +350,6 @@ const EncounterTokenField = (props: { encounter: Encounter; masonryBreakpoints: 
       displayAlert({
         message: 'An error occurred while updating your encounter.',
         errorType: e.message,
-        isError: true,
       });
     }
   };

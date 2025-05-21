@@ -35,7 +35,6 @@ const PendingPlayerAction = (props: {
     } catch (e: any) {
       displayAlert({
         message: `An error occurred while accepting the player.`,
-        isError: true,
         errorType: e.message,
       });
     }
@@ -49,7 +48,6 @@ const PendingPlayerAction = (props: {
     } catch (e: any) {
       displayAlert({
         message: `An error occurred while denying the player.`,
-        isError: true,
         errorType: e.message,
       });
     }
@@ -105,7 +103,6 @@ const NotificationButton = (props: { includeText?: boolean }) => {
       } catch (e: any) {
         displayAlert({
           message: `An error occurred while loading notifications.`,
-          isError: true,
           errorType: e.message,
         });
       }

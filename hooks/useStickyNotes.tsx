@@ -58,7 +58,6 @@ export const StickyNoteProvider = ({ children }: { children: ReactNode }) => {
       displayAlert({
         message: 'oops',
         errorType: e.message,
-        isError: true,
       });
     }
   }, [campaign?.stickyNoteIds]);
@@ -69,7 +68,6 @@ export const StickyNoteProvider = ({ children }: { children: ReactNode }) => {
     } catch (e: any) {
       displayAlert({
         message: 'An error occurred while saving changes to your sticky notes.',
-        isError: true,
         errorType: e.message,
       });
     }
@@ -95,7 +93,6 @@ export const StickyNoteProvider = ({ children }: { children: ReactNode }) => {
     } catch (e: any) {
       displayAlert({
         message: 'An error occurred while saving adding your new sticky note.',
-        isError: true,
         errorType: e.message,
       });
     }
@@ -112,7 +109,6 @@ export const StickyNoteProvider = ({ children }: { children: ReactNode }) => {
     } catch (e: any) {
       displayAlert({
         message: 'An error occurred while deleting your sticky note.',
-        isError: true,
         errorType: e.message,
       });
     }

@@ -65,8 +65,8 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
       setData(items);
     } catch (e: any) {
       displayAlert({
-        isError: true,
-        message: e.message,
+        errorType: e.message,
+        message: 'An error occurred while fetching items from Spotify.',
       });
     }
   };

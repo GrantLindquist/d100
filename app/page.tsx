@@ -56,7 +56,6 @@ export default function AuthPage() {
     } catch (e: any) {
       displayAlert({
         message: 'An error occurred while signing in.',
-        isError: true,
         errorType: e.message,
       });
     }

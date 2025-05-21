@@ -85,7 +85,7 @@ export const SpotifyPlayerProvider = ({ children }: {
         }
       } else {
         displayAlert({
-          isError: true,
+          errorType: 'No accessToken found',
           message: 'An error occurred while connecting to your Spotify.',
         });
       }

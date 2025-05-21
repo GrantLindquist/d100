@@ -6,7 +6,6 @@ import Link from 'next/link';
 interface Alert {
   message: string;
   link?: string;
-  isError?: boolean;
   errorType?: string;
 }
 
@@ -44,7 +43,7 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
             borderLeftWidth: 10,
             borderStyle: 'solid',
             paddingY: 0.5,
-            ...(alert.isError
+            ...(alert.errorType
               ? {
                 borderColor: 'red',
               }

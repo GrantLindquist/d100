@@ -39,7 +39,6 @@ const UserButton = () => {
     } catch (e: any) {
       displayAlert({
         message: `An error occurred while connecting your Spotify account.`,
-        isError: true,
         errorType: e.message,
       });
     }
@@ -66,7 +65,6 @@ const UserButton = () => {
     } catch (e: any) {
       displayAlert({
         message: 'An error occurred while signing out.',
-        isError: true,
         errorType: e.message,
       });
     }
@@ -93,7 +91,6 @@ const UserButton = () => {
       } catch (e: any) {
         displayAlert({
           message: 'An error occurred while leaving the campaign.',
-          isError: true,
           errorType: e.message,
         });
       }

@@ -246,7 +246,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
       } catch (e: any) {
         displayAlert({
           message: 'An error occurred while saving changes.',
-          isError: true,
           errorType: e.message,
         });
       }
@@ -276,7 +275,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
       } catch (e: any) {
         displayAlert({
           message: 'An error occurred while deleting the image.',
-          isError: true,
           errorType: e.name,
         });
       }
@@ -314,7 +312,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
       } catch (e: any) {
         displayAlert({
           message: 'An error occurred while uploading files.',
-          isError: true,
           errorType: e.name,
         });
       }
@@ -337,7 +334,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
     } catch (e: any) {
       displayAlert({
         message: `An error occurred while hiding this content.`,
-        isError: true,
         errorType: e.message,
       });
     }

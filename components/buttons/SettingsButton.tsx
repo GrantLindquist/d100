@@ -46,7 +46,6 @@ const PlayerList = (props: { players: UserBase[] }) => {
       } catch (e: any) {
         displayAlert({
           message: `An error occurred while kicking ${hoveredPlayer.displayName}.`,
-          isError: true,
           errorType: e.message,
         });
       }

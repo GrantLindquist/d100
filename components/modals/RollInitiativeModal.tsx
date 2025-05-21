@@ -97,7 +97,6 @@ const RollInitiativeModal = (props: { encounter: Encounter; setRoundCount: Funct
       displayAlert({
         message: 'An error occurred while setting initiative',
         errorType: e.message,
-        isError: true,
       });
     }
   };

@@ -52,7 +52,6 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
         } catch (e: any) {
           displayAlert({
             message: 'An error occurred while creating a token.',
-            isError: true,
             errorType: e.message,
           });
         }

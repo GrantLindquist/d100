@@ -106,7 +106,6 @@ const MoveUnitsModal = (props: {
       } catch (e: any) {
         displayAlert({
           message: 'An error occurred while fetching collections.',
-          isError: true,
           errorType: e.message,
         });
       }
@@ -169,7 +168,6 @@ const MoveUnitsModal = (props: {
     } catch (e: any) {
       displayAlert({
         message: 'An error occurred while moving your articles.',
-        isError: true,
         errorType: e.message,
       });
     }

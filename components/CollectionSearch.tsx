@@ -67,7 +67,6 @@ const CollectionSearch = (props: {
     } catch (e: any) {
       displayAlert({
         message: 'An error occurred while fetching articles.',
-        isError: true,
         errorType: e.message,
       });
     }
@@ -147,7 +146,6 @@ const CollectionSearch = (props: {
       } catch (e: any) {
         displayAlert({
           message: 'An error occurred while deleting articles.',
-          isError: true,
           errorType: e.message,
         });
       }
