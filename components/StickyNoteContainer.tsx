@@ -16,10 +16,7 @@ const StickyNoteComponent = (props: { stickyNote: StickyNote }) => {
   const [lastUnsavedEdit, setLastUnsavedEdit] = useState<number | null>(null);
   const [stickyNote, setStickyNote] = useState<StickyNote>(props.stickyNote);
 
-  const [position, setPosition] = useState<{ x: number; y: number }>({
-    x: props.stickyNote.position[0],
-    y: props.stickyNote.position[1],
-  });
+  const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const dragOffset = useRef({ x: 0, y: 0 });
   const saveTimeAllotment = 4000;
   const inBoundsOffset = 100;
@@ -50,6 +47,10 @@ const StickyNoteComponent = (props: { stickyNote: StickyNote }) => {
 
   useEffect(() => {
     setStickyNote(props.stickyNote);
+    setPosition({
+      x: props.stickyNote.position[0],
+      y: props.stickyNote.position[1],
+    });
   }, [props.stickyNote]);
 
   const iconStyle = {
@@ -60,7 +61,7 @@ const StickyNoteComponent = (props: { stickyNote: StickyNote }) => {
   const bind = useDrag(({ first, xy }) => {
     const [pointerX, pointerY] = xy;
 
-    const rect = document.getElementById(props.stickyNote.id)?.getBoundingClientRect();
+    const rect = document.getElementById(stickyNote.id)?.getBoundingClientRect();
     if (rect) {
       if (first) {
         dragOffset.current = {
@@ -94,10 +95,10 @@ const StickyNoteComponent = (props: { stickyNote: StickyNote }) => {
   }
   return (
     <Paper
-      id={props.stickyNote.id}
+      id={stickyNote.id}
       sx={{
-        width: props.stickyNote.dimensions[0],
-        height: props.stickyNote.dimensions[1],
+        width: stickyNote.dimensions[0],
+        height: stickyNote.dimensions[1],
         maxHeight: stickyNote.isMinimized ? 24 : 9999,
         minWidth: 150,
         minHeight: stickyNote.isMinimized ? 24 : 100,
@@ -146,7 +147,7 @@ const StickyNoteComponent = (props: { stickyNote: StickyNote }) => {
         <Box sx={{ flexGrow: 1 }}>
         <textarea
           placeholder="Stuff goes here..."
-          defaultValue={stickyNote.textContent}
+          value={stickyNote.textContent}
           onChange={(event) => updateLocalState('textContent', event.target.value)}
           style={{
             resize: 'none',

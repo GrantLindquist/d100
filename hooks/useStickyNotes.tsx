@@ -4,7 +4,16 @@ import { createContext, ReactNode, useContext, useEffect, useState } from 'react
 import { useCampaign } from '@/hooks/useCampaign';
 import { StickyNote } from '@/types/StickyNote';
 import { useAlert } from '@/hooks/useAlert';
-import { arrayRemove, arrayUnion, getDoc, runTransaction, setDoc } from '@firebase/firestore';
+import {
+  arrayRemove,
+  arrayUnion,
+  collection,
+  onSnapshot,
+  query,
+  runTransaction,
+  setDoc,
+  where,
+} from '@firebase/firestore';
 import { doc } from 'firebase/firestore';
 import db from '@/utils/firebase';
 import { generateUUID } from '@/utils/uuid';
@@ -33,33 +42,29 @@ export const StickyNoteProvider = ({ children }: { children: ReactNode }) => {
   const [stickyNotes, setStickyNotes] = useState<StickyNote[]>([]);
 
   useEffect(() => {
-    const fetchStickyNotes = async (ids: string[]) => {
-      try {
-        let response = [];
-        for (const id of ids) {
-          const stickyNoteDocSnap = await getDoc(doc(db, 'stickyNotes', id));
-          if (stickyNoteDocSnap.exists()) {
-            response.push(stickyNoteDocSnap.data() as StickyNote);
-          }
-        }
-        setStickyNotes(response);
-      } catch (e: any) {
-        displayAlert({
-          message: 'An error occurred while fetching your sticky notes.',
-          errorType: e.message,
-          isError: true,
+    try {
+      if (campaign?.stickyNoteIds) {
+        const q = query(collection(db, 'stickyNotes'), where('id', 'in', campaign.stickyNoteIds));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+          let stickyNotes: StickyNote[] = [];
+          querySnapshot.forEach((doc) => {
+            stickyNotes.push(doc.data() as StickyNote);
+          });
+          setStickyNotes(stickyNotes);
         });
+        return () => unsubscribe();
       }
-    };
-    if (campaign?.stickyNoteIds) {
-      fetchStickyNotes(campaign.stickyNoteIds);
+    } catch (e: any) {
+      displayAlert({
+        message: 'oops',
+        errorType: e.message,
+        isError: true,
+      });
     }
   }, [campaign?.stickyNoteIds]);
 
   const updateStickyNote = async (note: StickyNote) => {
     try {
-      const newStickyNotes = stickyNotes.map((obj) => obj.id === note.id ? note : obj);
-      setStickyNotes(newStickyNotes);
       await setDoc(doc(db, 'stickyNotes', note.id), note);
     } catch (e: any) {
       displayAlert({
@@ -95,6 +100,7 @@ export const StickyNoteProvider = ({ children }: { children: ReactNode }) => {
       });
     }
   };
+
   const handleDeleteStickyNote = async (id: string) => {
     try {
       await runTransaction(db, async (transaction) => {

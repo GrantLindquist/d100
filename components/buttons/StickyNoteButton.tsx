@@ -71,7 +71,7 @@ const StickyNoteButton = () => {
             </div>
           </Stack>,
         )}
-        <MenuItem onClick={() => handleAddStickyNote()}>
+        <MenuItem disabled={stickyNoteState.length >= 10} onClick={() => handleAddStickyNote()}>
           <AddIcon />
           &nbsp;Add Sticky Note
         </MenuItem>
