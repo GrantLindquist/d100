@@ -1,9 +1,9 @@
 runConfig:
-  minInstances: 1
   maxInstances: 3
   concurrency: 10
-  cpu: .25
+  cpu: 1
   memoryMiB: 256
+
 env:
   - variable: NEXT_PUBLIC_APP_URL
     value: https://d100.space
