@@ -1,5 +1,5 @@
 import { ImageUrl, Unit, UnitDisplayValues } from '@/types/Unit';
-import { ChangeEvent, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Box, Card, Checkbox, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 import ImageFrame from '@/components/content/ImageFrame';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 type UnitTabProps = {
   unit: Unit;
-  checked?: boolean;
+  checked: boolean;
   icon: ReactNode;
   isEditing: boolean;
   updateState: (removeId: boolean, unit: Unit) => void;
@@ -21,28 +21,35 @@ type UnitTabWrapperProps = {
 };
 
 const UnitTabWrapper = ({ props, children }: UnitTabWrapperProps) => {
+
+  const handleCheck = () => {
+    if (props.isEditing) {
+      props.updateState(props.checked, props.unit);
+    }
+  };
+
   return (
-    <div style={{ width: props.unit.type === 'collection' ? 'auto' : '100%' }}>
-      {props.isEditing ? <>{children}</> :
-        <Link
-          href={`/campaigns/${props.unit.campaignId}/${props.unit.type}s/${props.unit.id}`}
-          style={{
-            color: 'inherit',
-            textDecoration: 'none',
-          }}
-        >
-          {children}
-        </Link>
-      }
+    <div
+      style={{
+        width: props.unit.type === 'collection' ? 'auto' : '100%',
+        cursor: 'pointer',
+      }}
+      onClick={handleCheck}>
+      <Link
+        href={`/campaigns/${props.unit.campaignId}/${props.unit.type}s/${props.unit.id}`}
+        style={{
+          color: 'inherit',
+          textDecoration: 'none',
+          pointerEvents: props.isEditing ? 'none' : 'auto',
+        }}
+      >
+        {children}
+      </Link>
     </div>
   );
 };
 
 export const CondensedUnitTab = (props: UnitTabProps) => {
-
-  const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
-    props.updateState(!event.target.checked, props.unit);
-  };
 
   return (
     <UnitTabWrapper props={props}>
@@ -58,7 +65,6 @@ export const CondensedUnitTab = (props: UnitTabProps) => {
           {props.isEditing && (
             <Checkbox
               checked={props.checked}
-              onChange={handleCheck}
               sx={{
                 p: 0,
                 ':hover': {
@@ -76,10 +82,6 @@ export const CondensedUnitTab = (props: UnitTabProps) => {
 export const UnitTab = (props: UnitTabProps) => {
 
   const theme = useTheme();
-
-  const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
-    props.updateState(!event.target.checked, props.unit);
-  };
 
   return (
     <UnitTabWrapper props={props}>
@@ -131,7 +133,6 @@ export const UnitTab = (props: UnitTabProps) => {
             {props.isEditing && (
               <Checkbox
                 checked={props.checked}
-                onChange={handleCheck}
                 sx={{
                   p: 0,
                   ':hover': {

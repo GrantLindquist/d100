@@ -43,6 +43,7 @@ const CollectionSearch = (props: {
   const selectedUnitsIncludeCollection = selectedUnits.filter((unit) => unit.type === 'collection').length > 0;
 
   const [displayDeleteWarningModal, setDisplayDeleteWarningModal] = useState(false);
+  const [confirmButtonDisabled, setConfirmButtonDisabled] = useState(false);
 
   const fetchUnits = async (unitIds: string[]) => {
     try {
@@ -338,8 +339,11 @@ const CollectionSearch = (props: {
               Sub-Collections.</Typography>
             <Typography pt={1}>Do you wish to proceed?</Typography>
           </Box>
-          <Button onClick={() => {
-            handleDeleteUnits(true).then(() => setDisplayDeleteWarningModal(false));
+          <Button disabled={confirmButtonDisabled} onClick={() => {
+            setConfirmButtonDisabled(true);
+            handleDeleteUnits(true).then(() => {
+              setDisplayDeleteWarningModal(false);
+            }).finally(() => setConfirmButtonDisabled(false));
           }}>Yes</Button>
           <Button onClick={() => setDisplayDeleteWarningModal(false)}>On second thought...</Button>
         </Box>

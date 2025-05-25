@@ -25,11 +25,12 @@ import {
   runTransaction,
   where,
 } from '@firebase/firestore';
-import db from '@/utils/firebase';
+import db, { storage } from '@/utils/firebase';
 import { useCampaign } from '@/hooks/useCampaign';
 import { useAlert } from '@/hooks/useAlert';
 import { generateUUID } from '@/utils/uuid';
 import { SmallIconButton } from '@/components/buttons/SmallIconButton';
+import { deleteObject, getBlob, getDownloadURL, ref, uploadBytes } from '@firebase/storage';
 
 const CollectionCheckbox = (props: {
   checked: boolean;
@@ -83,6 +84,7 @@ const MoveUnitsModal = (props: {
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>(
     [],
   );
+  const [confirmButtonDisabled, setConfirmButtonDisabled] = useState(false);
 
   // TODO: Organize collections in parental order
   useEffect(() => {
@@ -123,45 +125,71 @@ const MoveUnitsModal = (props: {
     );
   };
 
-
   const handleMoveUnits = async (event: any) => {
     event.preventDefault();
 
-    /* TODO: Clone reference images as well. If a unit is cloned and the original is deleted, then the cloned unit will lose
-        access to the original's image */
     try {
       await runTransaction(db, async (transaction) => {
         for (const staleUnitId of props.selectedUnitIds) {
           const unitDocSnap = await getDoc(doc(db, 'units', staleUnitId));
+          if (!unitDocSnap.exists()) continue;
+
+          const staleUnitData = unitDocSnap.data();
+
           for (let collectionId of selectedCollectionIds) {
             const collectionDocSnap = await getDoc(doc(db, 'units', collectionId));
-            if (unitDocSnap.exists() && collectionDocSnap.exists()) {
+            if (!collectionDocSnap.exists()) continue;
 
-              const clonedUnitId = generateUUID();
-              let breadcrumbs = collectionDocSnap.data().breadcrumbs;
-              breadcrumbs.push({
-                unitId: clonedUnitId,
-                url: `/campaigns/${campaign!.id}/${unitDocSnap.data().type}s/${clonedUnitId}`,
-              });
+            const clonedUnitId = generateUUID();
+            const breadcrumbs = [...collectionDocSnap.data().breadcrumbs];
+            breadcrumbs.push({
+              unitId: clonedUnitId,
+              url: `/campaigns/${campaign!.id}/${staleUnitData.type}s/${clonedUnitId}`,
+            });
 
-              const clonedUnit = {
-                ...unitDocSnap.data(),
-                id: clonedUnitId,
-                breadcrumbs: breadcrumbs,
-              };
+            const newImageUrls = [];
+            for (const image of staleUnitData.imageUrls) {
+              const staleImageRef = ref(storage, image.src);
+              const blob = await getBlob(staleImageRef);
 
-              transaction.set(doc(db, 'units', clonedUnitId), clonedUnit);
-              transaction.update(doc(db, 'units', collectionId), {
-                unitIds: arrayUnion(clonedUnitId),
+              const newImageId = clonedUnitId + '-' + generateUUID();
+              const newImagePath = `${campaign!.id}/${newImageId}`;
+              const newImageRef = ref(storage, newImagePath);
+
+              await uploadBytes(newImageRef, blob);
+              const downloadURL = await getDownloadURL(newImageRef);
+
+              newImageUrls.push({
+                src: downloadURL,
+                ratio: image.ratio,
               });
             }
+
+            const clonedUnit = {
+              ...staleUnitData,
+              id: clonedUnitId,
+              breadcrumbs,
+              imageUrls: newImageUrls,
+            };
+
+            transaction.set(doc(db, 'units', clonedUnitId), clonedUnit);
+            transaction.update(doc(db, 'units', collectionId), {
+              unitIds: arrayUnion(clonedUnitId),
+            });
           }
+
+          for (const image of unitDocSnap.data().imageUrls) {
+            const staleImageRef = ref(storage, image.src);
+            await deleteObject(staleImageRef);
+          }
+
           transaction.update(doc(db, 'units', props.currentCollection.id), {
             unitIds: arrayRemove(staleUnitId),
           });
           transaction.delete(doc(db, 'units', staleUnitId));
         }
       });
+
       displayAlert({
         message: `${props.selectedUnitIds.length} items successfully moved.`,
       });
@@ -175,6 +203,7 @@ const MoveUnitsModal = (props: {
     setModalOpen(false);
     props.setEditing(false);
   };
+
 
   return (
     <>
@@ -206,7 +235,10 @@ const MoveUnitsModal = (props: {
                   updateState={updateSelectedCollectionIds}
                 />
               ))}
-              <Button sx={{ marginTop: 2 }} onClick={handleMoveUnits}>
+              <Button disabled={confirmButtonDisabled} sx={{ marginTop: 2 }} onClick={(event) => {
+                setConfirmButtonDisabled(true);
+                handleMoveUnits(event).finally(() => setConfirmButtonDisabled(false));
+              }}>
                 Move Items
               </Button>
             </Stack>
