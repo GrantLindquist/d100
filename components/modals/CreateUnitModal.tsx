@@ -25,9 +25,9 @@ import { useAlert } from '@/hooks/useAlert';
 import DescriptionIcon from '@mui/icons-material/Description';
 import KeyIcon from '@mui/icons-material/Key';
 import FolderIcon from '@mui/icons-material/Folder';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import { Encounter } from '@/types/Encounter';
 import { SmallIconButton } from '@/components/buttons/SmallIconButton';
+import Image from 'next/image';
 
 const generateDefaultContent = (title: string) => {
   return {
@@ -214,7 +214,8 @@ const CreateUnitModal = (props: { breadcrumbs: Breadcrumb[] }) => {
         </MenuItem>
         {isUserDm &&
           <MenuItem onClick={() => setModalState('encounter')}>
-            <AutoFixHighIcon sx={{ width: 20, height: 20 }} />
+            <Image src={'/encounter-icon.png'} alt={'In Initiative'} style={{ marginRight: '-2px' }} width={20}
+                   height={20} />
             &nbsp; Create new Encounter
           </MenuItem>
         }

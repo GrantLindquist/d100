@@ -16,7 +16,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import KeyIcon from '@mui/icons-material/Key';
 import DescriptionIcon from '@mui/icons-material/Description';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import { useAlert } from '@/hooks/useAlert';
 import { deleteObject, listAll, ref } from '@firebase/storage';
 import { outfit } from '@/components/AppWrapper';
@@ -24,6 +23,7 @@ import MoveUnitsModal from '@/components/modals/MoveUnitsModal';
 import { SmallIconButton, SmallIconButtonGroup } from '@/components/buttons/SmallIconButton';
 import { CondensedUnitTab, UnitTab } from '@/components/UnitTab';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
+import Image from 'next/image';
 
 const CollectionSearch = (props: {
   unitIds: string[];
@@ -306,7 +306,9 @@ const CollectionSearch = (props: {
                           case 'quest':
                             return <KeyIcon />;
                           case 'encounter':
-                            return <AutoFixHighIcon />;
+                            return <Image src={'/encounter-icon.png'} alt={'In Initiative'}
+                                          style={{ marginRight: '-2px' }} width={24}
+                                          height={24} />;
                           default:
                             return <DescriptionIcon />;
                         }

@@ -10,6 +10,7 @@ import { useDrag } from '@use-gesture/react';
 import { DEFAULT_STICKY_NOTE_DIMENSIONS } from '@/utils/globals';
 import { useStickyNotes } from '@/hooks/useStickyNotes';
 
+// TODO: Make this resizable from all sides
 const StickyNoteComponent = (props: { stickyNote: StickyNote }) => {
 
   const { updateStickyNote } = useStickyNotes();
