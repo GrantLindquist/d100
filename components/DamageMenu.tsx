@@ -115,7 +115,7 @@ const ConditionsDropdown = (props: {
     await updateDoc(doc(db, 'units', props.encounter.id), {
       activeConditions: arrayUnion(newCondition),
     });
-    setFormData({ conditionName: '', roundDuration: 1, endCondition: defaultEndCondition });
+    setFormData({ conditionName: '', roundDuration: 0, endCondition: defaultEndCondition });
   };
 
   return (

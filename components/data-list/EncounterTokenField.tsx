@@ -1,6 +1,6 @@
 'use client';
 
-import { Condition, Encounter, EncounterToken } from '@/types/Encounter';
+import { Condition, Encounter, EncounterToken, Initiative } from '@/types/Encounter';
 import { Box, Card, Grid2, IconButton, Menu, MenuItem, Stack, Typography, useTheme } from '@mui/material';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { useAlert } from '@/hooks/useAlert';
@@ -22,6 +22,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
 import { outfit } from '@/components/AppWrapper';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
+import Image from 'next/image';
+import ThemeTooltip from '@/components/ThemeTooltip';
 
 const DragInterface = ({ children, encounter, tokenId }: {
   children: ReactNode;
@@ -82,6 +84,8 @@ const DragInterface = ({ children, encounter, tokenId }: {
           ref={sourceRef}
           {...bind()}
           sx={{
+            width: '100%',
+            height: '100%',
             position: 'absolute',
             top: 0,
             left: 0,
@@ -167,22 +171,31 @@ const EncounterTokenCard = (props: {
   const [conditions, setConditions] = useState<Condition[]>([]);
   const [tokenImage, setTokenImage] = useState<ImageUrl | null>(null);
   const [anchor, setAnchor] = useState(null);
+  const inInitiative = props.encounter.initiativeOrder.find((order: Initiative) => order.tokenId === props.token.id);
+
+  const defaultTokenImage = {
+    src: props.token.isPlayer ? '/blank_ally_token_img.png' : '/blank_monster_token_img.png',
+    ratio: 1,
+  };
 
   useEffect(() => {
     async function fetchTokenImage(articleId: string) {
       const articleDocSnap = await getDoc(doc(db, 'units', articleId));
       if (articleDocSnap.exists()) {
-        setTokenImage(articleDocSnap.data().imageUrls[0]);
+        if (articleDocSnap.data().imageUrls.length > 0) {
+          setTokenImage(articleDocSnap.data().imageUrls[0]);
+        } else {
+          setTokenImage(defaultTokenImage);
+        }
+      } else {
+        setTokenImage(defaultTokenImage);
       }
     }
 
     if (props.token.articleId) {
       fetchTokenImage(props.token.articleId);
     } else {
-      setTokenImage({
-        src: props.token.isPlayer ? '/blank_ally_token_img.png' : '/blank_monster_token_img.png',
-        ratio: 1,
-      });
+      setTokenImage(defaultTokenImage);
     }
   }, []);
 
@@ -276,8 +289,19 @@ const EncounterTokenCard = (props: {
                 />
               </IconButton>
             </Stack>
-            <Typography variant={'subtitle2'}
-                        color={'grey'}>{`${props.token.tempHitPoints > 0 ? `(${props.token.tempHitPoints})` : ''} ${props.token.currentHitPoints}/${props.token.maxHitPoints} HP`}</Typography>
+            <Stack direction={'row'}>
+              <Typography variant={'subtitle2'}
+                          color={'grey'}
+                          sx={{ flexGrow: 1 }}>{`${props.token.tempHitPoints > 0 ? `(${props.token.tempHitPoints})` : ''} ${props.token.currentHitPoints}/${props.token.maxHitPoints} HP`}</Typography>
+              {inInitiative &&
+                <ThemeTooltip title={'In Initiative'}>
+                  <Image src={'/encounter-icon-grey.png'} alt={'In Initiative'}
+                         width={20}
+                         height={20}
+                         style={{ zIndex: 12, marginRight: '-2px' }}
+                  />
+                </ThemeTooltip>}
+            </Stack>
           </Box>
         </Card>
       </ConditionsInterface>
@@ -308,7 +332,7 @@ const EncounterTokenField = (props: { encounter: Encounter; masonryBreakpoints: 
   const [turnCount, setTurnCount] = useState(props.encounter.turnCount);
   const [roundCount, setRoundCount] = useState(props.encounter.roundCount);
 
-  const currentTurnToken = roundCount > 0 ? props.encounter.tokens.find((token) => token.id === props.encounter.initiativeOrder[turnCount].tokenId) : null;
+  const currentTurnToken = roundCount > 0 ? props.encounter.tokens.find((token) => token.id === props.encounter.initiativeOrder[turnCount]?.tokenId) : null;
 
   const confirmTitleChange = async () => {
     if (props.encounter.title !== encounterTitle) {
