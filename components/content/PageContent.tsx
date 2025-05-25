@@ -526,7 +526,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                       {`. Type any information you'd like inside this area.\n\n`}
                       {`To save or edit the `}
                       {unit.type === 'quest' ? <b>Quest</b> : <b>Article</b>}
-                      {`, use the action buttons on the bottom right.\nTry highlighting some text and experimenting with font types and headings!`}
+                      {`, use the action buttons on the bottom right.\nTry highlighting some text and experimenting with font styles and headings!`}
                     </Typography>
                   </div>
                 )}
