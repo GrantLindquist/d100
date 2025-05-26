@@ -256,6 +256,7 @@ const EncounterTokenCard = (props: {
         <Card sx={{
           userSelect: 'none',
           border: `2px solid ${props.isCurrentTurn ? theme.palette.primary.main : 'transparent'}`,
+          boxSizing: 'border-box',
         }}>
           <div style={{ filter: props.token.isDead ? 'grayscale(1)' : '' }}>
             <ImageFrame

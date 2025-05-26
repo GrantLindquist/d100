@@ -50,8 +50,7 @@ const ImageFrame = (props: { image: ImageUrl | null; alt?: string }) => {
       id={frameId.current}
       ref={frameRef}
       sx={{
-        // TODO: This is an absolutely diabolical hack. It's fine for now but fix this later.
-        width: '101%',
+        width: '100%',
         height: calculatedHeight,
         display: 'flex',
         justifyContent: 'center',
@@ -63,14 +62,13 @@ const ImageFrame = (props: { image: ImageUrl | null; alt?: string }) => {
           variant="rounded"
           sx={{
             width: '100%',
-            height: calculatedHeight,
+            height: '100%',
           }}
         />
       ) : (
         <img
           style={{
             width: '100%',
-            height: calculatedHeight,
             maxHeight: maxImageHeight,
             objectFit: 'contain',
           }}
