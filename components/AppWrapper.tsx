@@ -83,6 +83,13 @@ const AppWrapper = ({ children }: { children: ReactNode }) => {
           dense: true,
         },
       },
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: {
+            backgroundColor: '#222',
+          },
+        },
+      },
       MuiCssBaseline: {
         styleOverrides: {
           html: {

@@ -1,7 +1,7 @@
 'use client';
 
 import { Condition, Encounter, EncounterToken, Initiative } from '@/types/Encounter';
-import { Box, Card, Grid2, IconButton, Menu, MenuItem, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Card, Grid2, IconButton, Menu, MenuItem, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { useAlert } from '@/hooks/useAlert';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
@@ -23,7 +23,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import { outfit } from '@/components/AppWrapper';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 import Image from 'next/image';
-import ThemeTooltip from '@/components/ThemeTooltip';
 
 const DragInterface = ({ children, encounter, tokenId }: {
   children: ReactNode;
@@ -295,13 +294,13 @@ const EncounterTokenCard = (props: {
                           color={'grey'}
                           sx={{ flexGrow: 1 }}>{`${props.token.tempHitPoints > 0 ? `(${props.token.tempHitPoints})` : ''} ${props.token.currentHitPoints}/${props.token.maxHitPoints} HP`}</Typography>
               {inInitiative &&
-                <ThemeTooltip title={'In Initiative'}>
+                <Tooltip title={'In Initiative'}>
                   <Image src={'/encounter-icon-grey.png'} alt={'In Initiative'}
                          width={20}
                          height={20}
                          style={{ zIndex: 12, marginRight: '-2px' }}
                   />
-                </ThemeTooltip>}
+                </Tooltip>}
             </Stack>
           </Box>
         </Card>
