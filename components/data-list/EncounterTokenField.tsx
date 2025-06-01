@@ -237,17 +237,32 @@ const EncounterTokenCard = (props: {
 
   const handleRemoveCondition = async (removeIndex: number) => {
     const removeCondition = conditions[removeIndex];
-    removeCondition.roundEnd = props.encounter.roundCount;
-    removeCondition.turnEnd = props.encounter.turnCount;
+    const updatedCondition = {
+      ...removeCondition,
+      roundEnd: props.encounter.roundCount,
+      turnEnd: props.encounter.turnCount,
+    };
+    
+    const updatedActiveConditions = props.encounter.activeConditions.map((condition) => {
+      if (
+        condition.inflictedTokenId === updatedCondition.inflictedTokenId &&
+        condition.name === updatedCondition.name &&
+        condition.roundInflicted === updatedCondition.roundInflicted
+      ) {
+        return updatedCondition;
+      }
+      return condition;
+    });
 
-    const newConditions = conditions.filter((_, index) => index !== removeIndex);
-    newConditions.push(removeCondition);
+    setConditions((prev) =>
+      prev.map((cond, idx) => (idx === removeIndex ? updatedCondition : cond)),
+    );
 
-    setConditions(newConditions);
     await updateDoc(doc(db, 'units', props.encounter.id), {
-      activeConditions: newConditions,
+      activeConditions: updatedActiveConditions,
     });
   };
+
 
   return (
     <>
