@@ -43,7 +43,7 @@ export const StickyNoteProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     try {
-      if (campaign?.stickyNoteIds) {
+      if (campaign?.stickyNoteIds && campaign.stickyNoteIds.length > 0) {
         const q = query(collection(db, 'stickyNotes'), where('id', 'in', campaign.stickyNoteIds));
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
           let stickyNotes: StickyNote[] = [];
