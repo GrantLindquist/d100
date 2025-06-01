@@ -9,6 +9,11 @@ const SaveCheckLink = ({ children, href, ...props }: {
   const { isUnsavedChanges } = useUnsavedChanges();
 
   const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
+    // Allows default behavior for Ctrl+Click (or Cmd+Click) & Middle-click
+    if (e.ctrlKey || e.metaKey || e.button === 1) {
+      return;
+    }
+
     if (isUnsavedChanges) {
       if (
         !confirm(
