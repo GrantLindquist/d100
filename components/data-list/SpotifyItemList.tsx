@@ -28,10 +28,10 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
     try {
       let accessToken;
       const tokenCookie = await getCookie('spotify_access_token');
-      if (Date.now() > tokenCookie.obj.expiresAt) {
+      if (Date.now() > tokenCookie?.obj?.expiresAt) {
         accessToken = await refreshAccessToken();
       } else {
-        accessToken = tokenCookie.obj;
+        accessToken = tokenCookie?.obj;
       }
       const response = await fetch(`https://api.spotify.com/v1/search?q=${searchTerm}&type=album%2Ctrack%2Cplaylist&limit=10`, {
         method: 'GET',

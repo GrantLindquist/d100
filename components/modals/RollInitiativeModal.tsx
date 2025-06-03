@@ -42,6 +42,7 @@ const SortableToken = (props: { token: EncounterToken }) => {
   </div>);
 };
 
+// TODO: Create way for tokens to leave initiative w/o being deleted
 const RollInitiativeModal = (props: { encounter: Encounter; setRoundCount: Function }) => {
 
   const sensors = useSensors(

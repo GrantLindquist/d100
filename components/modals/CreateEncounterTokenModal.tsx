@@ -5,16 +5,37 @@ import { useAlert } from '@/hooks/useAlert';
 import { generateUUID } from '@/utils/uuid';
 import { doc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
-import { Box, Button, Checkbox, FormControlLabel, InputLabel, Modal, Stack, TextField } from '@mui/material';
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  InputLabel,
+  Menu,
+  Modal,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { MODAL_STYLE } from '@/utils/globals';
 import ExistingEncounterTokenList from '@/components/data-list/ExistingEncounterTokenList';
 import { Article } from '@/types/Unit';
 import { SmallIconButton } from '@/components/buttons/SmallIconButton';
 import AddIcon from '@mui/icons-material/Add';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
+  const theme = useTheme();
+
   const [open, setOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+
+  const handleCloseMenu = () => {
+    setOpen(false);
+    setSelectedArticle(null);
+  };
 
   const CreateEncounterTokenForm = (formProps: { selectedArticle: Article | null }) => {
     const { user } = useUser();
@@ -25,6 +46,12 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
       tokenIsPlayer: 'off',
       tokenCopies: 1,
     });
+
+    const [menuAnchor, setMenuAnchor] = useState(null);
+
+    const handleOpenMenu = (event: any) => {
+      setMenuAnchor(event.currentTarget);
+    };
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -48,7 +75,7 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
           await updateDoc(doc(db, 'units', props.encounter.id), {
             tokens: [...props.encounter.tokens, ...newEncounterTokens],
           });
-          setOpen(false);
+          handleCloseMenu();
         } catch (e: any) {
           displayAlert({
             message: 'An error occurred while creating a token.',
@@ -66,10 +93,38 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
       }));
     };
 
+
     return (
       <form onSubmit={handleSubmit}>
+        <Menu anchorEl={menuAnchor}
+              open={Boolean(menuAnchor)}
+              onClose={() => setMenuAnchor(null)}
+              transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              sx={{
+                'ul': {
+                  backgroundColor: '#222',
+                },
+              }}
+        >
+          <ExistingEncounterTokenList
+            selectArticle={(article: Article | null) => setSelectedArticle(article)}
+            selectedArticle={selectedArticle} />
+        </Menu>
         <Stack spacing={1}>
-          <InputLabel>Token Title</InputLabel>
+          <Stack direction={'row'} alignItems={'center'}>
+            <InputLabel style={{ flexGrow: 1 }}>Token Title</InputLabel>
+            <Typography onClick={handleOpenMenu} color={theme.palette.primary.main}
+                        sx={{ cursor: 'pointer', px: .5 }}>create from article</Typography>
+            <Tooltip
+              title={'To register an Article as an Encounter Token, open the Article, select the + icon, and select the "Encounter Token" option'}
+              placement={'top'}
+            >
+              <InfoOutlinedIcon
+                sx={{ color: 'grey', height: 16, width: 16 }}
+              />
+            </Tooltip>
+          </Stack>
           <TextField
             name="tokenTitle"
             variant="outlined"
@@ -101,6 +156,7 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
                 onChange={handleInputChange}
               />
             </Stack>
+            <Box width={'40%'}></Box>
           </Stack>
           <FormControlLabel
             control={
@@ -123,17 +179,10 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
   return (
     <>
       <SmallIconButton icon={<AddIcon />} onClick={() => setOpen(true)} />
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <Box sx={MODAL_STYLE} minHeight={370} width={700}>
+      <Modal open={open} onClose={handleCloseMenu}>
+        <Box sx={MODAL_STYLE}>
           <Stack direction={'row'} spacing={2}>
-            <Box width={'70%'}>
-              <CreateEncounterTokenForm selectedArticle={selectedArticle} />
-            </Box>
-            <Box width={'30%'}>
-              <ExistingEncounterTokenList
-                selectArticle={(article: Article | null) => setSelectedArticle(article)}
-                selectedArticle={selectedArticle} />
-            </Box>
+            <CreateEncounterTokenForm selectedArticle={selectedArticle} />
           </Stack>
         </Box>
       </Modal>

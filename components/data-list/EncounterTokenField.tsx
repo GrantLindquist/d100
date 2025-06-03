@@ -1,7 +1,7 @@
 'use client';
 
 import { Condition, Encounter, EncounterToken, Initiative } from '@/types/Encounter';
-import { Box, Card, Grid2, IconButton, Menu, MenuItem, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Card, Grid2, IconButton, Menu, MenuItem, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { useAlert } from '@/hooks/useAlert';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
@@ -23,7 +23,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import { outfit } from '@/components/AppWrapper';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 import Image from 'next/image';
-import ThemeTooltip from '@/components/ThemeTooltip';
 
 const DragInterface = ({ children, encounter, tokenId }: {
   children: ReactNode;
@@ -238,17 +237,32 @@ const EncounterTokenCard = (props: {
 
   const handleRemoveCondition = async (removeIndex: number) => {
     const removeCondition = conditions[removeIndex];
-    removeCondition.roundEnd = props.encounter.roundCount;
-    removeCondition.turnEnd = props.encounter.turnCount;
+    const updatedCondition = {
+      ...removeCondition,
+      roundEnd: props.encounter.roundCount,
+      turnEnd: props.encounter.turnCount,
+    };
+    
+    const updatedActiveConditions = props.encounter.activeConditions.map((condition) => {
+      if (
+        condition.inflictedTokenId === updatedCondition.inflictedTokenId &&
+        condition.name === updatedCondition.name &&
+        condition.roundInflicted === updatedCondition.roundInflicted
+      ) {
+        return updatedCondition;
+      }
+      return condition;
+    });
 
-    const newConditions = conditions.filter((_, index) => index !== removeIndex);
-    newConditions.push(removeCondition);
+    setConditions((prev) =>
+      prev.map((cond, idx) => (idx === removeIndex ? updatedCondition : cond)),
+    );
 
-    setConditions(newConditions);
     await updateDoc(doc(db, 'units', props.encounter.id), {
-      activeConditions: newConditions,
+      activeConditions: updatedActiveConditions,
     });
   };
+
 
   return (
     <>
@@ -256,6 +270,7 @@ const EncounterTokenCard = (props: {
         <Card sx={{
           userSelect: 'none',
           border: `2px solid ${props.isCurrentTurn ? theme.palette.primary.main : 'transparent'}`,
+          boxSizing: 'border-box',
         }}>
           <div style={{ filter: props.token.isDead ? 'grayscale(1)' : '' }}>
             <ImageFrame
@@ -294,13 +309,13 @@ const EncounterTokenCard = (props: {
                           color={'grey'}
                           sx={{ flexGrow: 1 }}>{`${props.token.tempHitPoints > 0 ? `(${props.token.tempHitPoints})` : ''} ${props.token.currentHitPoints}/${props.token.maxHitPoints} HP`}</Typography>
               {inInitiative &&
-                <ThemeTooltip title={'In Initiative'}>
+                <Tooltip title={'In Initiative'}>
                   <Image src={'/encounter-icon-grey.png'} alt={'In Initiative'}
                          width={20}
                          height={20}
                          style={{ zIndex: 12, marginRight: '-2px' }}
                   />
-                </ThemeTooltip>}
+                </Tooltip>}
             </Stack>
           </Box>
         </Card>

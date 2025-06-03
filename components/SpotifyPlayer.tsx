@@ -4,6 +4,7 @@ import { default as Player, spotifyApi } from 'react-spotify-web-playback';
 import { useEffect, useRef, useState } from 'react';
 import { SpotifyAccessToken } from '@/types/User';
 import { Box } from '@mui/material';
+import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 
 export const refreshAccessToken = async () => {
   const response = await fetch(
@@ -14,9 +15,11 @@ export const refreshAccessToken = async () => {
 
 const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
   const [accessToken, setAccessToken] = useState<SpotifyAccessToken | null>(null);
-  const [hovering, setHovering] = useState(false);
+  const [hovering, setHovering] = useState(true);
   const [visible, setVisible] = useState(false);
   const hideTimeoutRef = useRef<any | null>(null);
+
+  const { displayPlayer } = useSpotifyPlayer();
 
   // Load initial access token
   useEffect(() => {
@@ -32,6 +35,14 @@ const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
 
     initAccessToken();
   }, []);
+
+  // Temporarily displays player on-mount
+  useEffect(() => {
+    setHovering(true);
+    setTimeout(() => {
+      setHovering(false);
+    }, 500);
+  }, [displayPlayer]);
 
   useEffect(() => {
     if (!hovering) {

@@ -1,5 +1,5 @@
 'use client';
-import { Box, Checkbox, Stack, Typography } from '@mui/material';
+import { Box, Checkbox, Stack, Tooltip, Typography } from '@mui/material';
 import { useUser } from '@/hooks/useUser';
 import { getAdditionalUserInfo, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import db, { auth } from '@/utils/firebase';
@@ -13,7 +13,6 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import { outfit } from '@/components/AppWrapper';
 import RoundButton from '@/components/buttons/RoundButton';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import ThemeTooltip from '@/components/ThemeTooltip';
 
 export default function AuthPage() {
   const { user, setListening } = useUser();
@@ -95,12 +94,12 @@ export default function AuthPage() {
             <Typography variant={'subtitle2'} color={'grey'} pr={1}>
               Consent to session cookies
             </Typography>
-            <ThemeTooltip
+            <Tooltip
               title={'Session cookies are required for the app to function. d100 does not store any sensitive data.'}>
               <InfoOutlinedIcon
                 sx={{ color: 'grey', height: 20, width: 20 }}
               />
-            </ThemeTooltip>
+            </Tooltip>
           </Stack>
         </Box>
       </Box>

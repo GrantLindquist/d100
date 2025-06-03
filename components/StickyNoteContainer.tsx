@@ -9,21 +9,51 @@ import { useEffect, useRef, useState } from 'react';
 import { useDrag } from '@use-gesture/react';
 import { DEFAULT_STICKY_NOTE_DIMENSIONS } from '@/utils/globals';
 import { useStickyNotes } from '@/hooks/useStickyNotes';
+import { doc, onSnapshot } from '@firebase/firestore';
+import db from '@/utils/firebase';
+import { useAlert } from '@/hooks/useAlert';
 
 // TODO: Make this resizable from all sides
-const StickyNoteComponent = (props: { stickyNote: StickyNote }) => {
+const StickyNoteComponent = (props: { stickyNoteId: string }) => {
 
   const { updateStickyNote } = useStickyNotes();
+  const { displayAlert } = useAlert();
+
   const [lastUnsavedEdit, setLastUnsavedEdit] = useState<number | null>(null);
-  const [stickyNote, setStickyNote] = useState<StickyNote>(props.stickyNote);
+  const [stickyNote, setStickyNote] = useState<StickyNote | null>(null);
 
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const dragOffset = useRef({ x: 0, y: 0 });
-  const saveTimeAllotment = 4000;
+  const saveTimeAllotment = 2000;
   const inBoundsOffset = 100;
 
   useEffect(() => {
-    if (lastUnsavedEdit) {
+    try {
+      const unsubscribe = onSnapshot(
+        doc(db, 'stickyNotes', props.stickyNoteId),
+        (stickyNoteDocSnap) => {
+          if (stickyNoteDocSnap.exists()) {
+            const result = stickyNoteDocSnap.data() as StickyNote;
+            setStickyNote(result);
+            setPosition({
+              x: result.position[0],
+              y: result.position[1],
+            });
+          }
+        },
+      );
+
+      return () => unsubscribe();
+    } catch (e: any) {
+      displayAlert({
+        message: `An error occurred while loading your sticky note.`,
+        errorType: e.message,
+      });
+    }
+  }, [props.stickyNoteId]);
+
+  useEffect(() => {
+    if (lastUnsavedEdit && stickyNote) {
       const interval = setTimeout(function() {
         if (Date.now() > lastUnsavedEdit + saveTimeAllotment) {
           const {
@@ -46,52 +76,48 @@ const StickyNoteComponent = (props: { stickyNote: StickyNote }) => {
     }
   }, [lastUnsavedEdit]);
 
-  useEffect(() => {
-    setStickyNote(props.stickyNote);
-    setPosition({
-      x: props.stickyNote.position[0],
-      y: props.stickyNote.position[1],
-    });
-  }, [props.stickyNote]);
-
   const iconStyle = {
     fontSize: 16,
     cursor: 'pointer',
   };
 
   const bind = useDrag(({ first, xy }) => {
-    const [pointerX, pointerY] = xy;
+    if (stickyNote) {
+      const [pointerX, pointerY] = xy;
 
-    const rect = document.getElementById(stickyNote.id)?.getBoundingClientRect();
-    if (rect) {
-      if (first) {
-        dragOffset.current = {
-          x: pointerX - rect.left,
-          y: pointerY - rect.top,
-        };
+      const rect = document.getElementById(stickyNote.id)?.getBoundingClientRect();
+      if (rect) {
+        if (first) {
+          dragOffset.current = {
+            x: pointerX - rect.left,
+            y: pointerY - rect.top,
+          };
+        }
+        setLastUnsavedEdit(Date.now());
+        const posX = pointerX - dragOffset.current.x;
+        const posY = pointerY - dragOffset.current.y;
+        const inBoundsX = posX > 0 && (posX < window.innerWidth - rect.width + inBoundsOffset);
+        const inBoundsY = posY > 0 && (posY < window.innerHeight - rect.height + inBoundsOffset);
+        setPosition({
+          x: inBoundsX ? posX : position.x,
+          y: inBoundsY ? posY : position.y,
+        });
       }
-      setLastUnsavedEdit(Date.now());
-      const posX = pointerX - dragOffset.current.x;
-      const posY = pointerY - dragOffset.current.y;
-      const inBoundsX = posX > 0 && (posX < window.innerWidth - rect.width + inBoundsOffset);
-      const inBoundsY = posY > 0 && (posY < window.innerHeight - rect.height + inBoundsOffset);
-      setPosition({
-        x: inBoundsX ? posX : position.x,
-        y: inBoundsY ? posY : position.y,
-      });
     }
   }, {});
 
   const updateLocalState = (attr: string, value: any) => {
-    const newStickyNote = {
-      ...stickyNote,
-      [attr]: value,
-    };
-    setStickyNote(newStickyNote);
-    setLastUnsavedEdit(Date.now());
+    if (stickyNote) {
+      const newStickyNote = {
+        ...stickyNote,
+        [attr]: value,
+      };
+      setStickyNote(newStickyNote);
+      setLastUnsavedEdit(Date.now());
+    }
   };
 
-  if (!stickyNote.isDisplayed) {
+  if (!stickyNote || !stickyNote.isDisplayed) {
     return null;
   }
   return (
@@ -179,7 +205,7 @@ const StickyNoteContainer = () => {
     width: '100vw',
     pointerEvents: 'none',
   }}>
-    {stickyNoteState.map((note) => <StickyNoteComponent key={note.id} stickyNote={note} />)}
+    {stickyNoteState.map((note) => <StickyNoteComponent key={note.id} stickyNoteId={note.id} />)}
   </div>;
 };
 

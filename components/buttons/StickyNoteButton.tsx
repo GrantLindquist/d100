@@ -12,12 +12,6 @@ const StickyNoteButton = () => {
   const [anchor, setAnchor] = useState(null);
   const [hoveredStickyNoteId, setHoveredStickyNoteId] = useState<string | null>(null);
 
-  const iconStyle = {
-    fontSize: '18px',
-    cursor: 'pointer',
-    color: 'grey',
-  };
-
   const handleClick = (event: any) => {
     setAnchor(event.currentTarget);
   };
@@ -49,7 +43,9 @@ const StickyNoteButton = () => {
               alignItems: 'center',
             }}>
             <Typography
+              variant={'subtitle2'}
               sx={{
+                py: .2,
                 flexGrow: 2,
                 maxWidth: '250px',
                 whiteSpace: 'nowrap',
@@ -63,11 +59,25 @@ const StickyNoteButton = () => {
               display: 'flex',
               gap: 4,
             }}>
-              <VisibilityOffIcon style={iconStyle} onClick={() => updateStickyNote({
+              {!note.isDisplayed && <VisibilityOffIcon sx={{
+                fontSize: '18px',
+                cursor: 'pointer',
+                color: 'grey',
+                '&:hover': {
+                  color: 'white',
+                },
+              }} onClick={() => updateStickyNote({
                 ...note,
-                isDisplayed: !note.isDisplayed,
-              })} />
-              <DeleteIcon style={iconStyle} onClick={() => handleDeleteStickyNote(note.id)} />
+                isDisplayed: true,
+              })} />}
+              <DeleteIcon sx={{
+                fontSize: '18px',
+                cursor: 'pointer',
+                color: 'grey',
+                '&:hover': {
+                  color: 'white',
+                },
+              }} onClick={() => handleDeleteStickyNote(note.id)} />
             </div>
           </Stack>,
         )}
