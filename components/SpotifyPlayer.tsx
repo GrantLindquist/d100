@@ -6,6 +6,7 @@ import { SpotifyAccessToken } from '@/types/User';
 import { Box } from '@mui/material';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 
+// TODO: Create more effective way of sharing multiple spotify tracks between articles
 export const refreshAccessToken = async () => {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_APP_URL}/api/music/refresh-token`,

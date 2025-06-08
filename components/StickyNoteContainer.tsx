@@ -197,7 +197,7 @@ const StickyNoteComponent = (props: { stickyNoteId: string }) => {
           ) : (
             <MinimizeIcon onClick={() => updateLocalState('isMinimized', true)} sx={{ fontSize: iconStyle }} />
           )}
-          <CloseIcon onClick={() => updateLocalState('isDisplayed', false)} sx={{ fontSize: iconStyle }} />
+          <CloseIcon onClick={() => updateLocalState('isDisplayed', false)} sx={{ fontSize: iconStyle, zIndex: 30 }} />
         </Stack>
 
         {!stickyNote.isMinimized && (
