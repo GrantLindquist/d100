@@ -23,7 +23,7 @@ const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
 
   useEffect(() => {
     const tokenRef = { current: null as SpotifyAccessToken | null };
-    let interval: NodeJS.Timeout;
+    let interval;
 
     async function fetchInitialToken() {
       const token = await getCookie('spotify_access_token');
