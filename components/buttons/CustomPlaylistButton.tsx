@@ -11,13 +11,15 @@ import AddIcon from '@mui/icons-material/Add';
 import PlaylistModal from '@/components/modals/PlaylistModal';
 import { SmallIconButton } from '@/components/buttons/SmallIconButton';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import StopIcon from '@mui/icons-material/Stop';
 import EditIcon from '@mui/icons-material/Edit';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
+import { default as NextImage } from 'next/image';
 
 const CustomPlaylistButton = () => {
   const { campaign } = useCampaign();
   const { displayAlert } = useAlert();
-  const { setActivePlayingCollection } = useSpotifyPlayer();
+  const { activePlayingCollection, setActivePlayingCollection } = useSpotifyPlayer();
 
   const [anchor, setAnchor] = useState(null);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -95,6 +97,11 @@ const CustomPlaylistButton = () => {
                   backgroundColor: playlist.id === selectedPlaylist?.id ? 'rgba(255, 255, 255, .1)' : 'transparent',
                 }}
               >
+                {
+                  activePlayingCollection.id === playlist.id &&
+                  <NextImage src={'/spotify_playing.svg'} width={16} height={16} style={{ paddingBottom: 4 }}
+                             alt={'Playing Music'} />
+                }
                 <Typography
                   sx={{
                     py: 0.2,
@@ -118,9 +125,11 @@ const CustomPlaylistButton = () => {
                                                          onClick={() => {
                                                          }} />} />
               </div>
-              <SmallIconButton disabled={!selectedPlaylist} icon={<PlayArrowIcon />}
+              <SmallIconButton disabled={!selectedPlaylist}
+                               icon={selectedPlaylist?.id !== activePlayingCollection.id ? <PlayArrowIcon /> :
+                                 <StopIcon />}
                                onClick={() => setActivePlayingCollection({
-                                 id: selectedPlaylist!.id,
+                                 id: selectedPlaylist?.id !== activePlayingCollection.id ? selectedPlaylist!.id : null,
                                  isPlaylistType: true,
                                })} />
               <Box flexGrow={1}></Box>

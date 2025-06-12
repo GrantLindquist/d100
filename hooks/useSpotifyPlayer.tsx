@@ -14,6 +14,7 @@ type ActivePlayingCollection = {
   isPlaylistType: boolean;
 }
 
+// TODO: Add activeUnitId as a campaign attribute and listen to it w/ Firebase
 const SpotifyPlayerContext = createContext<{
   spotifyAuthenticated: boolean;
   displayPlayer: boolean;

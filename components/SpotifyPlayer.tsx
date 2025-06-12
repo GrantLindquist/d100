@@ -22,19 +22,35 @@ const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
 
   const { displayPlayer } = useSpotifyPlayer();
 
-  // Load initial access token
   useEffect(() => {
-    async function initAccessToken() {
+    const tokenRef = { current: null as SpotifyAccessToken | null };
+    let interval: NodeJS.Timeout;
+
+    async function fetchInitialToken() {
       const token = await getCookie('spotify_access_token');
+      let usableToken = token?.obj;
       if (!token || Date.now() > token.obj.expiresAt) {
-        const data = await refreshAccessToken();
-        setAccessToken(data);
-      } else {
-        setAccessToken(token.obj);
+        usableToken = await refreshAccessToken();
       }
+      tokenRef.current = usableToken;
+      setAccessToken(usableToken);
     }
 
-    initAccessToken();
+    fetchInitialToken();
+
+    interval = setInterval(async () => {
+      const currentToken = tokenRef.current;
+      if (!currentToken) return;
+
+      const timeLeft = currentToken.expiresAt - Date.now();
+      if (timeLeft < 60 * 1000) {
+        const newToken = await refreshAccessToken();
+        tokenRef.current = newToken;
+        setAccessToken(newToken);
+      }
+    }, 30 * 1000); // Check every 30 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
   // Temporarily displays player on-mount
@@ -114,6 +130,7 @@ const SpotifyPlayer = (props: { trackUris: string[]; playing: boolean }) => {
       >
         {accessToken && (
           <Player
+            name={'d100'}
             token={accessToken.token}
             uris={props.trackUris}
             callback={async (state) => {

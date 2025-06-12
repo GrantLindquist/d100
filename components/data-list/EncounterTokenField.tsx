@@ -242,7 +242,7 @@ const EncounterTokenCard = (props: {
       roundEnd: props.encounter.roundCount,
       turnEnd: props.encounter.turnCount,
     };
-    
+
     const updatedActiveConditions = props.encounter.activeConditions.map((condition) => {
       if (
         condition.inflictedTokenId === updatedCondition.inflictedTokenId &&
@@ -411,7 +411,7 @@ const EncounterTokenField = (props: { encounter: Encounter; masonryBreakpoints: 
     }}>
       {encounterTitle}
     </Typography>}
-    <Stack direction={'row'} spacing={2} mb={1} alignItems={'center'}>
+    <Stack direction={'row'} spacing={2} mb={1} mt={.5} alignItems={'center'}>
       {currentTurnToken ?
         <Stack direction={'row'} spacing={1}
                sx={{

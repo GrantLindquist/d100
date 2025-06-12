@@ -42,6 +42,7 @@ import AddToContentButton from '@/components/buttons/AddToContentButton';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import { SmallIconButton, SmallIconButtonGroup } from '@/components/buttons/SmallIconButton';
+import { default as NextImage } from 'next/image';
 
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
@@ -376,8 +377,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                   position: 'fixed',
                   width: '100%',
                   zIndex: 10,
-                  backgroundColor: '#111',
-                  paddingLeft: -.5,
+                  backgroundColor: 'background.paper',
                 } : {}}>
                   <SmallIconButtonGroup>
                     <Tooltip title={'Save Changes'} placement={'left'}>
@@ -400,9 +400,13 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                     {displayPlayer && unit.spotifyItems && unit.spotifyItems.length >= 0 && (
                       <Tooltip title={`Play Theme Tracks`} placement={'left'}>
                         <SmallIconButton
-                          onClick={() => setActivePlayingCollection({ id: unit.id, isPlaylistType: false })}
-                          icon={<PlaylistPlayIcon
-                            style={unit.id === activePlayingCollection.id ? { color: theme.palette.primary.main } : {}} />}
+                          onClick={() => setActivePlayingCollection({
+                            id: unit.id !== activePlayingCollection.id ? unit.id : null,
+                            isPlaylistType: false,
+                          })}
+                          icon={unit.id === activePlayingCollection.id ?
+                            <NextImage src={'/spotify_playing.svg'} width={20} height={20} alt={'Playing Music'} /> :
+                            <PlaylistPlayIcon />}
                         />
                       </Tooltip>)}
                   </SmallIconButtonGroup>
