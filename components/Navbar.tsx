@@ -25,10 +25,17 @@ import SaveCheckLink from '@/components/SaveCheckLink';
 import { useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import StickyNoteButton from '@/components/buttons/StickyNoteButton';
+import CustomPlaylistButton from '@/components/buttons/CustomPlaylistButton';
+import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 
 export const NavbarContainer = () => {
   const theme = useTheme();
+  const pathname = usePathname();
   const isCondensed = !useMediaQuery(theme.breakpoints.up('sm'));
+
+  if (pathname === '/') {
+    return null;
+  }
 
   return (
     <>
@@ -77,42 +84,41 @@ const NavbarBrand = () => {
 
 const Navbar = () => {
   const { campaign, isUserDm } = useCampaign();
-  const pathname = usePathname();
+  const { spotifyAuthenticated } = useSpotifyPlayer();
 
-  if (pathname !== '/') {
-    return (
-      <>
-        <Stack
-          direction={'row'}
-          spacing={2}
-          sx={{ flexGrow: 1, alignItems: 'center' }}
-        >
-          <NavbarBrand />
+  return (
+    <>
+      <Stack
+        direction={'row'}
+        spacing={2}
+        sx={{ flexGrow: 1, alignItems: 'center' }}
+      >
+        <NavbarBrand />
 
-          {campaign && (
-            <>
-              <Divider orientation={'vertical'} flexItem />
-              <NavBreadcrumbs />
-            </>
-          )}
-        </Stack>
-        <Stack direction={'row'} spacing={.5}>
-          {campaign && (<StickyNoteButton />)}
-          {isUserDm && (
-            <>
-              <NotificationButton />
-              <SettingsButton />
-              <Divider orientation={'vertical'} flexItem />
-            </>
-          )}
-          <UserButton />
-        </Stack>
-      </>
-    );
-  }
-  return null;
+        {campaign && (
+          <>
+            <Divider orientation={'vertical'} flexItem />
+            <NavBreadcrumbs />
+          </>
+        )}
+      </Stack>
+      <Stack direction={'row'} spacing={.5}>
+        {campaign && isUserDm && spotifyAuthenticated && <CustomPlaylistButton />}
+        {campaign && (<StickyNoteButton />)}
+        {isUserDm && (
+          <>
+            <NotificationButton />
+            <SettingsButton />
+            <Divider orientation={'vertical'} flexItem />
+          </>
+        )}
+        <UserButton />
+      </Stack>
+    </>
+  );
 };
 
+// TODO: Fix this design
 const NavbarCondensed = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 

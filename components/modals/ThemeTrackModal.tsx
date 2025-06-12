@@ -5,7 +5,7 @@ import SpotifyItemList from '@/components/data-list/SpotifyItemList';
 import { useAlert } from '@/hooks/useAlert';
 import { doc, getDoc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
-import { SpotifyBase } from '@/types/Spotify';
+import { Playlist, SpotifyBase } from '@/types/Spotify';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import { useCampaign } from '@/hooks/useCampaign';
 
@@ -15,7 +15,7 @@ const ThemeTrackModal = (props: { unitId: string }) => {
   const { isUserDm } = useCampaign();
 
   const [open, setOpen] = useState(false);
-  const [spotifyItems, setSpotifyItems] = useState<SpotifyBase[]>([]);
+  const [spotifyItems, setSpotifyItems] = useState<(SpotifyBase | Playlist)[]>([]);
 
   useEffect(() => {
     async function fetchSpotifyItems() {
@@ -82,7 +82,7 @@ const ThemeTrackModal = (props: { unitId: string }) => {
                 <Typography variant={'subtitle2'} color={'grey'} mt={-3}>
                   Saved Tracks
                 </Typography>
-                <SpotifyItemList isDeletingItem spotifyItems={spotifyItems} updateState={modifyTrackList} /></>}
+                <SpotifyItemList isDeletingItem items={spotifyItems} updateState={modifyTrackList} /></>}
             </Grid2>
           </Grid2>
         </Box>

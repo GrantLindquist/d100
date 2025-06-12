@@ -1,19 +1,21 @@
 'use client';
 import { StickyNote } from '@/types/StickyNote';
-import { Box, CircularProgress, Paper, Stack } from '@mui/material';
+import { Box, CircularProgress, Stack } from '@mui/material';
 import { default as MinimizeIcon } from '@mui/icons-material/Remove';
 import { default as MaximizeIcon } from '@mui/icons-material/CheckBoxOutlineBlank';
 import CloseIcon from '@mui/icons-material/Close';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { useEffect, useRef, useState } from 'react';
+import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { useDrag } from '@use-gesture/react';
 import { DEFAULT_STICKY_NOTE_DIMENSIONS } from '@/utils/globals';
 import { useStickyNotes } from '@/hooks/useStickyNotes';
 import { doc, onSnapshot } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { useAlert } from '@/hooks/useAlert';
+import { ResizableBox } from 'react-resizable';
+import 'react-resizable/css/styles.css';
+import './ResizeHandleOverride.css';
 
-// TODO: Make this resizable from all sides
 const StickyNoteComponent = (props: { stickyNoteId: string }) => {
 
   const { updateStickyNote } = useStickyNotes();
@@ -26,6 +28,11 @@ const StickyNoteComponent = (props: { stickyNoteId: string }) => {
   const dragOffset = useRef({ x: 0, y: 0 });
   const saveTimeAllotment = 2000;
   const inBoundsOffset = 100;
+
+  const [initialDimensions, setInitialDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
 
   useEffect(() => {
     try {
@@ -120,77 +127,102 @@ const StickyNoteComponent = (props: { stickyNoteId: string }) => {
   if (!stickyNote || !stickyNote.isDisplayed) {
     return null;
   }
+
   return (
-    <Paper
-      id={stickyNote.id}
-      sx={{
-        width: stickyNote.dimensions[0],
-        height: stickyNote.dimensions[1],
-        maxHeight: stickyNote.isMinimized ? 24 : 9999,
-        minWidth: 150,
-        minHeight: stickyNote.isMinimized ? 24 : 100,
+    <div
+      style={{
         position: 'absolute',
         top: position?.y ?? 100,
         left: position?.x ?? 20,
-        pointerEvents: 'fill',
-        resize: stickyNote.isMinimized ? 'none' : 'both',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
       }}
     >
-      <Stack
-        direction="row"
-        spacing={0.5}
-        px={0.5}
-        sx={{
-          height: '24px',
+      <ResizableBox
+        // @ts-ignore
+        id={stickyNote.id}
+        width={stickyNote.dimensions[0]}
+        height={stickyNote.dimensions[1]}
+        minConstraints={[150, 100]}
+        onResize={(e: SyntheticEvent, data: any) => {
+          const newWidth = Math.max(data.size.width);
+          const newHeight = Math.max(data.size.height);
+
+          let newX = position.x;
+          let newY = position.y;
+
+          if (data.handle.includes('w')) {
+            newX = position.x + (stickyNote!.dimensions[0] - newWidth);
+          }
+          if (data.handle.includes('n')) {
+            newY = position.y + (stickyNote!.dimensions[1] - newHeight);
+          }
+          setPosition({ x: newX, y: newY });
+          updateLocalState('dimensions', [newWidth, newHeight]);
+        }}
+        axis={stickyNote.isMinimized ? 'x' : 'both'}
+        resizeHandles={['se', 'e', 's', 'sw', 'nw', 'n', 'ne', 'w']}
+        style={{
+          backgroundColor: '#222',
+          overflow: 'hidden',
           display: 'flex',
-          alignItems: 'center',
+          flexDirection: 'column',
+          borderRadius: 3,
+          maxHeight: stickyNote.isMinimized ? 24 : 9999,
         }}
       >
-        <div
+        <Stack
           {...bind()}
-          style={{
-            flexGrow: 1,
+          direction="row"
+          spacing={0.5}
+          px={0.5}
+          sx={{
+            touchAction: 'none',
+            height: '24px',
             display: 'flex',
             alignItems: 'center',
-            cursor: 'pointer',
           }}
         >
-          <DragIndicatorIcon sx={{ fontSize: iconStyle }} />
-          {lastUnsavedEdit && Date.now() < lastUnsavedEdit + saveTimeAllotment &&
-            <CircularProgress size={'10px'} color={'inherit'} sx={{ marginLeft: .5 }} />}
-        </div>
-        {stickyNote.isMinimized ? (
-          <MaximizeIcon onClick={() => updateLocalState('isMinimized', false)} sx={{ fontSize: iconStyle }} />
-        ) : (
-          <MinimizeIcon onClick={() => updateLocalState('isMinimized', true)} sx={{ fontSize: iconStyle }} />
-        )}
-        <CloseIcon onClick={() => updateLocalState('isDisplayed', false)} sx={{ fontSize: iconStyle }} />
-      </Stack>
+          <div
+            style={{
+              flexGrow: 1,
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'move',
+            }}
+          >
+            <DragIndicatorIcon sx={{ fontSize: iconStyle }} />
+            {lastUnsavedEdit && Date.now() < lastUnsavedEdit + saveTimeAllotment &&
+              <CircularProgress size={'10px'} color={'inherit'} sx={{ marginLeft: .5 }} />}
+          </div>
+          {stickyNote.isMinimized ? (
+            <MaximizeIcon onClick={() => updateLocalState('isMinimized', false)} sx={{ fontSize: iconStyle }} />
+          ) : (
+            <MinimizeIcon onClick={() => updateLocalState('isMinimized', true)} sx={{ fontSize: iconStyle }} />
+          )}
+          <CloseIcon onClick={() => updateLocalState('isDisplayed', false)} sx={{ fontSize: iconStyle, zIndex: 30 }} />
+        </Stack>
 
-      {!stickyNote.isMinimized && (
-        <Box sx={{ flexGrow: 1 }}>
+        {!stickyNote.isMinimized && (
+          <Box sx={{ flexGrow: 1 }}>
         <textarea
           placeholder="Stuff goes here..."
           value={stickyNote.textContent}
           onChange={(event) => updateLocalState('textContent', event.target.value)}
           style={{
-            resize: 'none',
             width: '100%',
             height: '100%',
             backgroundColor: 'transparent',
             color: 'white',
             fontSize: '16px',
+            resize: 'none',
             border: 'none',
             outline: 'none',
             padding: '8px',
           }}
         />
-        </Box>
-      )}
-    </Paper>
+          </Box>
+        )}
+      </ResizableBox>
+    </div>
   );
 };
 
@@ -205,7 +237,11 @@ const StickyNoteContainer = () => {
     width: '100vw',
     pointerEvents: 'none',
   }}>
-    {stickyNoteState.map((note) => <StickyNoteComponent key={note.id} stickyNoteId={note.id} />)}
+    {stickyNoteState.map((note) => (
+      <div key={note.id} style={{ pointerEvents: 'auto' }}>
+        <StickyNoteComponent stickyNoteId={note.id} />
+      </div>
+    ))}
   </div>;
 };
 

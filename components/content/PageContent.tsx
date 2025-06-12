@@ -18,7 +18,6 @@ import ArticleAside from '@/components/content/ArticleAside';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { BubbleMenu, Editor, EditorContent, useEditor, useEditorState } from '@tiptap/react';
 import Bulletlist from '@tiptap/extension-bullet-list';
-import Document from '@tiptap/extension-document';
 import HardBreak from '@tiptap/extension-hard-break';
 import Heading from '@tiptap/extension-heading';
 import ListItem from '@tiptap/extension-list-item';
@@ -43,6 +42,7 @@ import AddToContentButton from '@/components/buttons/AddToContentButton';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import { SmallIconButton, SmallIconButtonGroup } from '@/components/buttons/SmallIconButton';
+import { default as NextImage } from 'next/image';
 
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
@@ -66,7 +66,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
   const { isUnsavedChanges, setUnsavedChanges } = useUnsavedChanges();
   const { isUserDm, campaign, setBreadcrumbs } = useCampaign();
   const { displayAlert } = useAlert();
-  const { activeUnitId, setActiveUnitId, displayPlayer } = useSpotifyPlayer();
+  const { activePlayingCollection, setActivePlayingCollection, displayPlayer } = useSpotifyPlayer();
   const pathname = usePathname();
   const theme = useTheme();
 
@@ -160,7 +160,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
       Blockquote,
       Bulletlist,
       Bold,
-      Document,
       EnforceTitle,
       Highlight.configure({
         HTMLAttributes: !props.displayHiddenMarks
@@ -401,9 +400,13 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                     {displayPlayer && unit.spotifyItems && unit.spotifyItems.length >= 0 && (
                       <Tooltip title={`Play Theme Tracks`} placement={'left'}>
                         <SmallIconButton
-                          onClick={() => setActiveUnitId(unit.id)}
-                          icon={<PlaylistPlayIcon
-                            style={unit.id === activeUnitId ? { color: theme.palette.primary.main } : {}} />}
+                          onClick={() => setActivePlayingCollection({
+                            id: unit.id !== activePlayingCollection.id ? unit.id : null,
+                            isPlaylistType: false,
+                          })}
+                          icon={unit.id === activePlayingCollection.id ?
+                            <NextImage src={'/spotify_playing.svg'} width={20} height={20} alt={'Playing Music'} /> :
+                            <PlaylistPlayIcon />}
                         />
                       </Tooltip>)}
                   </SmallIconButtonGroup>

@@ -24,7 +24,7 @@ const ArticleAside = (props: { titles: string[]; unit: Article | Quest }) => {
     const headerElement = Array.from(document.querySelectorAll('h2')).find(
       (header) => header.innerHTML === headerText,
     );
-    
+
     if (headerElement) {
       const rect = headerElement.getBoundingClientRect();
       const offset = window.scrollY || document.documentElement.scrollTop;

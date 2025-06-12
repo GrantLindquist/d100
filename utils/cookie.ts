@@ -21,12 +21,10 @@ async function decrypt(input: string): Promise<any> {
 }
 
 export const setCookie = async (cookieName: string, obj: any) => {
-  const expires = new Date(Date.now() + SESSION_TIMEOUT);
-  const cookie = await encrypt({ obj, expires });
+  const cookie = await encrypt({ obj });
   (await cookies()).set({
     name: cookieName,
     value: cookie,
-    expires: expires,
     httpOnly: true,
     sameSite: 'lax',
     path: '/',

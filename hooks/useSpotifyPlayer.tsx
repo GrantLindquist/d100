@@ -7,14 +7,20 @@ import db from '@/utils/firebase';
 import SpotifyPlayer, { refreshAccessToken } from '@/components/SpotifyPlayer';
 import { getCookie } from '@/utils/cookie';
 import { useAlert } from '@/hooks/useAlert';
+import { SpotifyBase } from '@/types/Spotify';
+
+type ActivePlayingCollection = {
+  id: string | null;
+  isPlaylistType: boolean;
+}
 
 const SpotifyPlayerContext = createContext<{
   spotifyAuthenticated: boolean;
   displayPlayer: boolean;
   setDisplayPlayer: Function;
   toggleDisplayPlayerSetting: Function;
-  activeUnitId: string | null;
-  setActiveUnitId: Function;
+  activePlayingCollection: ActivePlayingCollection;
+  setActivePlayingCollection: (apc: ActivePlayingCollection) => void;
 }>({
   spotifyAuthenticated: false,
   displayPlayer: false,
@@ -22,8 +28,8 @@ const SpotifyPlayerContext = createContext<{
   },
   toggleDisplayPlayerSetting: () => {
   },
-  activeUnitId: null,
-  setActiveUnitId: () => {
+  activePlayingCollection: { id: null, isPlaylistType: false },
+  setActivePlayingCollection: () => {
   },
 });
 
@@ -37,7 +43,10 @@ export const SpotifyPlayerProvider = ({ children }: {
   const [displayPlayer, setDisplayPlayer] = useState(false);
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
   const [trackUris, setTrackUris] = useState<string[]>([]);
-  const [activeUnitId, setActiveUnitId] = useState<string | null>(null);
+  const [activePlayingCollection, setActivePlayingCollection] = useState<ActivePlayingCollection>({
+    id: null,
+    isPlaylistType: false,
+  });
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
@@ -45,54 +54,109 @@ export const SpotifyPlayerProvider = ({ children }: {
   }, [user?.id]);
 
   useEffect(() => {
-    campaign &&
-    setDisplayPlayer(Boolean(campaign.settings.displaySpotifyPlayer));
+    if (user?.spotifyRefreshToken) {
+      campaign &&
+      setDisplayPlayer(Boolean(campaign.settings.displaySpotifyPlayer));
+    } else {
+      setDisplayPlayer(false);
+    }
   }, [campaign?.id]);
 
   useEffect(() => {
-    async function fetchSpotifyItems(unitId: string) {
-      let accessToken;
-      const tokenCookie = await getCookie('spotify_access_token');
-      if (tokenCookie) {
-        if (Date.now() > tokenCookie.obj.expiresAt) {
-          accessToken = await refreshAccessToken();
-        } else {
-          accessToken = tokenCookie.obj;
-        }
+    let isCancelled = false;
 
-        const unitDocSnap = await getDoc(doc(db, 'units', unitId));
-        if (unitDocSnap.exists()) {
-          const data = unitDocSnap.data();
-          const spotifyIds = [];
-          for (let item of data.spotifyItems) {
-            if (item.type === 'playlist') {
-              const response = await fetch(`https://api.spotify.com/v1/playlists/${item.id}?limit=100`, {
-                method: 'GET',
-                headers: {
-                  Authorization: 'Bearer ' + accessToken.token,
-                },
-              });
-              const data = await response.json();
-              for (let trackData of data.tracks.items) {
-                spotifyIds.push(`spotify:track:${trackData.track.id}`);
-              }
-            } else {
-              spotifyIds.push(`spotify:track:${item.id}`);
-            }
+    async function fetchItem(item: SpotifyBase, accessToken: { token: string }) {
+      const spotifyIds = [];
+      if (item.type === 'playlist') {
+        let nextUrl = `https://api.spotify.com/v1/playlists/${item.id}?limit=100`;
+
+        while (nextUrl) {
+          const response = await fetch(nextUrl, {
+            method: 'GET',
+            headers: {
+              Authorization: 'Bearer ' + accessToken.token,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to fetch playlist: ${response.statusText}`);
           }
-          setTrackUris(spotifyIds);
-          setPlaying(true);
+
+          const playlistData = await response.json();
+          for (let trackData of playlistData.tracks.items) {
+            spotifyIds.push(`spotify:track:${trackData.track.id}`);
+          }
+          nextUrl = playlistData.tracks.next;
         }
       } else {
+        spotifyIds.push(`spotify:track:${item.id}`);
+      }
+      return spotifyIds;
+    }
+
+    async function fetchSpotifyItems(id: string, isCustomPlaylistContext: boolean) {
+      try {
+        let accessToken;
+        const tokenCookie = await getCookie('spotify_access_token');
+
+        if (tokenCookie && tokenCookie.obj && tokenCookie.obj.expiresAt) {
+          if (Date.now() > tokenCookie.obj.expiresAt) {
+            accessToken = await refreshAccessToken();
+          } else {
+            accessToken = tokenCookie.obj;
+          }
+
+          let spotifyIds: string[] = [];
+          const docSnap = await getDoc(doc(db, isCustomPlaylistContext ? 'playlists' : 'units', id));
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            for (let item of data.spotifyItems) {
+              // Handle case where custom playlist is included in theme track context
+              if ('spotifyItems' in item) {
+                for (const spotifyItem of item.spotifyItems) {
+                  const response = await fetchItem(spotifyItem, accessToken);
+                  spotifyIds.push(...response);
+                }
+              } else {
+                const response = await fetchItem(item, accessToken);
+                spotifyIds.push(...response);
+              }
+            }
+
+            if (!isCancelled) {
+              setTrackUris(spotifyIds);
+              setPlaying(true);
+            }
+          } else {
+            if (!isCancelled) {
+              setTrackUris([]);
+              setPlaying(false);
+            }
+          }
+        } else {
+          displayAlert({
+            errorType: 'No accessToken found',
+            message: 'An error occurred while connecting to your Spotify.',
+          });
+        }
+      } catch (error) {
         displayAlert({
-          errorType: 'No accessToken found',
-          message: 'An error occurred while connecting to your Spotify.',
+          errorType: 'Fetch Error',
+          message: 'An error occurred while fetching Spotify items.',
         });
       }
     }
 
-    activeUnitId && fetchSpotifyItems(activeUnitId);
-  }, [activeUnitId]);
+    if (activePlayingCollection.id) {
+      fetchSpotifyItems(activePlayingCollection.id, activePlayingCollection.isPlaylistType);
+    } else {
+      setTrackUris([]);
+    }
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [activePlayingCollection.id, activePlayingCollection.isPlaylistType]);
 
   const toggleDisplayPlayerSetting = async () => {
     await updateDoc(doc(db, 'campaigns', campaign!.id), {
@@ -111,8 +175,8 @@ export const SpotifyPlayerProvider = ({ children }: {
         displayPlayer,
         setDisplayPlayer,
         toggleDisplayPlayerSetting,
-        activeUnitId,
-        setActiveUnitId,
+        activePlayingCollection: activePlayingCollection,
+        setActivePlayingCollection: setActivePlayingCollection,
       }}
     >
       {spotifyAuthenticated && displayPlayer && (

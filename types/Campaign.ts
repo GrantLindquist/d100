@@ -8,6 +8,7 @@ export interface Campaign {
   players: UserBase[];
   pendingPlayers: UserBase[];
   stickyNoteIds?: string[];
+  playlistIds: string[];
   settings: {
     displaySpotifyPlayer?: boolean;
   };

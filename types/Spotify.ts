@@ -7,3 +7,8 @@ export interface SpotifyBase {
   trackCount?: number;
 }
 
+export interface Playlist {
+  id: string;
+  title: string;
+  spotifyItems: SpotifyBase[];
+}

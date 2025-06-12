@@ -4,25 +4,53 @@ import { useAlert } from '@/hooks/useAlert';
 import { getCookie } from '@/utils/cookie';
 import { refreshAccessToken } from '@/components/SpotifyPlayer';
 import { SpotifyItemTabMemo } from '@/components/data-list/SpotifyItemTab';
-import { SpotifyBase } from '@/types/Spotify';
+import { Playlist, SpotifyBase } from '@/types/Spotify';
 import SearchIcon from '@mui/icons-material/Search';
+import { collection, getDocs, query, where } from '@firebase/firestore';
+import db from '@/utils/firebase';
+import { useCampaign } from '@/hooks/useCampaign';
 
-const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyBase[]; isDeletingItem?: boolean }) => {
+const searchTypeEnum = {
+  tracks: 'Tracks',
+  playlistCustom: 'Custom Playlists',
+  playlistSpotify: 'Playlists',
+};
+
+const SpotifyItemList = (props: {
+  updateState: Function;
+  items?: (SpotifyBase | Playlist)[];
+  isDeletingItem?: boolean
+}) => {
 
   const theme = useTheme();
   const { displayAlert } = useAlert();
+  const { campaign } = useCampaign();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
-  const [data, setData] = useState<SpotifyBase[]>([]);
-  const [searchType, setSearchType] = useState<'tracks' | 'playlists'>('tracks');
+  const [data, setData] = useState<(SpotifyBase | Playlist)[]>([]);
+  const [searchType, setSearchType] = useState<'tracks' | 'playlistSpotify' | 'playlistCustom'>('tracks');
 
   const [menuAnchor, setMenuAnchor] = useState(null);
 
   useEffect(() => {
-    const scrubbedSearchTerm = searchTerm.replace(/[^A-Z0-9 ,?!/$:-]/gi, '').replace('+', '').trim();
-    scrubbedSearchTerm.length > 0 && fetchSpotifyItems(scrubbedSearchTerm);
+    if (searchType === 'playlistCustom') {
+      fetchCustomPlaylists();
+    } else {
+      const scrubbedSearchTerm = searchTerm.replace(/[^A-Z0-9 ,?!/$:-]/gi, '').replace('+', '').trim();
+      scrubbedSearchTerm.length > 0 && fetchSpotifyItems(scrubbedSearchTerm);
+    }
   }, [searchTerm, searchType]);
+
+  const fetchCustomPlaylists = async () => {
+    let results: Playlist[] = [];
+    const q = query(collection(db, 'playlists'), where('id', 'in', campaign!.playlistIds));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      results.push(doc.data() as Playlist);
+    });
+    setData(results);
+  };
 
   const fetchSpotifyItems = async (searchTerm: string) => {
     try {
@@ -33,7 +61,7 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
       } else {
         accessToken = tokenCookie?.obj;
       }
-      const response = await fetch(`https://api.spotify.com/v1/search?q=${searchTerm}&type=album%2Ctrack%2Cplaylist&limit=10`, {
+      const response = await fetch(`https://api.spotify.com/v1/search?q=${searchTerm}&type=track%2Cplaylist&limit=10`, {
         method: 'GET',
         headers: {
           Authorization: 'Bearer ' + accessToken.token,
@@ -41,7 +69,7 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
       });
       const data = await response.json();
       let items: SpotifyBase[] = [];
-      if (searchType === 'playlists') {
+      if (searchType === 'playlistSpotify') {
         for (let item of data.playlists.items) {
           item && items.push({
             id: item.id,
@@ -76,13 +104,14 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
   };
 
   return (<Box px={1} height={'60vh'}>
-    {!props.spotifyItems &&
+    {!props.items &&
       <TextField
         onKeyDown={(e) => e.stopPropagation()}
         variant={'outlined'}
         size={'small'}
         onChange={(event) => setSearchTerm(event.target.value)}
         fullWidth
+        disabled={searchType === 'playlistCustom'}
         placeholder={'Search'}
         sx={{
           marginBottom: 2,
@@ -96,8 +125,13 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
             startAdornment: <SearchIcon style={{ marginRight: 6, color: 'grey', width: 20 }} />,
             endAdornment: (
               <>
-                <Typography onClick={handleOpenMenu} color={theme.palette.primary.main} sx={{ cursor: 'pointer' }}>
-                  {searchType}
+                <Typography onClick={handleOpenMenu} color={theme.palette.primary.main}
+                            sx={{
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap',
+                              flexShrink: 0,
+                            }}>
+                  {searchTypeEnum[searchType]}
                 </Typography>
                 <Menu
                   anchorEl={menuAnchor}
@@ -107,7 +141,8 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
                   anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
                 >
                   <MenuItem onClick={() => setSearchType('tracks')}>Tracks</MenuItem>
-                  <MenuItem onClick={() => setSearchType('playlists')}>Playlists</MenuItem>
+                  <MenuItem onClick={() => setSearchType('playlistSpotify')}>Playlists (Spotify)</MenuItem>
+                  <MenuItem onClick={() => setSearchType('playlistCustom')}>Playlists (Custom)</MenuItem>
                 </Menu>
               </>
             ),
@@ -115,12 +150,12 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
         }}
       />
     }
-    {!props.spotifyItems && !searchTerm ?
+    {!props.items && !searchTerm ?
       <Box textAlign={'center'}>
         <Typography color={'grey'} variant={'subtitle2'} px={4}>
           Try searching for tracks, albums, or playlists to add to associate with this article.
         </Typography>
-      </Box> : <>{(props.spotifyItems || data).map((result: SpotifyBase) => <Box
+      </Box> : <>{(props.items || data).map((result: SpotifyBase | Playlist) => <Box
         key={result.id}>
         <Stack direction={'row'}>
           <Stack direction={'column'} width={'100%'}>
@@ -133,7 +168,7 @@ const SpotifyItemList = (props: { updateState: Function; spotifyItems?: SpotifyB
                 displayModifyButton={result.id === hoveredItemId}
                 updateState={props.updateState}
                 isDeletingItem={Boolean(props.isDeletingItem)}
-                albumArtUrl={result.albumArtUrl}
+                albumArtUrl={'albumArtUrl' in result ? result.albumArtUrl : undefined}
               />
             </Box>
           </Stack>
