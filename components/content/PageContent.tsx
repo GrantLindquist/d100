@@ -18,7 +18,6 @@ import ArticleAside from '@/components/content/ArticleAside';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { BubbleMenu, Editor, EditorContent, useEditor, useEditorState } from '@tiptap/react';
 import Bulletlist from '@tiptap/extension-bullet-list';
-import Document from '@tiptap/extension-document';
 import HardBreak from '@tiptap/extension-hard-break';
 import Heading from '@tiptap/extension-heading';
 import ListItem from '@tiptap/extension-list-item';
@@ -66,7 +65,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
   const { isUnsavedChanges, setUnsavedChanges } = useUnsavedChanges();
   const { isUserDm, campaign, setBreadcrumbs } = useCampaign();
   const { displayAlert } = useAlert();
-  const { activeUnitId, setActiveUnitId, displayPlayer } = useSpotifyPlayer();
+  const { activePlayingCollection, setActivePlayingCollection, displayPlayer } = useSpotifyPlayer();
   const pathname = usePathname();
   const theme = useTheme();
 
@@ -160,7 +159,6 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
       Blockquote,
       Bulletlist,
       Bold,
-      Document,
       EnforceTitle,
       Highlight.configure({
         HTMLAttributes: !props.displayHiddenMarks
@@ -378,7 +376,8 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                   position: 'fixed',
                   width: '100%',
                   zIndex: 10,
-                  backgroundColor: 'background.paper',
+                  backgroundColor: '#111',
+                  paddingLeft: -.5,
                 } : {}}>
                   <SmallIconButtonGroup>
                     <Tooltip title={'Save Changes'} placement={'left'}>
@@ -401,9 +400,9 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                     {displayPlayer && unit.spotifyItems && unit.spotifyItems.length >= 0 && (
                       <Tooltip title={`Play Theme Tracks`} placement={'left'}>
                         <SmallIconButton
-                          onClick={() => setActiveUnitId(unit.id)}
+                          onClick={() => setActivePlayingCollection({ id: unit.id, isPlaylistType: false })}
                           icon={<PlaylistPlayIcon
-                            style={unit.id === activeUnitId ? { color: theme.palette.primary.main } : {}} />}
+                            style={unit.id === activePlayingCollection.id ? { color: theme.palette.primary.main } : {}} />}
                         />
                       </Tooltip>)}
                   </SmallIconButtonGroup>

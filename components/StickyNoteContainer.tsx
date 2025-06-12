@@ -175,6 +175,7 @@ const StickyNoteComponent = (props: { stickyNoteId: string }) => {
           spacing={0.5}
           px={0.5}
           sx={{
+            touchAction: 'none',
             height: '24px',
             display: 'flex',
             alignItems: 'center',

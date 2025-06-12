@@ -167,8 +167,8 @@ const CollectionSearch = (props: {
     units.filter((unit) => unit.type !== 'collection') ?? [];
 
   return (
-    <>
-      <Box mt={{ md: 6 }} mb={4} alignItems={'center'} display={'flex'} flexDirection={'column'}>
+    <Box mb={4}>
+      <Box mt={{ md: 6 }} alignItems={'center'} display={'flex'} flexDirection={'column'}>
         <Box maxWidth={600} width={'100%'}>
           <Stack direction={'row'} px={1}>
             {isEditing ? (
@@ -350,7 +350,7 @@ const CollectionSearch = (props: {
           <Button onClick={() => setDisplayDeleteWarningModal(false)}>On second thought...</Button>
         </Box>
       </Modal>
-    </>
+    </Box>
   );
 };
 export default CollectionSearch;

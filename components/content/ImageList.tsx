@@ -1,14 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Backdrop,
-  Box,
-  IconButton,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Backdrop, Box, IconButton, Paper, Stack, Typography } from '@mui/material';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -17,6 +10,7 @@ import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
 import { ImageUrl } from '@/types/Unit';
 import ImageFrame from '@/components/content/ImageFrame';
 
+// TODO: Images can overflow out of viewport on mobile
 const ImageList = (props: {
   imageUrls: ImageUrl[];
   handleDeleteImage: Function;

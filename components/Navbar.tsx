@@ -25,6 +25,8 @@ import SaveCheckLink from '@/components/SaveCheckLink';
 import { useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import StickyNoteButton from '@/components/buttons/StickyNoteButton';
+import CustomPlaylistButton from '@/components/buttons/CustomPlaylistButton';
+import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 
 export const NavbarContainer = () => {
   const theme = useTheme();
@@ -82,6 +84,7 @@ const NavbarBrand = () => {
 
 const Navbar = () => {
   const { campaign, isUserDm } = useCampaign();
+  const { spotifyAuthenticated } = useSpotifyPlayer();
 
   return (
     <>
@@ -100,6 +103,7 @@ const Navbar = () => {
         )}
       </Stack>
       <Stack direction={'row'} spacing={.5}>
+        {campaign && isUserDm && spotifyAuthenticated && <CustomPlaylistButton />}
         {campaign && (<StickyNoteButton />)}
         {isUserDm && (
           <>
@@ -114,6 +118,7 @@ const Navbar = () => {
   );
 };
 
+// TODO: Fix this design
 const NavbarCondensed = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
