@@ -26,6 +26,11 @@
     background-color: #232323;
 }
 
+.ProseMirror .compact-text {
+    display: block;
+    padding: 0;
+}
+
 a {
     color: #ff6a48;
     cursor: pointer;

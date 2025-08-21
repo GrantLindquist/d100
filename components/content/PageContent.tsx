@@ -1,48 +1,50 @@
 'use client';
 
-import { Box, Container, Grid, Stack, Tooltip, Typography, useTheme } from '@mui/material';
-import { Article, Breadcrumb, ImageUrl, Quest } from '@/types/Unit';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { arrayRemove, arrayUnion, doc, onSnapshot, updateDoc } from '@firebase/firestore';
-import db, { storage } from '@/utils/firebase';
-import { deleteObject, getDownloadURL, ref, uploadBytes } from '@firebase/storage';
-import { generateUUID } from '@/utils/uuid';
-import { useCampaign } from '@/hooks/useCampaign';
+import AddToContentButton from '@/components/buttons/AddToContentButton';
+import { SmallIconButton, SmallIconButtonGroup } from '@/components/buttons/SmallIconButton';
+import ArticleAside from '@/components/content/ArticleAside';
 import ImageList from '@/components/content/ImageList';
 import LootTable from '@/components/content/LootTable';
-import { useAlert } from '@/hooks/useAlert';
-import { getCurrentUnitIdFromUrl } from '@/utils/url';
-import { usePathname } from 'next/navigation';
-import CheckIcon from '@mui/icons-material/Check';
-import ArticleAside from '@/components/content/ArticleAside';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { BubbleMenu, Editor, EditorContent, useEditor, useEditorState } from '@tiptap/react';
-import Bulletlist from '@tiptap/extension-bullet-list';
-import HardBreak from '@tiptap/extension-hard-break';
-import Heading from '@tiptap/extension-heading';
-import ListItem from '@tiptap/extension-list-item';
-import Paragraph from '@tiptap/extension-paragraph';
-import Text from '@tiptap/extension-text';
-import History from '@tiptap/extension-history';
-import Bold from '@tiptap/extension-bold';
-import Italic from '@tiptap/extension-italic';
-import Blockquote from '@tiptap/extension-blockquote';
-import { Typography as TypographyExtension } from '@tiptap/extension-typography';
-import Link from '@tiptap/extension-link';
+import CompactParagraph from '@/components/content/text-editor/CompactParagraph';
 import '@/components/content/text-editor/EditorContent.css';
 import EnforceTitle from '@/components/content/text-editor/EnforceTitle';
+import FileDropzone from '@/components/content/text-editor/FileDropzone';
+import { useAlert } from '@/hooks/useAlert';
+import { useCampaign } from '@/hooks/useCampaign';
+import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { Article, Breadcrumb, ImageUrl, Quest } from '@/types/Unit';
+import db, { storage } from '@/utils/firebase';
+import { getCurrentUnitIdFromUrl } from '@/utils/url';
+import { generateUUID } from '@/utils/uuid';
+import { arrayRemove, arrayUnion, doc, onSnapshot, updateDoc } from '@firebase/firestore';
+import { deleteObject, getDownloadURL, ref, uploadBytes } from '@firebase/storage';
+import CheckIcon from '@mui/icons-material/Check';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
-import TitleIcon from '@mui/icons-material/Title';
-import Highlight from '@tiptap/extension-highlight';
-import FileDropzone from '@/components/content/text-editor/FileDropzone';
-import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import AddToContentButton from '@/components/buttons/AddToContentButton';
-import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
-import { SmallIconButton, SmallIconButtonGroup } from '@/components/buttons/SmallIconButton';
+import SubjectIcon from '@mui/icons-material/Subject';
+import TitleIcon from '@mui/icons-material/Title';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { Box, Container, Grid, Stack, Tooltip, Typography, useTheme } from '@mui/material';
+import Blockquote from '@tiptap/extension-blockquote';
+import Bold from '@tiptap/extension-bold';
+import Bulletlist from '@tiptap/extension-bullet-list';
+import HardBreak from '@tiptap/extension-hard-break';
+import Heading from '@tiptap/extension-heading';
+import Highlight from '@tiptap/extension-highlight';
+import History from '@tiptap/extension-history';
+import Italic from '@tiptap/extension-italic';
+import Link from '@tiptap/extension-link';
+import ListItem from '@tiptap/extension-list-item';
+import Paragraph from '@tiptap/extension-paragraph';
+import Text from '@tiptap/extension-text';
+import { Typography as TypographyExtension } from '@tiptap/extension-typography';
+import { BubbleMenu, Editor, EditorContent, useEditor, useEditorState } from '@tiptap/react';
 import { default as NextImage } from 'next/image';
+import { usePathname } from 'next/navigation';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
@@ -160,6 +162,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
       Blockquote,
       Bulletlist,
       Bold,
+      CompactParagraph,
       EnforceTitle,
       Highlight.configure({
         HTMLAttributes: !props.displayHiddenMarks
@@ -214,6 +217,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
       isItalic: ctx.editor?.isActive('italic'),
       isHeading: ctx.editor?.isActive('heading'),
       isHidden: ctx.editor?.isActive('highlight'),
+      isCompact: ctx.editor?.isActive('compact'),
     }),
     equalityFn: (prev, next) => {
       if (!next) {
@@ -224,7 +228,8 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
         prev.isBold === next.isBold &&
         prev.isItalic === next.isItalic &&
         prev.isHeading === next.isHeading &&
-        prev.isHidden == next.isHidden
+        prev.isHidden == next.isHidden && 
+        prev.isCompact == next.isCompact
       );
     },
   });
@@ -455,24 +460,30 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                             : 'grey',
                         }}
                       />
-                      <TitleIcon
-                        onClick={() =>
-                          editor
-                            .chain()
-                            .focus()
-                            .toggleHeading({
-                              level: 2,
-                            })
-                            .run()
-                        }
-                        sx={{
-                          margin: 0.75,
-                          cursor: 'pointer',
-                          color: currentEditorState.isHeading
-                            ? theme.palette.primary.main
-                            : 'grey',
-                        }}
-                      />
+                      <Tooltip
+                        title={'Sub Heading'}
+                        placement={'top'}
+                      >
+                        <TitleIcon
+                          onClick={() =>
+                            editor
+                              .chain()
+                              .focus()
+                              .toggleHeading({
+                                level: 2,
+                              })
+                              .run()
+                          }
+                          sx={{
+                            margin: 0.75,
+                            cursor: 'pointer',
+                            color: currentEditorState.isHeading
+                              ? theme.palette.primary.main
+                              : 'grey',
+                          }}
+                        />
+                      </Tooltip>
+                      
                       <FormatQuoteIcon
                         onClick={() =>
                           editor.chain().focus().toggleBlockquote().run()
@@ -485,6 +496,25 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                             : 'grey',
                         }}
                       />
+                      <Tooltip
+                          title={'Toggle compact paragraph'}
+                          placement={'top'}
+                        >
+                        <SubjectIcon
+                          onClick={() =>
+                            editor.chain().focus().toggleCompact().run()
+                          }
+                          sx={{
+                            width: 22,
+                            height: 22,
+                            margin: 0.75,
+                            cursor: 'pointer',
+                            color: currentEditorState.isCompact
+                              ? theme.palette.primary.main
+                              : 'grey',
+                          }}
+                        />
+                      </Tooltip>
                       {isUserDm && (
                         <Tooltip
                           title={'Hide from players'}
