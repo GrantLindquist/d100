@@ -16,6 +16,13 @@ import EditIcon from '@mui/icons-material/Edit';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import { default as NextImage } from 'next/image';
 
+/* TODO: Custom playlists have the following issues:
+* 1. After creating custom playlist, browser must be hard refreshed before it appears in Menu
+* 2. Custom playlists that contain Spotify playlists do not accurately display total number of tracks contained in them
+* 3. Custom playlists do not appear in SpotifyList unless the search bar isn't empty, despite the fact that the searchbar is disabled when set to Custom Playlists
+* 4. Not enough right padding on text in custom playlist menu
+* 5. Handle case where custom playlist is deleted but it's still used in an Article (perhaps include warning dialog when deleting)
+* */
 const CustomPlaylistButton = () => {
   const { campaign } = useCampaign();
   const { displayAlert } = useAlert();

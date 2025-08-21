@@ -1,19 +1,10 @@
-import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
-import {
-  Box,
-  Button,
-  Checkbox,
-  CircularProgress,
-  Divider,
-  FormControlLabel,
-  Modal,
-  Stack,
-  Typography,
-} from '@mui/material';
-import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
-import { useEffect, useState } from 'react';
 import { outfit } from '@/components/AppWrapper';
+import { useAlert } from '@/hooks/useAlert';
+import { useCampaign } from '@/hooks/useCampaign';
 import { Collection } from '@/types/Unit';
+import db, { storage } from '@/utils/firebase';
+import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
+import { generateUUID } from '@/utils/uuid';
 import {
   arrayRemove,
   arrayUnion,
@@ -25,12 +16,20 @@ import {
   runTransaction,
   where,
 } from '@firebase/firestore';
-import db, { storage } from '@/utils/firebase';
-import { useCampaign } from '@/hooks/useCampaign';
-import { useAlert } from '@/hooks/useAlert';
-import { generateUUID } from '@/utils/uuid';
-import { SmallIconButton } from '@/components/buttons/SmallIconButton';
 import { deleteObject, getBlob, getDownloadURL, ref, uploadBytes } from '@firebase/storage';
+import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
+import {
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  Divider,
+  FormControlLabel,
+  Modal,
+  Stack,
+  Typography
+} from '@mui/material';
+import { useEffect, useState } from 'react';
 
 const CollectionCheckbox = (props: {
   checked: boolean;
@@ -207,11 +206,10 @@ const MoveUnitsModal = (props: {
 
   return (
     <>
-      <SmallIconButton
-        disabled={props.disabled}
-        onClick={() => setModalOpen(true)}
-        icon={<DriveFileMoveIcon />}
-      />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <DriveFileMoveIcon />
+        Move Items
+      </Box>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box sx={MODAL_STYLE}>
           <Typography

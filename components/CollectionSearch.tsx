@@ -1,8 +1,20 @@
 'use client';
 
 import { ChangeEvent, useEffect, useState } from 'react';
-import { Box, Button, Divider, Modal, Stack, TextField, Tooltip, Typography } from '@mui/material';
-
+import {
+  Box,
+  Button,
+  Divider,
+  Menu,
+  MenuItem,
+  Modal,
+  Stack,
+  TextareaAutosize,
+  TextField,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { Article, Collection, Quest, Unit } from '@/types/Unit';
 import { arrayRemove, collection, doc, getDocs, query, runTransaction, updateDoc, where } from '@firebase/firestore';
 import db, { storage } from '@/utils/firebase';
@@ -24,6 +36,9 @@ import { SmallIconButton, SmallIconButtonGroup } from '@/components/buttons/Smal
 import { CondensedUnitTab, UnitTab } from '@/components/UnitTab';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 import Image from 'next/image';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+
 
 const CollectionSearch = (props: {
   unitIds: string[];
@@ -31,6 +46,7 @@ const CollectionSearch = (props: {
 }) => {
   const { isUserDm, campaign } = useCampaign();
   const { displayAlert } = useAlert();
+  const theme = useTheme();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [collectionTitle, setCollectionTitle] = useState(props.collection.title);
@@ -44,6 +60,7 @@ const CollectionSearch = (props: {
 
   const [displayDeleteWarningModal, setDisplayDeleteWarningModal] = useState(false);
   const [confirmButtonDisabled, setConfirmButtonDisabled] = useState(false);
+  const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(null);
 
   const fetchUnits = async (unitIds: string[]) => {
     try {
@@ -154,6 +171,22 @@ const CollectionSearch = (props: {
     }
   };
 
+  const toggleHideCollection = async (toggle: boolean) => {
+    try {
+      await updateDoc(doc(db, 'units', props.collection.id), {
+        hidden: toggle,
+      });
+      displayAlert({
+        message: `Collection is ${toggle ? 'now' : 'no longer'} hidden from players.`,
+      });
+    } catch (e: any) {
+      displayAlert({
+        message: `An error occurred while hiding this content.`,
+        errorType: e.message,
+      });
+    }
+  };
+
   const confirmChanges = async () => {
     if (props.collection.title !== collectionTitle) {
       await updateDoc((doc(db, 'units', props.collection.id)), {
@@ -161,6 +194,14 @@ const CollectionSearch = (props: {
       });
     }
     setEditing(false);
+  };
+
+  const handleActionMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setActionMenuAnchor(event.currentTarget);
+  };
+
+  const handleActionMenuClose = () => {
+    setActionMenuAnchor(null);
   };
 
   const searchResults =
@@ -172,19 +213,33 @@ const CollectionSearch = (props: {
         <Box maxWidth={600} width={'100%'}>
           <Stack direction={'row'} px={1}>
             {isEditing ? (
-              <input
+              <TextareaAutosize
                 value={collectionTitle}
-                onChange={(e) => setCollectionTitle(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value.length <= 50) {
+                    setCollectionTitle(e.target.value);
+                  }
+                }}
                 autoFocus
+                minRows={1}
+                maxRows={4}
                 style={{
-                  all: 'unset',
+                  color: 'white',
+                  border: 'none',
+                  outline: 'none',
+                  lineHeight: 1.1,
+                  backgroundColor: 'transparent',
                   fontSize: '3rem',
-                  height: '3.7rem',
                   fontWeight: BOLD_FONT_WEIGHT,
                   fontFamily: outfit.style.fontFamily,
-                  flexGrow: 1,
-                  width: '50%',
+                  width: '100%',
                   cursor: 'text',
+                  overflow: 'hidden',
+                  resize: 'none',
+                  padding: 0,
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
                 }}
               />
             ) : (
@@ -192,9 +247,10 @@ const CollectionSearch = (props: {
                 variant="h3"
                 fontWeight={BOLD_FONT_WEIGHT}
                 flexGrow={1}
-                pb={0.5}
                 sx={{
                   fontFamily: outfit.style.fontFamily,
+                  lineHeight: 1.1,
+                  paddingBottom: .5,
                 }}
               >
                 {props.collection.title}
@@ -219,20 +275,10 @@ const CollectionSearch = (props: {
                         icon={<CheckIcon />}
                       />
                     </Tooltip>
-                    <Tooltip title={'Move Items'} placement={'left'}>
-                      <MoveUnitsModal
-                        selectedUnitIds={selectedUnitIds}
-                        disabled={selectedUnitIds.length === 0 || selectedUnitsIncludeCollection}
-                        setEditing={setEditing}
-                        currentCollection={props.collection}
-                      />
-                    </Tooltip>
-                    <Tooltip title={'Delete Items'} placement={'left'}>
+                    <Tooltip title={'More Actions'} placement={'left'}>
                       <SmallIconButton
-
-                        disabled={selectedUnitIds.length === 0}
-                        onClick={() => handleDeleteUnits(false)}
-                        icon={<DeleteIcon />}
+                        icon={<MoreVertIcon />}
+                        onClick={handleActionMenuOpen}
                       />
                     </Tooltip>
                   </>
@@ -329,6 +375,55 @@ const CollectionSearch = (props: {
           </ResponsiveMasonry>
         </Box>
       )}
+
+      <Menu
+        anchorEl={actionMenuAnchor}
+        open={Boolean(actionMenuAnchor)}
+        onClose={handleActionMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+      >
+        <MenuItem
+          onClick={handleActionMenuClose}
+          disabled={selectedUnitIds.length === 0 || selectedUnitsIncludeCollection}
+        >
+          <MoveUnitsModal
+            selectedUnitIds={selectedUnitIds}
+            disabled={selectedUnitIds.length === 0 || selectedUnitsIncludeCollection}
+            setEditing={setEditing}
+            currentCollection={props.collection}
+          />
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            toggleHideCollection(!props.collection.hidden);
+            handleActionMenuClose();
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <VisibilityOffIcon />
+            {props.collection.hidden ? 'Show Collection' : 'Hide Collection'}
+          </Box>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleDeleteUnits(false);
+            handleActionMenuClose();
+          }}
+          disabled={selectedUnitIds.length === 0}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <DeleteIcon />
+            Delete Items
+          </Box>
+        </MenuItem>
+      </Menu>
 
       <Modal open={displayDeleteWarningModal} onClose={() => setDisplayDeleteWarningModal(false)}>
         <Box sx={MODAL_STYLE} width={600}>
