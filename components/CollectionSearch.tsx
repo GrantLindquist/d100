@@ -196,7 +196,7 @@ const CollectionSearch = (props: {
     setEditing(false);
   };
 
-  const handleActionMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+  const handleActionMenuOpen = (event: any) => {
     setActionMenuAnchor(event.currentTarget);
   };
 
