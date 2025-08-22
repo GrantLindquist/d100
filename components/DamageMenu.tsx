@@ -335,10 +335,11 @@ const DamageMenu = (props: {
         value={healthCounter.toString()}
         type="number"
         onChange={(event) => {
-          const value = Number(event.target.value);
-          if (value < 0) {
+          const input = event.target.value;
+          const value = parseInt(input, 10);
+          if (isNaN(value) || value < 0) {
             setHealthCounter(0);
-          } else if (value <= 999) {
+          } else if (value <= 9999) {
             setHealthCounter(value);
           }
         }}

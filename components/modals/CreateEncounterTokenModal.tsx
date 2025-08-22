@@ -42,7 +42,7 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
     const { displayAlert } = useAlert();
     const [formData, setFormData] = useState({
       tokenTitle: formProps.selectedArticle?.title ?? '',
-      tokenHitPoints: 1,
+      tokenHitPoints: formProps.selectedArticle?.encounterTokenDefaultHP ?? 1,
       tokenIsPlayer: 'off',
       tokenCopies: 1,
     });
@@ -93,7 +93,7 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
       }));
     };
 
-
+    // TODO: Set a value cap to the number fields here
     return (
       <form onSubmit={handleSubmit}>
         <Menu anchorEl={menuAnchor}
@@ -143,6 +143,15 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
                 type="number"
                 value={formData.tokenHitPoints}
                 onChange={handleInputChange}
+                sx={{
+                  '& input[type=number]': {
+                    MozAppearance: 'textfield',
+                    '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  },
+                }}
               />
             </Stack>
             <Stack direction={'column'} spacing={1}>
@@ -154,6 +163,15 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
                 type="number"
                 value={formData.tokenCopies}
                 onChange={handleInputChange}
+                sx={{
+                  '& input[type=number]': {
+                    MozAppearance: 'textfield',
+                    '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  },
+                }}
               />
             </Stack>
             <Box width={'40%'}></Box>

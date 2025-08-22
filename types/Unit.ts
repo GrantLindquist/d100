@@ -28,6 +28,7 @@ export interface Article extends Unit {
   content: Object;
   imageUrls: ImageUrl[];
   hasEncounterToken?: boolean;
+  encounterTokenDefaultHP?: number;
 }
 
 export interface Quest extends Article {
