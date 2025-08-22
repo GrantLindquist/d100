@@ -1,5 +1,5 @@
 import { Box, Grid2, MenuItem, Modal, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
 import SpotifyItemList from '@/components/data-list/SpotifyItemList';
 import { useAlert } from '@/hooks/useAlert';
@@ -8,6 +8,7 @@ import db from '@/utils/firebase';
 import { Playlist, SpotifyBase } from '@/types/Spotify';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import { useCampaign } from '@/hooks/useCampaign';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
 
 const ThemeTrackModal = (props: { unitId: string }) => {
   const { displayAlert } = useAlert();
@@ -58,7 +59,8 @@ const ThemeTrackModal = (props: { unitId: string }) => {
   return (
     <>
       <MenuItem disabled={!spotifyAuthenticated || !isUserDm} onClick={() => setOpen(true)}>
-        Theme Track
+        <MusicNoteIcon sx={{ width: 20, height: 20 }} />
+        &nbsp; Theme Track
       </MenuItem>
       <Modal open={open} onClose={handleUpdateTracks}>
         <Box sx={{
