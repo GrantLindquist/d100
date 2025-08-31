@@ -1,4 +1,4 @@
-import { Box, IconButton, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Stack, Typography, useTheme } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { memo } from 'react';
@@ -23,7 +23,7 @@ const SpotifyItemTab = (props: {
     <Stack direction={'row'} alignItems={'center'} py={0.5}>
       {props.albumArtUrl && (
         <Image
-          style={{ marginRight: 10 }}
+          style={{ marginRight: 10, marginLeft: 5 }}
           src={props.albumArtUrl}
           alt={'Album cover art'}
           height={40}
@@ -47,27 +47,31 @@ const SpotifyItemTab = (props: {
         )}
       </Box>
 
-      {props.displayModifyButton && (
-        <IconButton onClick={() => props.updateState(props.item, props.isDeletingItem)}>
-          {!props.isDeletingItem ? (
-            <AddIcon
-              sx={{
-                height: 20,
-                width: 20,
-                color: theme.palette.primary.main,
-              }}
-            />
-          ) : (
-            <RemoveIcon
-              sx={{
-                height: 20,
-                width: 20,
-                color: theme.palette.primary.main,
-              }}
-            />
-          )}
-        </IconButton>
-      )}
+      <Box onClick={() => props.updateState(props.item, props.isDeletingItem)}
+           sx={!props.displayModifyButton ? { opacity: 0 } : {
+             display: 'flex',
+             alignItems: 'center',
+             margin: 1,
+             cursor: 'pointer',
+           }}>
+        {!props.isDeletingItem ? (
+          <AddIcon
+            sx={{
+              height: 20,
+              width: 20,
+              color: theme.palette.primary.main,
+            }}
+          />
+        ) : (
+          <RemoveIcon
+            sx={{
+              height: 20,
+              width: 20,
+              color: theme.palette.primary.main,
+            }}
+          />
+        )}
+      </Box>
     </Stack>
   );
 };

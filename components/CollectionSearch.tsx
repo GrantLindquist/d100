@@ -352,7 +352,7 @@ const CollectionSearch = (props: {
                           case 'quest':
                             return <KeyIcon />;
                           case 'encounter':
-                            return <Image src={'/encounter-icon.png'} alt={'In Initiative'}
+                            return <Image src={'/encounter-icon.png'} alt={'Encounter'}
                                           style={{ marginRight: '-2px' }} width={24}
                                           height={24} />;
                           default:

@@ -9,6 +9,7 @@ import { Playlist, SpotifyBase } from '@/types/Spotify';
 import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import { useCampaign } from '@/hooks/useCampaign';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import { arrayMove } from '@dnd-kit/sortable';
 
 const ThemeTrackModal = (props: { unitId: string }) => {
   const { displayAlert } = useAlert();
@@ -56,8 +57,21 @@ const ThemeTrackModal = (props: { unitId: string }) => {
     }
   };
 
+  const sortTrackList = (event: any) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const currentList = spotifyItems;
+    const oldIndex = currentList.findIndex((item) => item.id === active.id);
+    const newIndex = currentList.findIndex((item) => item.id === over.id);
+
+    const newItems = arrayMove(currentList, oldIndex, newIndex);
+    setSpotifyItems(newItems);
+  };
+
   return (
     <>
+
       <MenuItem disabled={!spotifyAuthenticated || !isUserDm} onClick={() => setOpen(true)}>
         <MusicNoteIcon sx={{ width: 20, height: 20 }} />
         &nbsp; Theme Track
@@ -84,7 +98,8 @@ const ThemeTrackModal = (props: { unitId: string }) => {
                 <Typography variant={'subtitle2'} color={'grey'} mt={-3}>
                   Saved Tracks
                 </Typography>
-                <SpotifyItemList isDeletingItem items={spotifyItems} updateState={modifyTrackList} /></>}
+                <SpotifyItemList isDeletingItem items={spotifyItems} updateState={modifyTrackList}
+                                 sortTrackList={sortTrackList} /></>}
             </Grid2>
           </Grid2>
         </Box>

@@ -119,7 +119,7 @@ const UserButton = () => {
               disabled={spotifyAuthenticated}
               onClick={handleConnectSpotify}
             >
-              <Stack direction={'row'}>
+              <Stack direction={'row'} alignItems={'center'}>
                 <Image src={'/spotify.svg'} alt={'Spotify Logo'} width={22} height={22} style={{ marginRight: 6 }} />
                 {spotifyAuthenticated ? 'Connected' : 'Connect Spotify'}
               </Stack>

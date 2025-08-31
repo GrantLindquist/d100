@@ -6,8 +6,8 @@ import { doc, updateDoc } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import ThemeTrackModal from '@/components/modals/ThemeTrackModal';
 import { SmallIconButton } from '@/components/buttons/SmallIconButton';
-import PersonPinIcon from '@mui/icons-material/PersonPin';
 import ImageIcon from '@mui/icons-material/Image';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import TollIcon from '@mui/icons-material/Toll';
 
 const AddToContentButton = (props: {
@@ -76,7 +76,7 @@ const AddToContentButton = (props: {
             <MenuItem
               onClick={toggleHasEncounterToken}
             >
-              <PersonPinIcon sx={{
+              <AccountCircleIcon sx={{
                 width: 20,
                 height: 20,
                 color: props.unit.hasEncounterToken ? theme.palette.primary.main : 'white',
