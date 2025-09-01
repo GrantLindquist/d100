@@ -8,6 +8,7 @@ import { arrayUnion, doc, runTransaction } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import { generateUUID } from '@/utils/uuid';
 import { useCampaign } from '@/hooks/useCampaign';
+import { arrayMove } from '@dnd-kit/sortable';
 
 const defaultPlaylist = {
   id: '',
@@ -15,6 +16,7 @@ const defaultPlaylist = {
   spotifyItems: [],
 };
 
+// TODO: Find a way to combine this component with ThemeTrackModal
 const PlaylistModal = (props: { playlist: Playlist | null, trigger: ReactNode }) => {
   const { displayAlert } = useAlert();
   const { campaign } = useCampaign();
@@ -60,17 +62,28 @@ const PlaylistModal = (props: { playlist: Playlist | null, trigger: ReactNode })
     }
   };
 
-  const modifyTrackList = (item: SpotifyBase, isDeletingTrack: boolean) => {
-    let items;
-    if (isDeletingTrack) {
-      items = [...playlist.spotifyItems].filter(i => i.id !== item.id);
+  const modifyTrackList = (item: SpotifyBase, deleteIndex: number | null) => {
+    let newItems = [...playlist.spotifyItems];
+    if (deleteIndex) {
+      newItems.splice(deleteIndex, 1);
     } else {
-      items = [...playlist.spotifyItems];
-      items.push(item);
+      newItems.push(item);
     }
     setPlaylist({
       ...playlist,
-      spotifyItems: items,
+      spotifyItems: newItems,
+    });
+  };
+
+  const sortTrackList = (activeId: string, overId: string) => {
+    const currentList = playlist.spotifyItems;
+    const oldIndex = currentList.findIndex((item) => item.id === activeId);
+    const newIndex = currentList.findIndex((item) => item.id === overId);
+
+    const newItems = arrayMove(currentList, oldIndex, newIndex);
+    setPlaylist({
+      ...playlist,
+      spotifyItems: newItems,
     });
   };
 
@@ -121,7 +134,7 @@ const PlaylistModal = (props: { playlist: Playlist | null, trigger: ReactNode })
                   Saved Tracks
                 </Typography>
                 <SpotifyItemList isDeletingItem items={playlist.spotifyItems}
-                                 updateState={modifyTrackList} /></>}
+                                 updateState={modifyTrackList} sortTrackList={sortTrackList} /></>}
             </Grid2>
           </Grid2>
           <Stack direction={'row'}>

@@ -12,6 +12,7 @@ const isPlaylist = (item: SpotifyBase | Playlist): item is Playlist => {
 
 const SpotifyItemTab = (props: {
   item: SpotifyBase | Playlist,
+  index: number,
   displayModifyButton: boolean,
   updateState: Function,
   isDeletingItem: boolean
@@ -47,7 +48,7 @@ const SpotifyItemTab = (props: {
         )}
       </Box>
 
-      <Box onClick={() => props.updateState(props.item, props.isDeletingItem)}
+      <Box onClick={() => props.updateState(props.item, props.isDeletingItem ? props.index : null)}
            sx={!props.displayModifyButton ? { opacity: 0 } : {
              display: 'flex',
              alignItems: 'center',
@@ -82,6 +83,7 @@ export const SpotifyItemTabMemo = memo(
   (prevProps, nextProps) => {
     return (
       prevProps.item.id === nextProps.item.id &&
+      prevProps.index == nextProps.index &&
       prevProps.displayModifyButton === nextProps.displayModifyButton &&
       prevProps.isDeletingItem === nextProps.isDeletingItem
     );

@@ -1,15 +1,15 @@
-import { Box, Grid2, MenuItem, Modal, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
 import SpotifyItemList from '@/components/data-list/SpotifyItemList';
 import { useAlert } from '@/hooks/useAlert';
-import { doc, getDoc, updateDoc } from '@firebase/firestore';
-import db from '@/utils/firebase';
-import { Playlist, SpotifyBase } from '@/types/Spotify';
-import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import { useCampaign } from '@/hooks/useCampaign';
-import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
+import { Playlist, SpotifyBase } from '@/types/Spotify';
+import db from '@/utils/firebase';
+import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
 import { arrayMove } from '@dnd-kit/sortable';
+import { doc, getDoc, updateDoc } from '@firebase/firestore';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import { Box, Grid2, MenuItem, Modal, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 
 const ThemeTrackModal = (props: { unitId: string }) => {
   const { displayAlert } = useAlert();
@@ -47,23 +47,29 @@ const ThemeTrackModal = (props: { unitId: string }) => {
     }
   };
 
-  const modifyTrackList = (item: SpotifyBase, isDeletingTrack: boolean) => {
-    if (isDeletingTrack) {
-      setSpotifyItems([...spotifyItems].filter(i => i.id !== item.id));
+  const modifyTrackList = (item: SpotifyBase, deleteIndex: number | null) => {
+    let newItems = [...spotifyItems];
+    if (deleteIndex) {
+      newItems.splice(deleteIndex, 1);
     } else {
-      let newItems = [...spotifyItems];
       newItems.push(item);
-      setSpotifyItems(newItems);
     }
+    setSpotifyItems(newItems);
   };
 
-  const sortTrackList = (event: any) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
+  const sortTrackList = (activeId: string, overId: string) => {
     const currentList = spotifyItems;
-    const oldIndex = currentList.findIndex((item) => item.id === active.id);
-    const newIndex = currentList.findIndex((item) => item.id === over.id);
+
+    const parseId = (compositeId: string) => {
+      const [itemId, indexStr] = compositeId.split('-');
+      return { itemId, index: parseInt(indexStr, 10) };
+    };
+
+    const { itemId: activeItemId, index: activeIndex } = parseId(activeId);
+    const { itemId: overItemId, index: overIndex } = parseId(overId);
+
+    const oldIndex = currentList.findIndex((item, index) => item.id === activeItemId && index === activeIndex);
+    const newIndex = currentList.findIndex((item, index) => item.id === overItemId && index === overIndex);
 
     const newItems = arrayMove(currentList, oldIndex, newIndex);
     setSpotifyItems(newItems);
@@ -71,7 +77,6 @@ const ThemeTrackModal = (props: { unitId: string }) => {
 
   return (
     <>
-
       <MenuItem disabled={!spotifyAuthenticated || !isUserDm} onClick={() => setOpen(true)}>
         <MusicNoteIcon sx={{ width: 20, height: 20 }} />
         &nbsp; Theme Track
@@ -99,7 +104,9 @@ const ThemeTrackModal = (props: { unitId: string }) => {
                   Saved Tracks
                 </Typography>
                 <SpotifyItemList isDeletingItem items={spotifyItems} updateState={modifyTrackList}
-                                 sortTrackList={sortTrackList} /></>}
+                                 sortTrackList={sortTrackList}
+                />
+              </>}
             </Grid2>
           </Grid2>
         </Box>

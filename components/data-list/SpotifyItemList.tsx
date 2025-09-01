@@ -13,7 +13,6 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { closestCenter, DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
-// TODO: Patch adding/removing bug caused by items w/ same spotify ID
 const searchTypeEnum = {
   tracks: 'Tracks',
   playlistCustom: 'Custom Playlists',
@@ -51,16 +50,16 @@ const SortableItem = ({
 
 const SpotifyItemList = (props: {
   updateState: Function;
-  sortTrackList?: Function;
   items?: (SpotifyBase | Playlist)[];
   isDeletingItem?: boolean;
+  sortTrackList?: Function;
 }) => {
   const theme = useTheme();
   const { displayAlert } = useAlert();
   const { campaign } = useCampaign();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const [hoveredSortKey, setHoveredSortKey] = useState<string | null>(null);
   const [data, setData] = useState<(SpotifyBase | Playlist)[]>([]);
   const [searchType, setSearchType] = useState<
     'tracks' | 'playlistSpotify' | 'playlistCustom'
@@ -68,7 +67,13 @@ const SpotifyItemList = (props: {
 
   const [menuAnchor, setMenuAnchor] = useState(null);
 
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+  );
 
   useEffect(() => {
     if (searchType === 'playlistCustom') {
@@ -81,11 +86,6 @@ const SpotifyItemList = (props: {
       scrubbedSearchTerm.length > 0 && fetchSpotifyItems(scrubbedSearchTerm);
     }
   }, [searchTerm, searchType]);
-
-  useEffect(() => {
-    console.log(props.items);
-    props.items && setData(props.items);
-  }, [props.items]);
 
   const fetchCustomPlaylists = async () => {
     let results: Playlist[] = [];
@@ -233,37 +233,43 @@ const SpotifyItemList = (props: {
             collisionDetection={closestCenter}
             onDragEnd={(event) => {
               if (props.sortTrackList) {
-                props.sortTrackList(event);
+                const { active, over } = event;
+                if (!over || active.id === over.id) return;
+                props.sortTrackList(active.id, over.id);
               }
             }}
           >
+            {/* Sort key -> {id}-{index} */}
             <SortableContext
-              items={itemsToRender.map((item) => item.id)}
+              items={itemsToRender.map((item, index) => `${item.id}-${index}`)}
               strategy={verticalListSortingStrategy}
             >
-              {itemsToRender.map((result: SpotifyBase | Playlist) => (
-                <SortableItem key={result.id} id={result.id} applyDraggable={Boolean(props.isDeletingItem)}>
-                  <Stack direction={'row'}>
-                    <Stack direction={'column'} width={'100%'}>
-                      <Box
-                        onMouseEnter={() => setHoveredItemId(result.id)}
-                        onMouseLeave={() => setHoveredItemId(null)}
-                      >
-                        <SpotifyItemTabMemo
-                          item={result}
-                          displayModifyButton={result.id === hoveredItemId}
-                          updateState={props.updateState}
-                          isDeletingItem={Boolean(props.isDeletingItem)}
-                          albumArtUrl={
-                            'albumArtUrl' in result ? result.albumArtUrl : undefined
-                          }
-                        />
-                      </Box>
+              {itemsToRender.map((result: SpotifyBase | Playlist, index) => {
+                  const sortKey = `${result.id}-${index}`;
+                  return (<SortableItem key={sortKey} id={sortKey} applyDraggable={!!props.isDeletingItem}>
+                    <Stack direction={'row'}>
+                      <Stack direction={'column'} width={'100%'}>
+                        <Box
+                          onMouseEnter={() => setHoveredSortKey(sortKey)}
+                          onMouseLeave={() => setHoveredSortKey(null)}
+                        >
+                          <SpotifyItemTabMemo
+                            item={result}
+                            index={index}
+                            displayModifyButton={sortKey === hoveredSortKey}
+                            updateState={props.updateState}
+                            isDeletingItem={!!props.isDeletingItem}
+                            albumArtUrl={
+                              'albumArtUrl' in result ? result.albumArtUrl : undefined
+                            }
+                          />
+                        </Box>
+                      </Stack>
                     </Stack>
-                  </Stack>
-                  <Divider />
-                </SortableItem>
-              ))}
+                    <Divider />
+                  </SortableItem>);
+                },
+              )}
             </SortableContext>
           </DndContext>
         )}
