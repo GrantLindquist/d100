@@ -6,15 +6,16 @@ import db from '@/utils/firebase';
 import { useAlert } from '@/hooks/useAlert';
 import { useCampaign } from '@/hooks/useCampaign';
 import Image from 'next/image';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const EnabledArticleTab = (props: { article: Article }) => {
   const image = props.article.imageUrls.length > 0 ? props.article.imageUrls[0] : null;
   return (
     <Stack direction={'row'} alignItems={'center'} sx={{ cursor: 'pointer' }}>
-      {image &&
-        <Image style={{ marginRight: 10 }} src={image.src} alt={'Album cover art'} height={40}
-               width={40} />}
-      <Box flexGrow={1}>
+      {image ?
+        <Image src={image.src} alt={'Album cover art'} height={40}
+               width={40} /> : <AccountCircleIcon sx={{ fontSize: 40 }} />}
+      <Box flexGrow={1} marginLeft={1.5}>
         <Typography variant="subtitle1" lineHeight={1.1}>{props.article.title}</Typography>
       </Box>
     </Stack>
@@ -57,12 +58,12 @@ const ExistingEncounterTokenList = (props: { selectArticle: Function; selectedAr
       fullWidth
       placeholder={'Search Articles'}
       sx={{
-        backgroundColor: '#222222',
+        backgroundColor: 'transparent',
         color: '#DDDDDD',
         '& fieldset': { border: 'none' },
       }} />
     <Divider sx={{ mx: 1 }} />
-    <Box py={1}>
+    <Box py={1} maxHeight={300}>
       {enabledArticles.map((article) => {
         if (article.title.toLowerCase().includes(searchTerm.toLowerCase())) {
           const isSelected = article.id === props.selectedArticle?.id;

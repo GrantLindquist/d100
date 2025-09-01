@@ -84,7 +84,7 @@ const NavbarBrand = () => {
 
 const Navbar = () => {
   const { campaign, isUserDm } = useCampaign();
-  const { spotifyAuthenticated } = useSpotifyPlayer();
+  const { displayPlayer, spotifyAuthenticated } = useSpotifyPlayer();
 
   return (
     <>
@@ -103,7 +103,7 @@ const Navbar = () => {
         )}
       </Stack>
       <Stack direction={'row'} spacing={.5}>
-        {campaign && isUserDm && spotifyAuthenticated && <CustomPlaylistButton />}
+        {campaign && isUserDm && spotifyAuthenticated && displayPlayer && <CustomPlaylistButton />}
         {campaign && (<StickyNoteButton />)}
         {isUserDm && (
           <>

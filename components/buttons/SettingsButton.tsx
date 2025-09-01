@@ -208,7 +208,7 @@ const SettingsButton = (props: { includeText?: boolean }) => {
         </Box>
         {spotifyAuthenticated && (
           <MenuItem onClick={() => toggleDisplayPlayerSetting(!displayPlayer)}>
-            <Stack direction={'row'}>
+            <Stack direction={'row'} alignItems={'center'}>
               <Image src={'/spotify.svg'} alt={'Spotify Logo'} width={24} height={24} style={{ marginRight: 6 }} />
               {displayPlayer ? 'Hide Player' : 'Show Player'}
             </Stack>

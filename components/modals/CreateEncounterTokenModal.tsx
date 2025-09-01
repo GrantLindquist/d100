@@ -101,11 +101,6 @@ const CreateEncounterTokenModal = (props: { encounter: Encounter }) => {
               onClose={() => setMenuAnchor(null)}
               transformOrigin={{ horizontal: 'left', vertical: 'top' }}
               anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-              sx={{
-                'ul': {
-                  backgroundColor: '#222',
-                },
-              }}
         >
           <ExistingEncounterTokenList
             selectArticle={(article: Article | null) => setSelectedArticle(article)}

@@ -5,6 +5,7 @@ import ImageFrame from '@/components/content/ImageFrame';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import Link from 'next/link';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 type UnitTabProps = {
   unit: Unit;
@@ -113,7 +114,12 @@ export const UnitTab = (props: UnitTabProps) => {
         >
           <Stack direction={'row'} spacing={1} flexGrow={1}>
             <Stack direction={'column'}>
-              {props.icon}
+              {/* @ts-ignore */}
+              {props.unit.hasEncounterToken ?
+                <Tooltip title={'Registered as Encounter Token'}>
+                  <AccountCircleIcon />
+                </Tooltip>
+                : props.icon}
               {props.unit.hidden && (
                 <Tooltip title={'Hidden from players'}>
                   <VisibilityOffIcon sx={{ color: 'grey' }} />
