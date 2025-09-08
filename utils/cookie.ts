@@ -1,7 +1,7 @@
 'use server';
 import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
-import { SESSION_TIMEOUT } from '@/utils/globals';
+import { SESSION_TIMEOUT_SECONDS } from '@/utils/globals';
 
 const key = new TextEncoder().encode('annihilation_cannon');
 
@@ -9,7 +9,7 @@ async function encrypt(payload: any) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime(Date.now() + SESSION_TIMEOUT)
+    .setExpirationTime(`${SESSION_TIMEOUT_SECONDS}s`)
     .sign(key);
 }
 

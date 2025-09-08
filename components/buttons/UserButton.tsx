@@ -104,7 +104,9 @@ const UserButton = () => {
                 height: 30,
                 marginRight: 1,
               }}
-            />
+            >
+              {user?.displayName ? user.displayName[0] : ''}
+            </Avatar>
             <Typography color={'white'} variant={'subtitle2'}>
               {user?.displayName}
             </Typography>

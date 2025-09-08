@@ -15,7 +15,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/campaigns', request.url));
   }
 
-  // Otherwise allow the request
   return NextResponse.next();
 }
 
