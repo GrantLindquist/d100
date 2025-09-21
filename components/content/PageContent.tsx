@@ -27,7 +27,7 @@ import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import SubjectIcon from '@mui/icons-material/Subject';
 import TitleIcon from '@mui/icons-material/Title';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { Box, Container, Grid, Stack, Tooltip, Typography, useTheme } from '@mui/material';
+import { Box, Container, Grid, Stack, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material';
 import Blockquote from '@tiptap/extension-blockquote';
 import Bold from '@tiptap/extension-bold';
 import Bulletlist from '@tiptap/extension-bullet-list';
@@ -49,15 +49,18 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
   const { isUserDm } = useCampaign();
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
 
   return (
     <Box
       sx={{
         backgroundColor: '#111111',
+        minHeight: '100vh',
       }}
     >
       <Container sx={{ pt: { xs: 0, md: 3.9 } }}>
-        {isUserDm !== null && <ContentEditor displayHiddenMarks={isUserDm} />}
+        {isUserDm !== null && <ContentEditor displayHiddenMarks={isUserDm} compactView={!isDesktop} />}
       </Container>
     </Box>
   );
@@ -228,7 +231,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
         prev.isBold === next.isBold &&
         prev.isItalic === next.isItalic &&
         prev.isHeading === next.isHeading &&
-        prev.isHidden == next.isHidden && 
+        prev.isHidden == next.isHidden &&
         prev.isCompact == next.isCompact
       );
     },
@@ -483,7 +486,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                           }}
                         />
                       </Tooltip>
-                      
+
                       <FormatQuoteIcon
                         onClick={() =>
                           editor.chain().focus().toggleBlockquote().run()
@@ -497,9 +500,9 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                         }}
                       />
                       <Tooltip
-                          title={'Toggle compact paragraph'}
-                          placement={'top'}
-                        >
+                        title={'Toggle compact paragraph'}
+                        placement={'top'}
+                      >
                         <SubjectIcon
                           onClick={() =>
                             editor.chain().focus().toggleCompact().run()

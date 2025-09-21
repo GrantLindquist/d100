@@ -1,9 +1,15 @@
-import { Box, Container, Stack } from '@mui/material';
+'use client';
+import { Box, Container, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import CampaignList from '@/components/data-list/CampaignList';
 import CreateCampaignModal from '@/components/modals/CreateCampaignModal';
 import JoinCampaignModal from '@/components/modals/JoinCampaignModal';
+import { outfit } from '@/components/AppWrapper';
+import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 
 export default function CampaignsPage() {
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
+
   return (
     <Box
       display="flex"
@@ -18,13 +24,24 @@ export default function CampaignsPage() {
           }}
         >
           <Stack spacing={2}>
+            <Typography
+              sx={{
+                fontFamily: outfit.style.fontFamily,
+              }}
+              fontWeight={BOLD_FONT_WEIGHT}
+              align={'center'}
+              variant={isDesktop ? 'h3' : 'h4'}
+            >
+              Your Campaigns
+            </Typography>
             <CampaignList />
 
             <Stack
-              direction={'row'}
+              direction={isDesktop ? 'row' : 'column'}
               spacing={2}
               justifyContent={'center'}
               sx={{
+                width: '80%',
                 position: 'fixed',
                 bottom: 48,
                 left: '50%',

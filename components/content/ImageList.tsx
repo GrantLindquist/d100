@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Backdrop, Box, IconButton, Paper, Stack, Typography } from '@mui/material';
+import { Backdrop, Box, IconButton, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -9,14 +9,17 @@ import Masonry from '@mui/lab/Masonry';
 import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
 import { ImageUrl } from '@/types/Unit';
 import ImageFrame from '@/components/content/ImageFrame';
+import Image from 'next/image';
 
-// TODO: Images can overflow out of viewport on mobile
 const ImageList = (props: {
   imageUrls: ImageUrl[];
   handleDeleteImage: Function;
 }) => {
   const [backdropIndex, setBackdropIndex] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
+
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
 
   const changeBackdrop = (difference: -1 | 1) => {
     if (backdropIndex !== null) {
@@ -77,44 +80,54 @@ const ImageList = (props: {
         onClick={() => setOpen(false)}
       >
         <Box
-          sx={{ height: '65%' }}
-          onClick={(event) => event.stopPropagation()}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: isDesktop ? '70%' : '100%',
+            height: '80%',
+            position: 'relative',
+          }}
         >
-          <img
-            style={{ height: '100%' }}
-            src={
-              backdropIndex !== null ? props.imageUrls[backdropIndex].src : '-'
-            }
-            alt={'Resized Reference Image'}
-          />
-          <Paper
-            sx={{
-              position: 'absolute',
-              bottom: '10%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-            }}
-          >
-            <Stack direction={'row'}>
-              <IconButton
-                disabled={props.imageUrls.length <= 1}
-                onClick={() => changeBackdrop(-1)}
-              >
-                <KeyboardArrowLeftIcon />
-              </IconButton>
-              <IconButton
-                disabled={props.imageUrls.length <= 1}
-                onClick={() => changeBackdrop(1)}
-              >
-                <KeyboardArrowRightIcon />
-              </IconButton>
-              <Box sx={{ pl: 4 }}>
-                <IconButton onClick={handleDeleteImage}>
-                  <DeleteIcon />
+          {backdropIndex !== null && <>
+            <Image
+              fill
+              src={props.imageUrls[backdropIndex].src}
+              alt="Resized Reference Image"
+              style={{
+                objectFit: 'contain',
+              }}
+            />
+            <Paper
+              onClick={(event) => event.stopPropagation()}
+              sx={{
+                position: 'fixed',
+                bottom: '20px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+              }}
+            >
+              <Stack direction={'row'}>
+                <IconButton
+                  disabled={props.imageUrls.length <= 1}
+                  onClick={() => changeBackdrop(-1)}
+                >
+                  <KeyboardArrowLeftIcon />
                 </IconButton>
-              </Box>
-            </Stack>
-          </Paper>
+                <IconButton
+                  disabled={props.imageUrls.length <= 1}
+                  onClick={() => changeBackdrop(1)}
+                >
+                  <KeyboardArrowRightIcon />
+                </IconButton>
+                <Box sx={{ pl: 4 }}>
+                  <IconButton onClick={handleDeleteImage}>
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              </Stack>
+            </Paper>
+          </>}
         </Box>
       </Backdrop>
     </>

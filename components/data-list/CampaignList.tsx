@@ -11,7 +11,6 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CampaignActionsModal from '@/components/modals/CampaignActionsModal';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { outfit } from '@/components/AppWrapper';
 import Link from 'next/link';
 
 const CampaignTab = (props: {
@@ -158,16 +157,6 @@ const CampaignList = () => {
 
   return (
     <>
-      <Typography
-        sx={{
-          fontFamily: outfit.style.fontFamily,
-        }}
-        fontWeight={BOLD_FONT_WEIGHT}
-        align={'center'}
-        variant={'h3'}
-      >
-        Your Campaigns
-      </Typography>
       {user && (
         <>
           {user.campaignIds?.length > 0 ? (
