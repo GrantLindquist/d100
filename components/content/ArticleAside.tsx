@@ -20,7 +20,7 @@ const SubheaderAsideSx = {
   paddingY: 0.5,
 };
 
-const ArticleAside = (props: { titles: string[]; unit: Article | Quest }) => {
+const ArticleAside = (props: { titles: string[]; unit: Article | Quest; openBackdrop: Function }) => {
   const scrollToHeader = (headerText: string) => {
     const headerElement = Array.from(document.querySelectorAll('h2 h4')).find(
       (header) => header.innerHTML.trim() === headerText.trim(),
@@ -44,10 +44,12 @@ const ArticleAside = (props: { titles: string[]; unit: Article | Quest }) => {
   return (
     <Card sx={{ userSelect: 'none' }}>
       {props.unit.imageUrls.length > 0 && (
-        <ImageFrame
-          image={props.unit.imageUrls[0]}
-          alt={props.unit.title}
-        />
+        <div onClick={() => props.openBackdrop()} style={{ cursor: 'pointer' }}>
+          <ImageFrame
+            image={props.unit.imageUrls[0]}
+            alt={props.unit.title}
+          />
+        </div>
       )}
       <Box
         py={2}

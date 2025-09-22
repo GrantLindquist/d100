@@ -13,7 +13,6 @@ import {
   TextField,
   Tooltip,
   Typography,
-  useTheme,
 } from '@mui/material';
 import { Article, Collection, Quest, Unit } from '@/types/Unit';
 import { arrayRemove, collection, doc, getDocs, query, runTransaction, updateDoc, where } from '@firebase/firestore';
@@ -46,7 +45,6 @@ const CollectionSearch = (props: {
 }) => {
   const { isUserDm, campaign } = useCampaign();
   const { displayAlert } = useAlert();
-  const theme = useTheme();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [collectionTitle, setCollectionTitle] = useState(props.collection.title);
