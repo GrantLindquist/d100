@@ -3,7 +3,6 @@
 import AddToContentButton from '@/components/buttons/AddToContentButton';
 import { SmallIconButton, SmallIconButtonGroup } from '@/components/buttons/SmallIconButton';
 import ArticleAside from '@/components/content/ArticleAside';
-import ImageList from '@/components/content/ImageList';
 import LootTable from '@/components/content/LootTable';
 import CompactParagraph from '@/components/content/text-editor/CompactParagraph';
 import '@/components/content/text-editor/EditorContent.css';
@@ -27,7 +26,7 @@ import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import SubjectIcon from '@mui/icons-material/Subject';
 import TitleIcon from '@mui/icons-material/Title';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { Box, Container, Grid, Stack, Tooltip, Typography, useTheme } from '@mui/material';
+import { Box, Container, Grid, Stack, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material';
 import Blockquote from '@tiptap/extension-blockquote';
 import Bold from '@tiptap/extension-bold';
 import Bulletlist from '@tiptap/extension-bullet-list';
@@ -45,19 +44,26 @@ import { BubbleMenu, Editor, EditorContent, useEditor, useEditorState } from '@t
 import { default as NextImage } from 'next/image';
 import { usePathname } from 'next/navigation';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
+import ImageFrame from '@/components/content/ImageFrame';
+import ExpandImage from '@/components/content/ExpandImage';
+import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 
 // Conditionally renders hidden (highlight) mark
 export const PageContent = () => {
   const { isUserDm } = useCampaign();
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
 
   return (
     <Box
       sx={{
         backgroundColor: '#111111',
+        minHeight: '100vh',
       }}
     >
       <Container sx={{ pt: { xs: 0, md: 3.9 } }}>
-        {isUserDm !== null && <ContentEditor displayHiddenMarks={isUserDm} />}
+        {isUserDm !== null && <ContentEditor displayHiddenMarks={isUserDm} compactView={!isDesktop} />}
       </Container>
     </Box>
   );
@@ -75,6 +81,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
   const [unit, setUnit] = useState<Article | Quest | null>(null);
   const [sectionTitles, setSectionTitles] = useState<string[]>([]);
   const [displayPlaceholder, setDisplayPlaceholder] = useState(false);
+  const [imageBackdropIndex, setImageBackdropIndex] = useState<number | null>(null);
 
   // Represented in pixels
   const [placeholderYPosition, setPlaceholderYPosition] = useState<number>(0);
@@ -228,7 +235,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
         prev.isBold === next.isBold &&
         prev.isItalic === next.isItalic &&
         prev.isHeading === next.isHeading &&
-        prev.isHidden == next.isHidden && 
+        prev.isHidden == next.isHidden &&
         prev.isCompact == next.isCompact
       );
     },
@@ -355,6 +362,9 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
             ref={fileInputRef}
             onChange={handleFileChange}
           />
+          <ExpandImage imageUrls={unit.imageUrls} openedBackdropIndex={imageBackdropIndex}
+                       setOpenedBackdropIndex={setImageBackdropIndex}
+                       handleDeleteImage={handleDeleteImage} />
           <Grid container spacing={3}>
             <Grid item xs={12} md={3}>
               <Box
@@ -372,7 +382,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                     display: { xs: 'none', md: 'block' },
                   }}
                 >
-                  <ArticleAside titles={sectionTitles} unit={unit} />
+                  <ArticleAside openBackdrop={() => setImageBackdropIndex(0)} titles={sectionTitles} unit={unit} />
                 </Box>}
               </Box>
             </Grid>
@@ -483,7 +493,7 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                           }}
                         />
                       </Tooltip>
-                      
+
                       <FormatQuoteIcon
                         onClick={() =>
                           editor.chain().focus().toggleBlockquote().run()
@@ -497,9 +507,9 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                         }}
                       />
                       <Tooltip
-                          title={'Toggle compact paragraph'}
-                          placement={'top'}
-                        >
+                        title={'Toggle compact paragraph'}
+                        placement={'top'}
+                      >
                         <SubjectIcon
                           onClick={() =>
                             editor.chain().focus().toggleCompact().run()
@@ -565,19 +575,38 @@ export const ContentEditor = (props: { displayHiddenMarks: boolean; compactView?
                 )}
                 {/* @ts-ignore */}
                 {unit.type === 'quest' && unit.loot && (
-                  <>
-                    {/*<QuestTimeline questId={content.id} />*/}
-                    <div style={{ paddingBottom: '28px' }}>
-                      <LootTable questId={unit.id} />
-                    </div>
-                  </>
+                  <div style={{ paddingBottom: '28px' }}>
+                    <LootTable questId={unit.id} />
+                  </div>
                 )}
                 {unit.imageUrls.length > 0 && (
                   <div style={{ paddingBottom: '28px' }}>
-                    <ImageList
-                      imageUrls={unit.imageUrls}
-                      handleDeleteImage={handleDeleteImage}
-                    />
+                    <Typography
+                      id={'Reference Images'}
+                      fontWeight={BOLD_FONT_WEIGHT}
+                      variant={SUBTITLE_VARIANT}
+                      pb={1}
+                    >
+                      Reference Images
+                    </Typography>
+                    <ResponsiveMasonry
+                      columnsCountBreakPoints={!props.compactView ? { 200: 1, 400: 2, 600: 3, 800: 4 } : { 200: 2 }}>
+                      <Masonry>
+                        {unit.imageUrls.map((image, index) => {
+                          return (
+                            <Box
+                              key={index}
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => {
+                                setImageBackdropIndex(index);
+                              }}
+                            >
+                              <ImageFrame image={image} alt={`Enlarged image #${index}`} />
+                            </Box>
+                          );
+                        })}
+                      </Masonry>
+                    </ResponsiveMasonry>
                   </div>
                 )}
               </Box>

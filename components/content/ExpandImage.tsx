@@ -1,22 +1,38 @@
 'use client';
 
-import { useState } from 'react';
-import { Backdrop, Box, IconButton, Paper, Stack, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Backdrop, Box, IconButton, Paper, Stack, useMediaQuery, useTheme } from '@mui/material';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import DeleteIcon from '@mui/icons-material/Delete';
-import Masonry from '@mui/lab/Masonry';
-import { BOLD_FONT_WEIGHT, SUBTITLE_VARIANT } from '@/utils/globals';
 import { ImageUrl } from '@/types/Unit';
-import ImageFrame from '@/components/content/ImageFrame';
+import Image from 'next/image';
 
-// TODO: Images can overflow out of viewport on mobile
-const ImageList = (props: {
+const ExpandImage = (props: {
   imageUrls: ImageUrl[];
+  openedBackdropIndex: number | null;
+  setOpenedBackdropIndex: Function;
   handleDeleteImage: Function;
 }) => {
   const [backdropIndex, setBackdropIndex] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setBackdropIndex(props.openedBackdropIndex);
+    if (props.openedBackdropIndex !== null) {
+      setOpen(true);
+    }
+  }, [props.openedBackdropIndex]);
+
+  useEffect(() => {
+    if (!open) {
+      setBackdropIndex(null);
+      props.setOpenedBackdropIndex(null);
+    }
+  }, [open]);
+
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
 
   const changeBackdrop = (difference: -1 | 1) => {
     if (backdropIndex !== null) {
@@ -44,53 +60,37 @@ const ImageList = (props: {
   };
 
   return (
-    <>
-      <Typography
-        id={'Reference Images'}
-        fontWeight={BOLD_FONT_WEIGHT}
-        variant={SUBTITLE_VARIANT}
-        pb={1}
-      >
-        Reference Images
-      </Typography>
-      <Masonry spacing={1}>
-        {props.imageUrls.map((image, index) => {
-          return (
-            <Box
-              key={index}
-              style={{ cursor: 'pointer' }}
-              onClick={() => {
-                setOpen(true);
-                setBackdropIndex(index);
-              }}
-            >
-              <ImageFrame image={image} alt={`Enlarged image #${index}`} />
-            </Box>
-          );
-        })}
-      </Masonry>
-      <Backdrop
+    <Backdrop
+      sx={{
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+      }}
+      open={open}
+      onClick={() => setOpen(false)}
+    >
+      <Box
         sx={{
-          zIndex: (theme) => theme.zIndex.drawer + 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: isDesktop ? '70%' : '100%',
+          height: '80%',
+          position: 'relative',
         }}
-        open={open}
-        onClick={() => setOpen(false)}
       >
-        <Box
-          sx={{ height: '65%' }}
-          onClick={(event) => event.stopPropagation()}
-        >
-          <img
-            style={{ height: '100%' }}
-            src={
-              backdropIndex !== null ? props.imageUrls[backdropIndex].src : '-'
-            }
-            alt={'Resized Reference Image'}
+        {backdropIndex !== null && <>
+          <Image
+            fill
+            src={props.imageUrls[backdropIndex].src}
+            alt="Resized Reference Image"
+            style={{
+              objectFit: 'contain',
+            }}
           />
           <Paper
+            onClick={(event) => event.stopPropagation()}
             sx={{
-              position: 'absolute',
-              bottom: '10%',
+              position: 'fixed',
+              bottom: '20px',
               left: '50%',
               transform: 'translateX(-50%)',
             }}
@@ -115,9 +115,9 @@ const ImageList = (props: {
               </Box>
             </Stack>
           </Paper>
-        </Box>
-      </Backdrop>
-    </>
+        </>}
+      </Box>
+    </Backdrop>
   );
 };
-export default ImageList;
+export default ExpandImage;

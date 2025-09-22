@@ -11,7 +11,6 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CampaignActionsModal from '@/components/modals/CampaignActionsModal';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { outfit } from '@/components/AppWrapper';
 import Link from 'next/link';
 
 const CampaignTab = (props: {
@@ -44,100 +43,102 @@ const CampaignTab = (props: {
   }, [props.campaignId]);
 
   const handleClickMenu = (event: any) => {
-    event.stopPropagation();
     setAnchor(event.currentTarget);
   };
 
   return (
-    <Link
-      href={campaign ? `/campaigns/${props.campaignId}/collections/${campaign!.baseCollectionId}` : '#'}
-      style={{
-        color: 'inherit',
-        textDecoration: 'none',
+    <Card
+      variant="outlined"
+      sx={{
+        background: `linear-gradient(130deg, rgba(28, 28, 28), ${theme.palette.background.default})`,
+        cursor: 'pointer',
+        ':hover': {
+          borderColor: '#555',
+        },
       }}
     >
-      <Card
-        variant="outlined"
-        sx={{
-          background: `linear-gradient(130deg, rgba(28, 28, 28), ${theme.palette.background.default})`,
-          cursor: 'pointer',
-          ':hover': {
-            borderColor: '#555',
-          },
-        }}
-      >
-        <Box py={1.5} px={2.5}>
-          {loading ? (
-            <Stack spacing={1} py={1}>
-              <Skeleton variant="rounded" width={'80%'} height={20} />
-              <Skeleton variant="rounded" width={'55%'} height={20} />
-            </Stack>
-          ) : (
-            <>
-              {campaign && (
-                <Stack direction={'row'}>
-                  <Box flexGrow={1}>
+      <Box py={1.5} px={2.5}>
+        {loading ? (
+          <Stack spacing={1} py={1}>
+            <Skeleton variant="rounded" width={'80%'} height={20} />
+            <Skeleton variant="rounded" width={'55%'} height={20} />
+          </Stack>
+        ) : (
+          <>
+            {campaign && (
+              <Stack direction={'row'}>
+                <Box flexGrow={1}>
+                  <Link
+                    href={campaign ? `/campaigns/${props.campaignId}/collections/${campaign!.baseCollectionId}` : '#'}
+                    style={{
+                      color: 'inherit',
+                      textDecoration: 'none',
+                    }}
+                  >
                     <Typography variant={'h6'} fontWeight={BOLD_FONT_WEIGHT}>
                       {campaign.title}
                     </Typography>
                     <PlayerAvatarList players={campaign.players} />
-                  </Box>
-                  {(props.displayActions || anchor) && (
-                    <IconButton
-                      onClick={handleClickMenu}
-                      disableRipple
-                      disableFocusRipple
-                      sx={{
-                        paddingRight: 0,
-                        width: '10%',
-                      }}
-                    >
-                      <MoreVertIcon
-                        sx={{
-                          width: 20,
-                          height: 20,
-                        }}
-                      />
-                    </IconButton>
-                  )}
-                  <Menu
-                    anchorEl={anchor}
-                    open={Boolean(anchor)}
-                    onClose={() => setAnchor(null)}
-                    transformOrigin={{ horizontal: 'center', vertical: 'top' }}
-                    anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
-                    disableScrollLock
-                  >
-                    <MenuItem
-                      disabled={user?.id !== campaign.dmId}
-                      onClick={() => setModalState('edit')}
-                    >
-                      <EditIcon sx={{ width: 20, height: 20 }} />
-                      &nbsp; Edit
-                    </MenuItem>
-                    <MenuItem
-                      disabled={user?.id !== campaign.dmId}
-                      onClick={() => setModalState('delete')}
-                    >
-                      <DeleteIcon sx={{ width: 20, height: 20 }} />
-                      &nbsp; Delete
-                    </MenuItem>
-                  </Menu>
-                  <CampaignActionsModal
-                    campaign={campaign}
-                    modalState={modalState}
-                    handleClose={() => {
-                      setModalState(null);
-                      setAnchor(null);
+                  </Link>
+                </Box>
+                {(props.displayActions || anchor) && (
+                  <IconButton
+                    onClick={handleClickMenu}
+                    disableRipple
+                    disableFocusRipple
+                    sx={{
+                      paddingRight: 0,
+                      width: '10%',
                     }}
-                  />
-                </Stack>
-              )}
-            </>
-          )}
-        </Box>
-      </Card>
-    </Link>
+                  >
+                    <MoreVertIcon
+                      sx={{
+                        width: 20,
+                        height: 20,
+                      }}
+                    />
+                  </IconButton>
+                )}
+                <Menu
+                  anchorEl={anchor}
+                  open={Boolean(anchor)}
+                  onClose={() => setAnchor(null)}
+                  transformOrigin={{ horizontal: 'center', vertical: 'top' }}
+                  anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+                  disableScrollLock
+                >
+                  <MenuItem
+                    disabled={user?.id !== campaign.dmId}
+                    onClick={() => {
+                      setModalState('edit');
+                    }}
+                  >
+                    <EditIcon sx={{ width: 20, height: 20 }} />
+                    &nbsp; Edit
+                  </MenuItem>
+                  <MenuItem
+                    disabled={user?.id !== campaign.dmId}
+                    onClick={() => setModalState('delete')}
+                  >
+                    <DeleteIcon sx={{ width: 20, height: 20 }} />
+                    &nbsp; Delete
+                  </MenuItem>
+                </Menu>
+                <CampaignActionsModal
+                  campaign={campaign}
+                  modalState={modalState}
+                  handleClose={() => {
+                    setModalState(null);
+                    setAnchor(null);
+                  }}
+                />
+              </Stack>
+            )}
+          </>
+        )}
+      </Box>
+    </Card>
+
   );
 };
 
@@ -156,16 +157,6 @@ const CampaignList = () => {
 
   return (
     <>
-      <Typography
-        sx={{
-          fontFamily: outfit.style.fontFamily,
-        }}
-        fontWeight={BOLD_FONT_WEIGHT}
-        align={'center'}
-        variant={'h3'}
-      >
-        Your Campaigns
-      </Typography>
       {user && (
         <>
           {user.campaignIds?.length > 0 ? (

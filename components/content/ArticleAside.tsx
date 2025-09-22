@@ -4,6 +4,7 @@ import { BOLD_FONT_WEIGHT } from '@/utils/globals';
 import ImageFrame from '@/components/content/ImageFrame';
 import '@/components/content/text-editor/EditorContent.css';
 
+// TODO: Header not found for Reference Images + misc. bugs w/ ArticleAside
 const HeaderAsideSx = {
   '&:hover': {
     cursor: 'pointer',
@@ -19,10 +20,10 @@ const SubheaderAsideSx = {
   paddingY: 0.5,
 };
 
-const ArticleAside = (props: { titles: string[]; unit: Article | Quest }) => {
+const ArticleAside = (props: { titles: string[]; unit: Article | Quest; openBackdrop: Function }) => {
   const scrollToHeader = (headerText: string) => {
-    const headerElement = Array.from(document.querySelectorAll('h2')).find(
-      (header) => header.innerHTML === headerText,
+    const headerElement = Array.from(document.querySelectorAll('h2 h4')).find(
+      (header) => header.innerHTML.trim() === headerText.trim(),
     );
 
     if (headerElement) {
@@ -43,10 +44,12 @@ const ArticleAside = (props: { titles: string[]; unit: Article | Quest }) => {
   return (
     <Card sx={{ userSelect: 'none' }}>
       {props.unit.imageUrls.length > 0 && (
-        <ImageFrame
-          image={props.unit.imageUrls[0]}
-          alt={props.unit.title}
-        />
+        <div onClick={() => props.openBackdrop()} style={{ cursor: 'pointer' }}>
+          <ImageFrame
+            image={props.unit.imageUrls[0]}
+            alt={props.unit.title}
+          />
+        </div>
       )}
       <Box
         py={2}
