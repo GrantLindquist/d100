@@ -28,6 +28,7 @@ export const setCookie = async (cookieName: string, obj: any) => {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
+    maxAge: SESSION_TIMEOUT_SECONDS
   });
 };
 

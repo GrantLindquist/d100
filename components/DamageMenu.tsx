@@ -256,7 +256,6 @@ const DamageMenu = (props: {
               inflictedToken.currentHitPoints += difference;
             } else {
               inflictedToken.tempHitPoints -= healthCounter;
-              inflictedToken.tempHitPoints -= healthCounter;
             }
           } else {
             inflictedToken.currentHitPoints -= healthCounter;
@@ -364,7 +363,7 @@ const DamageMenu = (props: {
     </Stack>
     <Stack direction={'row'} spacing={.5} py={.5}>
       <Button variant="contained" onClick={() => handleApplyHitPoints(false)}
-              sx={{ width: '50%', color: 'white', backgroundColor: 'green' }}>
+              sx={{ width: '50%', color: 'white', backgroundColor: 'green' }} disabled={applyTempHitPointsChecked && healthCounter < (inflictedToken?.tempHitPoints ?? 0)}>
         Heal
       </Button>
       <Button variant="contained" onClick={() => handleApplyHitPoints(true)}
