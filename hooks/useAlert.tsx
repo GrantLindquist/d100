@@ -24,6 +24,7 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
 
   const displayAlert = (alert: Alert) => {
     Boolean(alert.errorType) && console.error(alert.errorType);
+    console.error(alert.message)
     setAlert(alert);
     setOpen(true);
   };

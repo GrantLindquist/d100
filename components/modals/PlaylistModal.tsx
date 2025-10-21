@@ -1,14 +1,14 @@
-import { Box, Button, Grid2, Modal, Stack, Typography } from '@mui/material';
-import { ReactNode, useEffect, useState } from 'react';
-import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
 import SpotifyItemList from '@/components/data-list/SpotifyItemList';
 import { useAlert } from '@/hooks/useAlert';
-import { Playlist, SpotifyBase } from '@/types/Spotify';
-import { arrayUnion, doc, runTransaction } from '@firebase/firestore';
-import db from '@/utils/firebase';
-import { generateUUID } from '@/utils/uuid';
 import { useCampaign } from '@/hooks/useCampaign';
+import { Playlist, SpotifyBase } from '@/types/Spotify';
+import db from '@/utils/firebase';
+import { BOLD_FONT_WEIGHT, MODAL_STYLE } from '@/utils/globals';
+import { generateUUID } from '@/utils/uuid';
 import { arrayMove } from '@dnd-kit/sortable';
+import { arrayUnion, doc, runTransaction } from '@firebase/firestore';
+import { Box, Button, Grid2, Modal, Stack, Typography } from '@mui/material';
+import { ReactNode, useEffect, useState } from 'react';
 
 const defaultPlaylist = {
   id: '',
@@ -16,7 +16,7 @@ const defaultPlaylist = {
   spotifyItems: [],
 };
 
-// TODO: Find a way to combine this component with ThemeTrackModal
+// TODO: Find a way to combine this component with ThemeTrackModal & remove "Save Playlist"
 const PlaylistModal = (props: { playlist: Playlist | null, trigger: ReactNode }) => {
   const { displayAlert } = useAlert();
   const { campaign } = useCampaign();
@@ -64,7 +64,7 @@ const PlaylistModal = (props: { playlist: Playlist | null, trigger: ReactNode })
 
   const modifyTrackList = (item: SpotifyBase, deleteIndex: number | null) => {
     let newItems = [...playlist.spotifyItems];
-    if (deleteIndex) {
+    if (deleteIndex != null) {
       newItems.splice(deleteIndex, 1);
     } else {
       newItems.push(item);
@@ -77,9 +77,18 @@ const PlaylistModal = (props: { playlist: Playlist | null, trigger: ReactNode })
 
   const sortTrackList = (activeId: string, overId: string) => {
     const currentList = playlist.spotifyItems;
-    const oldIndex = currentList.findIndex((item) => item.id === activeId);
-    const newIndex = currentList.findIndex((item) => item.id === overId);
-
+  
+    const parseId = (compositeId: string) => {
+      const [itemId, indexStr] = compositeId.split('-');
+      return { itemId, index: parseInt(indexStr, 10) };
+    };
+  
+    const { itemId: activeItemId, index: activeIndex } = parseId(activeId);
+    const { itemId: overItemId, index: overIndex } = parseId(overId);
+  
+    const oldIndex = currentList.findIndex((item, index) => item.id === activeItemId && index === activeIndex);
+    const newIndex = currentList.findIndex((item, index) => item.id === overItemId && index === overIndex);
+  
     const newItems = arrayMove(currentList, oldIndex, newIndex);
     setPlaylist({
       ...playlist,
