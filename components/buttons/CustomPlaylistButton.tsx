@@ -97,8 +97,7 @@ const CustomPlaylistButton = () => {
                 spacing={1}
                 onClick={() => setSelectedPlaylist(playlist.id !== selectedPlaylist?.id ? playlist : null)}
                 sx={{
-                  pl: 3,
-                  pr: 1.5,
+                  px: 3,
                   alignItems: 'center',
                   cursor: 'pointer',
                   backgroundColor: playlist.id === selectedPlaylist?.id ? 'rgba(255, 255, 255, .1)' : 'transparent',

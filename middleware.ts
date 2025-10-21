@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
 
   const isAuthenticated = !!session;
   const isAtRoot = request.nextUrl.pathname === '/';
-
+  
   if (!isAuthenticated && !isAtRoot) {
     return NextResponse.redirect(new URL('/', request.url));
   }

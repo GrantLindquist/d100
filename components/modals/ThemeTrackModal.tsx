@@ -49,7 +49,7 @@ const ThemeTrackModal = (props: { unitId: string }) => {
 
   const modifyTrackList = (item: SpotifyBase, deleteIndex: number | null) => {
     let newItems = [...spotifyItems];
-    if (deleteIndex) {
+    if (deleteIndex !== null) {
       newItems.splice(deleteIndex, 1);
     } else {
       newItems.push(item);

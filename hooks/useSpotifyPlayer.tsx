@@ -68,7 +68,7 @@ export const SpotifyPlayerProvider = ({ children }: {
     async function fetchItem(item: SpotifyBase, accessToken: { token: string }) {
       const spotifyIds = [];
       if (item.type === 'playlist') {
-        let nextUrl = `https://api.spotify.com/v1/playlists/${item.id}?limit=100`;
+        let nextUrl = `https://api.spotify.com/v1/playlists/${item.id}/tracks?limit=100`;
 
         while (nextUrl) {
           const response = await fetch(nextUrl, {
@@ -83,10 +83,10 @@ export const SpotifyPlayerProvider = ({ children }: {
           }
 
           const playlistData = await response.json();
-          for (let trackData of playlistData.tracks.items) {
+          for (const trackData of playlistData.items) {
             spotifyIds.push(`spotify:track:${trackData.track.id}`);
           }
-          nextUrl = playlistData.tracks.next;
+          nextUrl = playlistData.next;
         }
       } else {
         spotifyIds.push(`spotify:track:${item.id}`);
