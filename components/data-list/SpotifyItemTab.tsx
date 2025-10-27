@@ -20,6 +20,25 @@ const SpotifyItemTab = (props: {
 }) => {
   const theme = useTheme();
 
+  const calculateTrackCount = (item: SpotifyBase | Playlist): number => {
+    if (!isPlaylist(item)) {
+      return item.trackCount || 1;
+    }
+    else {
+      let trackCount = 0;
+      for (const spotifyItem of item.spotifyItems) {
+         if (isPlaylist(item)) {
+            trackCount += calculateTrackCount(spotifyItem);
+         }
+        else {
+          trackCount += spotifyItem.trackCount || 1;
+        }
+      }
+      return trackCount;
+    }
+  }
+  const trackCount = calculateTrackCount(props.item);
+
   return (
     <Stack direction={'row'} alignItems={'center'} py={0.5}>
       {props.albumArtUrl && (
@@ -38,7 +57,7 @@ const SpotifyItemTab = (props: {
         </Typography>
         {isPlaylist(props.item) ? (
           <Typography variant="subtitle2" color={'#666'}>
-            {`${props.item.spotifyItems.length} track${props.item.spotifyItems.length > 1 ? 's' : ''}`}
+            {`${trackCount} track${trackCount > 1 ? 's' : ''}`}
           </Typography>
         ) : (
           <Typography variant="subtitle2" color={'#666'}>
