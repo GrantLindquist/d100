@@ -389,7 +389,6 @@ const CollectionSearch = (props: {
         }}
       >
         <MenuItem
-          onClick={handleActionMenuClose}
           disabled={selectedUnitIds.length === 0 || selectedUnitsIncludeCollection}
         >
           <MoveUnitsModal
@@ -397,6 +396,7 @@ const CollectionSearch = (props: {
             disabled={selectedUnitIds.length === 0 || selectedUnitsIncludeCollection}
             setEditing={setEditing}
             currentCollection={props.collection}
+            closeMenu={handleActionMenuClose}
           />
         </MenuItem>
         <MenuItem
