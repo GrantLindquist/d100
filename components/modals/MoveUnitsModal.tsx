@@ -200,18 +200,21 @@ const MoveUnitsModal = (props: {
     }
 
     setModalOpen(false);
+    
     props.setEditing(false);
   };
 
-
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Box onClick={(event) => {
+        event.stopPropagation();
+        setModalOpen(true);
+      }} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <DriveFileMoveIcon />
         Move Items
       </Box>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <Box sx={MODAL_STYLE}>
+        <Box sx={MODAL_STYLE} onClick={(event) => event.stopPropagation()}>
           <Typography
             variant="h4"
             sx={{

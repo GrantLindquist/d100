@@ -37,8 +37,9 @@ import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 import Image from 'next/image';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { truncate } from '@/utils/string';
 
-
+// TODO: Make  a caching system that uses lastEditedDate to avoid fetching units every time
 const CollectionSearch = (props: {
   unitIds: string[];
   collection: Collection;
@@ -202,8 +203,8 @@ const CollectionSearch = (props: {
     setActionMenuAnchor(null);
   };
 
-  const searchResults =
-    units.filter((unit) => unit.type !== 'collection') ?? [];
+  const searchResults = units.filter((unit) => unit.type !== 'collection') ?? [];
+  const truncatedCollectionTitle = truncate(props.collection.title, 15);
 
   return (
     <Box mb={4}>
@@ -406,7 +407,7 @@ const CollectionSearch = (props: {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <VisibilityOffIcon />
-            {props.collection.hidden ? 'Show Collection' : 'Hide Collection'}
+            {props.collection.hidden ? `Show ${truncatedCollectionTitle}` : `Hide ${truncatedCollectionTitle}`}
           </Box>
         </MenuItem>
         <MenuItem
