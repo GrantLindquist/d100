@@ -4,7 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { Playlist } from '@/types/Spotify';
 import { useCampaign } from '@/hooks/useCampaign';
 import { useAlert } from '@/hooks/useAlert';
-import { arrayRemove, collection, doc, onSnapshot, query, updateDoc, where } from '@firebase/firestore';
+import { arrayRemove, collection, deleteDoc, doc, onSnapshot, query, runTransaction, updateDoc, where } from '@firebase/firestore';
 import db from '@/utils/firebase';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import AddIcon from '@mui/icons-material/Add';
@@ -17,10 +17,7 @@ import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer';
 import { default as NextImage } from 'next/image';
 
 /* TODO: Custom playlists have the following issues:
-* 1. After creating custom playlist, browser must be hard refreshed before it appears in Menu
 * 2. Custom playlists that contain Spotify playlists do not accurately display total number of tracks contained in them
-* 3. Custom playlists do not appear in SpotifyList unless the search bar isn't empty, despite the fact that the searchbar is disabled when set to Custom Playlists
-* 4. Not enough right padding on text in custom playlist menu
 * 5. Handle case where custom playlist is deleted but it's still used in an Article (perhaps include warning dialog when deleting)
 * */
 const CustomPlaylistButton = () => {
@@ -46,8 +43,7 @@ const CustomPlaylistButton = () => {
     }
 
     campaign?.playlistIds && campaign.playlistIds.length > 0 && fetchPlaylists();
-  }, [campaign?.id]);
-
+  }, [campaign?.id, campaign?.playlistIds]);
 
   useEffect(() => {
     if (!anchor) {
@@ -60,10 +56,17 @@ const CustomPlaylistButton = () => {
   };
 
   const handleDeletePlaylist = async () => {
+    console.log(selectedPlaylist)
     try {
       if (selectedPlaylist) {
-        await updateDoc(doc(db, 'campaigns', campaign!.id), {
-          playlists: arrayRemove(selectedPlaylist),
+        await runTransaction(db, async (transaction) => {
+          transaction.update(doc(db, 'campaigns', campaign!.id), {
+            playlistIds: arrayRemove(selectedPlaylist.id),
+          });
+          transaction.delete(doc(db, 'playlists', selectedPlaylist.id));
+        });
+        displayAlert({
+          message: selectedPlaylist.title + ' has been deleted.',
         });
       }
     } catch (e: any) {

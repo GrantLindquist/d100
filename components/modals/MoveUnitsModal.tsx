@@ -74,6 +74,7 @@ const MoveUnitsModal = (props: {
   disabled: boolean;
   setEditing: Function;
   currentCollection: Collection;
+  closeMenu: Function;
 }) => {
   const { campaign } = useCampaign();
   const { displayAlert } = useAlert();
@@ -126,6 +127,7 @@ const MoveUnitsModal = (props: {
 
   const handleMoveUnits = async (event: any) => {
     event.preventDefault();
+    props.closeMenu();
 
     try {
       await runTransaction(db, async (transaction) => {
@@ -146,42 +148,47 @@ const MoveUnitsModal = (props: {
               url: `/campaigns/${campaign!.id}/${staleUnitData.type}s/${clonedUnitId}`,
             });
 
-            const newImageUrls = [];
-            for (const image of staleUnitData.imageUrls) {
-              const staleImageRef = ref(storage, image.src);
-              const blob = await getBlob(staleImageRef);
-
-              const newImageId = clonedUnitId + '-' + generateUUID();
-              const newImagePath = `${campaign!.id}/${newImageId}`;
-              const newImageRef = ref(storage, newImagePath);
-
-              await uploadBytes(newImageRef, blob);
-              const downloadURL = await getDownloadURL(newImageRef);
-
-              newImageUrls.push({
-                src: downloadURL,
-                ratio: image.ratio,
-              });
-            }
-
             const clonedUnit = {
               ...staleUnitData,
               id: clonedUnitId,
               breadcrumbs,
-              imageUrls: newImageUrls,
             };
+            
+            // Encounters cannot have imagesUrls
+            if (staleUnitData.type !== 'encounter') {
+              const newImageUrls = [];
+              for (const image of staleUnitData.imageUrls) {
+                const staleImageRef = ref(storage, image.src);
+                const blob = await getBlob(staleImageRef);
 
+                const newImageId = clonedUnitId + '-' + generateUUID();
+                const newImagePath = `${campaign!.id}/${newImageId}`;
+                const newImageRef = ref(storage, newImagePath);
+
+                await uploadBytes(newImageRef, blob);
+                const downloadURL = await getDownloadURL(newImageRef);
+
+                newImageUrls.push({
+                  src: downloadURL,
+                  ratio: image.ratio,
+                });
+              }
+              // @ts-ignore
+              clonedUnit.imageUrls = newImageUrls;
+            }
             transaction.set(doc(db, 'units', clonedUnitId), clonedUnit);
             transaction.update(doc(db, 'units', collectionId), {
               unitIds: arrayUnion(clonedUnitId),
             });
           }
 
-          for (const image of unitDocSnap.data().imageUrls) {
-            const staleImageRef = ref(storage, image.src);
-            await deleteObject(staleImageRef);
+          if (staleUnitData.type !== 'encounter') {
+            for (const image of unitDocSnap.data().imageUrls) {
+              const staleImageRef = ref(storage, image.src);
+              await deleteObject(staleImageRef);
+            }
           }
-
+         
           transaction.update(doc(db, 'units', props.currentCollection.id), {
             unitIds: arrayRemove(staleUnitId),
           });
@@ -200,18 +207,21 @@ const MoveUnitsModal = (props: {
     }
 
     setModalOpen(false);
+    
     props.setEditing(false);
   };
 
-
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Box onClick={(event) => {
+        event.stopPropagation();
+        setModalOpen(true);
+      }} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <DriveFileMoveIcon />
         Move Items
       </Box>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <Box sx={MODAL_STYLE}>
+        <Box sx={MODAL_STYLE} onClick={(event) => event.stopPropagation()}>
           <Typography
             variant="h4"
             sx={{

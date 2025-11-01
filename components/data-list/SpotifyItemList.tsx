@@ -1,17 +1,17 @@
-import { ReactNode, useEffect, useState } from 'react';
-import { Box, Divider, Menu, MenuItem, Stack, TextField, Typography, useTheme } from '@mui/material';
-import { useAlert } from '@/hooks/useAlert';
-import { getCookie } from '@/utils/cookie';
 import { refreshAccessToken } from '@/components/SpotifyPlayer';
 import { SpotifyItemTabMemo } from '@/components/data-list/SpotifyItemTab';
-import { Playlist, SpotifyBase } from '@/types/Spotify';
-import SearchIcon from '@mui/icons-material/Search';
-import { collection, getDocs, query, where } from '@firebase/firestore';
-import db from '@/utils/firebase';
+import { useAlert } from '@/hooks/useAlert';
 import { useCampaign } from '@/hooks/useCampaign';
-import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { Playlist, SpotifyBase } from '@/types/Spotify';
+import { getCookie } from '@/utils/cookie';
+import db from '@/utils/firebase';
 import { closestCenter, DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { collection, getDocs, query, where } from '@firebase/firestore';
+import SearchIcon from '@mui/icons-material/Search';
+import { Box, Divider, Menu, MenuItem, Stack, TextField, Typography, useTheme } from '@mui/material';
+import { ReactNode, useEffect, useState } from 'react';
 
 const searchTypeEnum = {
   tracks: 'Tracks',
@@ -166,7 +166,6 @@ const SpotifyItemList = (props: {
           size={'small'}
           onChange={(event) => setSearchTerm(event.target.value)}
           fullWidth
-          disabled={searchType === 'playlistCustom'}
           placeholder={'Search'}
           sx={{
             marginBottom: 2,
@@ -220,7 +219,7 @@ const SpotifyItemList = (props: {
       )}
 
       <Box flex={1} sx={{ overflowY: 'auto' }}>
-        {!props.items && !searchTerm ? (
+        {!props.items && !searchTerm && searchType !== "playlistCustom" ? (
           <Box textAlign={'center'}>
             <Typography color={'grey'} variant={'subtitle2'} px={4}>
               Try searching for tracks, albums, or playlists to add to associate
@@ -246,28 +245,31 @@ const SpotifyItemList = (props: {
             >
               {itemsToRender.map((result: SpotifyBase | Playlist, index) => {
                   const sortKey = `${result.id}-${index}`;
-                  return (<SortableItem key={sortKey} id={sortKey} applyDraggable={!!props.isDeletingItem}>
-                    <Stack direction={'row'}>
-                      <Stack direction={'column'} width={'100%'}>
-                        <Box
-                          onMouseEnter={() => setHoveredSortKey(sortKey)}
-                          onMouseLeave={() => setHoveredSortKey(null)}
-                        >
-                          <SpotifyItemTabMemo
-                            item={result}
-                            index={index}
-                            displayModifyButton={sortKey === hoveredSortKey}
-                            updateState={props.updateState}
-                            isDeletingItem={!!props.isDeletingItem}
-                            albumArtUrl={
-                              'albumArtUrl' in result ? result.albumArtUrl : undefined
-                            }
-                          />
-                        </Box>
+                  if (searchType !== 'playlistCustom' || result.title.includes(searchTerm) || searchTerm === '') {
+                    return (<SortableItem key={sortKey} id={sortKey} applyDraggable={!!props.isDeletingItem}>
+                      <Stack direction={'row'}>
+                        <Stack direction={'column'} width={'100%'}>
+                          <Box
+                            onMouseEnter={() => setHoveredSortKey(sortKey)}
+                            onMouseLeave={() => setHoveredSortKey(null)}
+                          >
+                            <SpotifyItemTabMemo
+                              item={result}
+                              index={index}
+                              displayModifyButton={sortKey === hoveredSortKey}
+                              updateState={props.updateState}
+                              isDeletingItem={!!props.isDeletingItem}
+                              albumArtUrl={
+                                'albumArtUrl' in result ? result.albumArtUrl : undefined
+                              }
+                            />
+                          </Box>
+                        </Stack>
                       </Stack>
-                    </Stack>
-                    <Divider />
-                  </SortableItem>);
+                      <Divider />
+                    </SortableItem>
+                    );
+                  }
                 },
               )}
             </SortableContext>

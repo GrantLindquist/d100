@@ -1,7 +1,7 @@
 'use client';
-import { createContext, ReactNode, useContext, useState } from 'react';
 import { Box, Snackbar, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
+import { createContext, ReactNode, useContext, useState } from 'react';
 
 interface Alert {
   message: string;
@@ -23,8 +23,10 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false);
 
   const displayAlert = (alert: Alert) => {
-    Boolean(alert.errorType) && console.error(alert.errorType);
-    console.error(alert.message)
+    if (Boolean(alert.errorType)) {
+      console.error(alert.errorType);
+      console.error(alert.message)
+    }
     setAlert(alert);
     setOpen(true);
   };
